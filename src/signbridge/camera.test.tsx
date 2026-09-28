@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useCamera } from './hooks';
+import { useCamera } from './camera';
 
 afterEach(() => {
   cleanup();
@@ -20,6 +20,23 @@ const fakeStream = () => {
 };
 
 describe('Camera lifecycle', () => {
+  it('requests the selected phone camera without audio and stops on backgrounding', async () => {
+    const fake = fakeStream();
+    const acquire = vi.fn(async () => fake.stream);
+    mediaMock(acquire);
+    const { result } = renderHook(useCamera);
+    await act(async () => {
+      await result.current.start('environment');
+    });
+    expect(acquire).toHaveBeenCalledWith({
+      video: { facingMode: 'environment', width: { ideal: 960 }, height: { ideal: 720 } },
+      audio: false,
+    });
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    expect(result.current.status).toBe('off');
+    expect(fake.stop).toHaveBeenCalledTimes(1);
+  });
   it('releases a stream that arrives after unmounting', async () => {
     const fake = fakeStream();
     let resolve!: (value: MediaStream) => void;

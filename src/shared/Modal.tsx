@@ -1,50 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { X, Sparkles } from 'lucide-react';
-
-export function Mascot({
-  className = '',
-  alt = 'Рыжий котёнок — ваш помощник Gesturingo',
-}: {
-  className?: string;
-  alt?: string;
-}) {
-  return (
-    <img
-      className={`mascot ${className}`}
-      src={`${import.meta.env.BASE_URL}mascot/gesturingo-cat.png`}
-      alt={alt}
-      draggable={false}
-    />
-  );
-}
-export function Brand({ compact = false }: { compact?: boolean }) {
-  return (
-    <span className="brand">
-      <span className="brand-mark">
-        <img src={`${import.meta.env.BASE_URL}mascot/gesturingo-cat.png`} alt="" />
-      </span>
-      {!compact && (
-        <span>
-          gesturingo<span className="brand-dot">.</span>
-        </span>
-      )}
-    </span>
-  );
-}
-export function ProgressBar({ value, label }: { value: number; label?: string }) {
-  return (
-    <div
-      className="progress-track"
-      role="progressbar"
-      aria-label={label}
-      aria-valuenow={Math.round(Math.min(100, Math.max(0, value)))}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <span style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
-    </div>
-  );
-}
+import { X } from 'lucide-react';
 
 export function Modal({
   title,
@@ -76,7 +31,7 @@ export function Modal({
       if (event.key !== 'Tab') return;
       const elements = Array.from(
         ref.current?.querySelectorAll<HTMLElement>(
-          'button:not(:disabled), a[href], input, select, [tabindex="0"]',
+          'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
         ) || [],
       ).filter((element) => element.getClientRects().length > 0);
       const first = elements[0],
@@ -131,27 +86,6 @@ export function Modal({
         </button>
         {children}
       </div>
-    </div>
-  );
-}
-
-export function HandSign({ letter, left = false }: { letter: string; left?: boolean }) {
-  const dynamic = ['J', 'Z'].includes(letter);
-  // Keep direction arrows intact for dynamic letters; mirror static handshapes only.
-  return (
-    <div className="hand-illustration">
-      <div className="hand-diagram-stage">
-        <img
-          src={`${import.meta.env.BASE_URL}asl/${letter}.png`}
-          alt={`Образец буквы ${letter} в дактильной азбуке ASL${dynamic ? ', со стрелкой движения' : ''}`}
-          className="hand-diagram"
-          style={{ transform: left && !dynamic ? 'scaleX(-1)' : undefined }}
-        />
-      </div>
-      <span className="hand-caption">
-        <Sparkles size={12} />{' '}
-        {dynamic ? 'Повторите движение по стрелке' : 'Рассмотрите положение пальцев'}
-      </span>
     </div>
   );
 }
