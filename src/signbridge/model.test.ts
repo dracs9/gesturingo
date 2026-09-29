@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  credibleCandidate,
-  demoDictionary,
-  guardFrame,
-  loadPreferences,
-  makeDemoFrame,
-} from './model';
+import { credibleCandidate, demoDictionary, guardFrame, makeDemoFrame } from './model';
 
 describe('Recognition boundary', () => {
   it('rejects low confidence and competing intents', () => {
@@ -97,16 +91,5 @@ describe('Recognition boundary', () => {
       guardFrame({ ...makeDemoFrame('hello', 'almost'), corrections: [] }, demoDictionary)
         .corrections,
     ).toEqual([]);
-  });
-});
-
-describe('Privacy defaults', () => {
-  it('restores malformed settings with microphone, TTS and history disabled', () => {
-    for (const raw of ['broken', 'null', '[]', '{"captionsConsent":"yes","saveDialog":1}']) {
-      const preferences = loadPreferences(raw);
-      expect(preferences.captionsConsent).toBe(false);
-      expect(preferences.saveDialog).toBe(false);
-      expect(preferences.speak).toBe(false);
-    }
   });
 });

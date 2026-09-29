@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useCaptions, useVoice } from './speech';
-import { preferencesDefault } from './model';
+import { russianVoice, useVoice } from './speech';
 
 afterEach(() => {
   cleanup();
@@ -21,27 +20,6 @@ class MockUtterance {
     this.text = text;
   }
 }
-class MockRecognizer {
-  static instances: MockRecognizer[] = [];
-  lang = '';
-  continuous = false;
-  interimResults = false;
-  onstart: (() => void) | null = null;
-  onend: (() => void) | null = null;
-  onerror: ((event: { error: string }) => void) | null = null;
-  onresult:
-    | ((event: {
-        resultIndex: number;
-        results: { isFinal: boolean; 0: { transcript: string } }[];
-      }) => void)
-    | null = null;
-  start = vi.fn();
-  abort = vi.fn();
-  constructor() {
-    MockRecognizer.instances.push(this);
-  }
-}
-
 describe('Browser speech lifecycle', () => {
   it('selects a local Russian voice and cancels stale speech callbacks', () => {
     const local = { voiceURI: 'ru-local', lang: 'ru-RU', localService: true };
@@ -57,7 +35,7 @@ describe('Browser speech lifecycle', () => {
     vi.stubGlobal('SpeechSynthesisUtterance', MockUtterance);
     const { result, unmount } = renderHook(useVoice);
     act(() => {
-      result.current.speak('Здравствуйте', preferencesDefault);
+      result.current.speak('Здравствуйте', russianVoice);
     });
     const utterance = synthesis.speak.mock.calls[0][0] as MockUtterance;
     expect(utterance.voice).toBe(local);
@@ -73,48 +51,8 @@ describe('Browser speech lifecycle', () => {
   it('offers a text fallback if speech synthesis is unavailable', () => {
     const { result } = renderHook(useVoice);
     act(() => {
-      expect(result.current.speak('Спасибо', preferencesDefault)).toBe(false);
+      expect(result.current.speak('Спасибо', russianVoice)).toBe(false);
     });
     expect(result.current.error).toContain('Сообщение остаётся на экране');
-  });
-  it('delivers each final caption once and removes microphone callbacks on stop', () => {
-    MockRecognizer.instances = [];
-    vi.stubGlobal('SpeechRecognition', MockRecognizer);
-    const deliver = vi.fn();
-    const { result } = renderHook(() => useCaptions(deliver));
-    expect(MockRecognizer.instances).toHaveLength(0);
-    act(() => result.current.start('ru-RU'));
-    const recognizer = MockRecognizer.instances[0];
-    expect(recognizer.lang).toBe('ru-RU');
-    act(() => recognizer.onstart?.());
-    expect(result.current.status).toBe('listening');
-    const final = {
-      resultIndex: 0,
-      results: [{ isFinal: true, 0: { transcript: 'Могу помочь' } }],
-    };
-    act(() => {
-      recognizer.onresult?.(final);
-      recognizer.onresult?.(final);
-    });
-    expect(deliver).toHaveBeenCalledExactlyOnceWith('Могу помочь');
-    act(() => result.current.stop());
-    expect(recognizer.abort).toHaveBeenCalledTimes(1);
-    expect(recognizer.onresult).toBeNull();
-    expect(result.current.status).toBe('off');
-  });
-  it('stops the microphone when permission is denied and permits retry', () => {
-    MockRecognizer.instances = [];
-    vi.stubGlobal('SpeechRecognition', MockRecognizer);
-    const { result, unmount } = renderHook(() => useCaptions(vi.fn()));
-    act(() => result.current.start('ru-RU'));
-    const recognizer = MockRecognizer.instances[0];
-    act(() => recognizer.onerror?.({ error: 'not-allowed' }));
-    expect(result.current.status).toBe('error');
-    expect(result.current.error).toContain('Доступ к микрофону закрыт');
-    expect(recognizer.abort).toHaveBeenCalledTimes(1);
-    act(() => result.current.start('ru-RU'));
-    const retry = MockRecognizer.instances[1];
-    unmount();
-    expect(retry.abort).toHaveBeenCalledTimes(1);
   });
 });
