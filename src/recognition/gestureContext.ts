@@ -1,6 +1,6 @@
 // Which gestures are active on which screen (CLAUDE.md §7.5): protects against letters firing as commands.
 
-export type ScreenName = "welcome" | "tutorial" | "map" | "lesson" | "results" | "bridge" | "record";
+export type ScreenName = "welcome" | "tutorial" | "map" | "lesson" | "results" | "bridge" | "record" | "letters";
 export type LetterMode = "none" | "current" | "learned";
 
 export interface GestureContext {
@@ -27,6 +27,8 @@ export const GESTURE_CONTEXTS: Readonly<Record<ScreenName, GestureContext>> = {
   lesson: { cursor: false, dwell: false, ok: false, back: true, letters: "current" },
   bridge: { cursor: false, dwell: false, ok: false, back: true, letters: "learned" },
   record: { cursor: true, dwell: true, ok: false, back: true, letters: "none" },
+  // Service page: buttons like /record; its live check narrows this to the lesson context via the UI store.
+  letters: { cursor: true, dwell: true, ok: false, back: true, letters: "none" },
 };
 
 export function getGestureContext(screen: ScreenName): GestureContext {

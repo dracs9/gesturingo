@@ -1,0 +1,211 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  /* Room for the hand status on top and the gesture legend + camera dock at the bottom. */
+  padding: 72px 16px calc(150px + env(safe-area-inset-bottom));
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.intro {
+  max-width: 48rem;
+  color: var(--text-muted);
+}
+
+.headActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.small {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 16px;
+  font-size: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 2px solid var(--surface-hover);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.cardVerified {
+  border-color: var(--accent);
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.letter {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.badgeOk,
+.badgeTodo {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.badgeOk {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.badgeTodo {
+  border: 2px solid var(--focus);
+  color: var(--focus);
+}
+
+.skeleton {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1;
+  align-self: center;
+}
+
+.meta {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.warn {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--surface-hover);
+}
+
+.table thead th {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.freeRow {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.shares {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+.export {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.export textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--surface-hover);
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+}
+
+.unavailable {
+  color: var(--text-muted);
+}
+
+.unavailable h2 {
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.liveBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 72px 24px 0;
+}
+
+.status {
+  padding: 48px 24px;
+  font-size: 1.2rem;
+  text-align: center;
+}

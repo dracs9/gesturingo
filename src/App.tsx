@@ -13,6 +13,7 @@ import { Bridge } from "./screens/Bridge";
 import { ControlTutorial } from "./screens/ControlTutorial";
 import { LevelMap } from "./screens/LevelMap";
 import { Lesson } from "./screens/Lesson";
+import { Letters } from "./screens/Letters";
 import { Record } from "./screens/Record";
 import { Results } from "./screens/Results";
 import { Welcome } from "./screens/Welcome";
@@ -37,6 +38,8 @@ function renderScreen(route: Route) {
       return <Bridge />;
     case "record":
       return <Record />;
+    case "letters":
+      return <Letters />;
   }
 }
 
@@ -58,7 +61,8 @@ export function App() {
   const cameraStatus = useSession((st) => st.cameraStatus);
   const startCamera = useSession((st) => st.startCamera);
 
-  const needsCamera = route.name !== "welcome";
+  // /letters shows its grid without a camera; its live check starts the camera on a click.
+  const needsCamera = route.name !== "welcome" && route.name !== "letters";
   const ready = cameraStatus === "ready";
   const gestureOverride = useUi((st) => st.gestureOverride);
   const dockHidden = useUi((st) => st.dockHidden);

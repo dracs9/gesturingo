@@ -16,4 +16,8 @@ describe("gestureContext (CLAUDE.md §7.5)", () => {
   it("uses buttons and back on /record", () => {
     expect(getGestureContext("record")).toEqual({ cursor: true, dwell: true, ok: false, back: true, letters: "none" });
   });
+
+  it("uses buttons and back on /letters", () => {
+    expect(getGestureContext("letters")).toEqual({ cursor: true, dwell: true, ok: false, back: true, letters: "none" });
+  });
 });

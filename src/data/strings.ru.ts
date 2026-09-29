@@ -20,6 +20,7 @@ export const strings = {
     results: "Итоги · Gesturingo",
     bridge: "Мост · Gesturingo",
     record: "Запись образцов · Gesturingo",
+    letters: "Проверка букв · Gesturingo",
   },
 
   common: {
@@ -229,6 +230,43 @@ export const strings = {
     saveReference: "Сохранить эталон",
     again: "Записать заново",
     referenceHint: "Эталон — выбранный кадр. По умолчанию — самый типичный.",
+  },
+
+  lettersPage: {
+    title: "Проверка букв",
+    intro:
+      "Служебная страница для сверки с официальной таблицей дактильной азбуки. Правила получены автоматически из статистики фото: палец получает правило, если ≥ 80% людей держат его одинаково.",
+    progress: (done: number, total: number) => `Сверено: ${done} из ${total}`,
+    export: "Экспорт overrides",
+    exportTitle: "Вставь это значение в LETTER_OVERRIDES (src/data/letters.overrides.ts)",
+    copy: "Скопировать",
+    copied: "Скопировано ✓",
+    download: "Скачать JSON",
+    close: "Закрыть",
+    verified: "✓ сверено",
+    notVerified: "⚠ не сверено",
+    markVerified: "Сверено с таблицей",
+    tryLive: "Проверить вживую",
+    accuracy: (pct: number, bySigner: boolean) =>
+      `Точность kNN: ${pct}%${bySigner ? " (на новых людях)" : " (1 автор — завышена)"}`,
+    lowAccuracy: "⚠ ниже 70%",
+    samples: (n: number, signers: number, sources: string) => `Образцов: ${n} · авторов: ${signers} · ${sources}`,
+    finger: "Палец",
+    rule: "Правило",
+    shares: "прямой / полусогн. / согнут",
+    free: "свободный",
+    touches: (list: string) => `Касаются: ${list}`,
+    similar: (list: string) => `Похожие: ${list}`,
+    noSimilar: "Похожих нет",
+    noReference: "Нет эталона",
+    unavailableTitle: "Не проверяются",
+    dynamic: (list: string) => `С движением: ${list}`,
+    excluded: (list: string) => `Исключены: ${list}`,
+    back: "← К списку",
+    prev: "‹ Пред.",
+    next: "След. ›",
+    cameraStarting: "Включаю камеру…",
+    liveHint: "Показывай букву — подсказки как в уроке. Открытая ладонь 3 с — к списку.",
   },
 
   handStatus: {

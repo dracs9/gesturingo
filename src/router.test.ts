@@ -8,6 +8,7 @@ describe("matchRoute", () => {
     expect(matchRoute("/map")).toEqual({ name: "map" });
     expect(matchRoute("/bridge")).toEqual({ name: "bridge" });
     expect(matchRoute("/record")).toEqual({ name: "record" });
+    expect(matchRoute("/letters")).toEqual({ name: "letters" });
   });
 
   it("extracts lesson id", () => {
@@ -31,5 +32,6 @@ describe("matchRoute", () => {
     expect(matchRoute(paths.lesson("урок 1"))).toEqual({ name: "lesson", lessonId: "урок 1" });
     expect(matchRoute(paths.results("7"))).toEqual({ name: "results", lessonId: "7" });
     expect(matchRoute(paths.record())).toEqual({ name: "record" });
+    expect(matchRoute(paths.letters())).toEqual({ name: "letters" });
   });
 });
