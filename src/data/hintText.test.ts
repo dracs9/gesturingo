@@ -14,4 +14,8 @@ describe("hintText", () => {
     ).toBe("Похоже на «О» — соедини кончики большого и указательного пальцев");
     expect(hintText({ hintCode: "confusion.looksLike", params: { letter: "О" } })).toBe("Похоже на «О»");
   });
+
+  it("fills the repeated-letter hint of the Bridge", () => {
+    expect(hintText({ hintCode: "bridge.release", params: { letter: "Н" } })).toBe("Опусти руку и покажи «Н» ещё раз");
+  });
 });

@@ -7,6 +7,7 @@ import { navigate, paths } from "../router";
 import { useGestureCommands } from "../store/gestureCommands";
 import { useProgress } from "../store/progress";
 import { useSession } from "../store/session";
+import { primeSpeech } from "../tts/speech";
 import s from "./Screen.module.css";
 import w from "./Welcome.module.css";
 
@@ -33,6 +34,7 @@ export function Welcome({ gate = false }: WelcomeProps) {
   const start = async (target: string) => {
     // This click is the one real user gesture: browsers only allow sound after it.
     unlockAudio();
+    primeSpeech();
     await startCamera();
     if (!gate && useSession.getState().cameraStatus === "ready") navigate(target);
   };

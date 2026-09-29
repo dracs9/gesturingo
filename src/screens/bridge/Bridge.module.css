@@ -1,0 +1,153 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--gap);
+  align-items: start;
+  min-height: 100dvh;
+  padding: 72px 24px 24px;
+}
+
+.camera {
+  position: relative;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
+  font-weight: 800;
+}
+
+.word {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 76px;
+  border: 3px solid var(--surface-hover);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 2.4rem;
+  font-weight: 800;
+}
+
+.tileNow {
+  border-color: var(--focus);
+  color: var(--text);
+}
+
+.tileDone {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  animation: pop 0.3s ease-out;
+}
+
+.wordDone .tile {
+  transform: scale(1.12);
+  transition: transform 0.3s ease;
+}
+
+.counter {
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.letter {
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.show {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.result {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.resultTitle {
+  margin: 0;
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.spoken {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.header {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 55;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 64px 16px 96px;
+  }
+
+  .tile {
+    width: 52px;
+    height: 62px;
+    font-size: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tileDone {
+    animation: none;
+  }
+
+  .wordDone .tile {
+    transition: none;
+  }
+}
