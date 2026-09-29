@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { canonicalHand, toFrame, type SyntheticHandOptions } from "../../__fixtures__/syntheticHand";
-import { flattenPoints } from "../../normalize";
+import { flattenPoints, normalizeHand } from "../../normalize";
 import { pickMedoid } from "../../samples";
-import { capPerSigner, mirrorVector, normalizeRaw, type RawSample } from "./dataset";
+import {
+  capPerSigner,
+  fromHandFrame,
+  mirrorVector,
+  normalizeRaw,
+  serializeRawSamples,
+  type RawSample,
+} from "./dataset";
 import { draftSpec, RULE_MIN_SHARE } from "./draft";
 import { confusedWith, crossValidate, type EvalSample } from "./evaluate";
 import { resolveOrientation } from "./orientation";
@@ -35,6 +42,16 @@ describe("normalizeRaw", () => {
     };
     const expected = vector(V_SIGN);
     normalizeRaw(raw).forEach((v, i) => expect(v).toBeCloseTo(expected[i] ?? 0, 6));
+  });
+
+  it("a /record frame exported as a raw record normalizes like the live frame", () => {
+    const frame = toFrame(canonicalHand(V_SIGN), { handedness: "Left", width: 640, height: 480, roll: 12 });
+    const raw = fromHandFrame(frame, { letter: "В", source: "record", signer: "S01", file: "record/S01/В/0" });
+    const parsed = JSON.parse(serializeRawSamples([raw])) as RawSample[];
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0]).toMatchObject({ letter: "В", source: "record", signer: "S01", handedness: "Left", width: 640 });
+    const live = flattenPoints(normalizeHand(frame).points);
+    normalizeRaw(parsed[0]!).forEach((v, i) => expect(v).toBeCloseTo(live[i] ?? 0, 3));
   });
 
   it("mirrorVector gives the same hand with the other Left/Right label", () => {

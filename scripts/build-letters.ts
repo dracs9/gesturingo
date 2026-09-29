@@ -60,6 +60,12 @@ function loadRaw(): RawSample[] {
  */
 const KNOWN_HAND: Readonly<Record<string, Handedness>> = { "rsl-1": "Right" };
 
+/**
+ * Sources recorded in the app itself (/record): live webcam front view, and the Left/Right label
+ * comes from video tracking like in the lesson — trusted as is and used as anchors too.
+ */
+const TRUSTED_SOURCES: ReadonlySet<string> = new Set(["record"]);
+
 /** Normalizes every photo and fixes mirrored ones (Left/Right mislabels, back-of-hand shots) letter by letter. */
 function toSamples(raw: readonly RawSample[]): Sample[] {
   const byLetter = new Map<string, RawSample[]>();
@@ -73,7 +79,7 @@ function toSamples(raw: readonly RawSample[]): Sample[] {
     const vectors = list.map((r, i) => normalizeRaw({ ...r, handedness: known[i] ?? r.handedness }));
     const flips = resolveOrientation(
       vectors,
-      known.map((h) => h !== undefined),
+      list.map((r, i) => known[i] !== undefined || TRUSTED_SOURCES.has(r.source)),
     );
     return list.map((r, i) => {
       const v = vectors[i] ?? [];

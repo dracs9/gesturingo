@@ -5,7 +5,8 @@ import { SkeletonPreview } from "../components/SkeletonPreview";
 import { ALPHABET } from "../data/alphabet";
 import { strings } from "../data/strings.ru";
 import { getHandStatus } from "../recognition/errors/frameChecks";
-import type { Handedness } from "../recognition/landmarks";
+import type { HandFrame, Handedness } from "../recognition/landmarks";
+import { fromHandFrame, serializeRawSamples } from "../recognition/letters/build/dataset";
 import { flattenPoints, normalizeHand } from "../recognition/normalize";
 import { onFrame } from "../recognition/pipeline";
 import {
@@ -32,6 +33,8 @@ type Phase = "idle" | "countdown" | "recording" | "done";
 
 interface Recording {
   frames: number[][];
+  /** The same frames unnormalized, for scripts/landmarks/ (same format as the extracted photos). */
+  raw: HandFrame[];
   handedness: Handedness;
 }
 
@@ -90,16 +93,18 @@ export function Record() {
   useEffect(() => {
     if (phase !== "recording") return;
     const frames: number[][] = [];
+    const raw: HandFrame[] = [];
     const hands: Handedness[] = [];
     const unsubscribe = onFrame((observation) => {
       if (!observation || getHandStatus(observation.frame) !== "ok") return;
       const normalized = normalizeHand(observation.frame);
       frames.push(roundFrame(flattenPoints(normalized.points)));
+      raw.push(observation.frame);
       hands.push(normalized.handedness);
       setProgress(frames.length);
       if (frames.length >= frameCount) {
         unsubscribe();
-        setRecording({ frames, handedness: majorityHandedness(hands) });
+        setRecording({ frames, raw, handedness: majorityHandedness(hands) });
         setSelected(Math.max(0, pickMedoid(frames)));
         setPhase("done");
       }
@@ -126,6 +131,15 @@ export function Record() {
       sampleFileName(letter, signerId),
       serializeSampleFile({ letter, signer: signerId, handedness: recording.handedness, frames: recording.frames }),
     );
+  };
+
+  // Raw landmarks for `npm run build:letters`: drop the file into scripts/landmarks/.
+  const downloadLandmarks = () => {
+    if (!recording) return;
+    const records = recording.raw.map((frame, i) =>
+      fromHandFrame(frame, { letter, source: "record", signer: signerId, file: `record/${signerId}/${letter}/${i}` }),
+    );
+    download(sampleFileName(letter, signerId).replace(/\.json$/, ".landmarks.json"), serializeRawSamples(records));
   };
 
   const saveReference = () => {
@@ -231,11 +245,13 @@ export function Record() {
               {t.frameOf(selected + 1, recording.frames.length)} · {t.handedness(strings.hand[recording.handedness])}
             </p>
             <p className={r.hint}>{t.referenceHint}</p>
+            <p className={r.hint}>{t.landmarksHint}</p>
             <div className={r.actions}>
               <GestureButton variant="primary" onClick={downloadSamples}>
                 {t.downloadSamples}
               </GestureButton>
               <GestureButton onClick={saveReference}>{t.saveReference}</GestureButton>
+              <GestureButton onClick={downloadLandmarks}>{t.downloadLandmarks}</GestureButton>
             </div>
           </div>
         )}

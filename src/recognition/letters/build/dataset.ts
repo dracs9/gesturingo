@@ -42,6 +42,31 @@ export function toHandFrame(raw: RawSample): HandFrame {
   };
 }
 
+const round5 = (v: number) => Math.round(v * 1e5) / 1e5;
+
+/**
+ * A camera frame (recorded on /record) as a raw record for scripts/landmarks/ — the inverse of
+ * `toHandFrame`, so recordings join the letter build exactly like the extracted photos.
+ */
+export function fromHandFrame(
+  frame: HandFrame,
+  meta: { letter: string; source: string; signer: string; file: string },
+): RawSample {
+  return {
+    ...meta,
+    handedness: frame.handedness,
+    score: round5(frame.score),
+    width: frame.videoWidth,
+    height: frame.videoHeight,
+    landmarks: frame.landmarks.map((p) => [round5(p.x), round5(p.y), round5(p.z)]),
+  };
+}
+
+/** JSON array with one record per line, like scripts/extract_landmarks.py writes. */
+export function serializeRawSamples(records: readonly RawSample[]): string {
+  return `[\n${records.map((r) => JSON.stringify(r)).join(",\n")}\n]\n`;
+}
+
 /** Normalizes a photo with the same code the app runs on every camera frame. */
 export function normalizeRaw(raw: RawSample): number[] {
   return flattenPoints(normalizeHand(toHandFrame(raw)).points);

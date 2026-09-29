@@ -230,6 +230,8 @@ export const strings = {
     saveReference: "Сохранить эталон",
     again: "Записать заново",
     referenceHint: "Эталон — выбранный кадр. По умолчанию — самый типичный.",
+    downloadLandmarks: "Скачать точки для сборки",
+    landmarksHint: "Точки для сборки — файл в scripts/landmarks/, затем npm run build:letters: запись войдёт в статистику, правила и kNN наравне с фото.",
   },
 
   lettersPage: {
