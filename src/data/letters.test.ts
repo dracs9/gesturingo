@@ -46,6 +46,10 @@ describe("letter data", () => {
     }
   });
 
+  it("teaches only letters the team checked against the official table", () => {
+    for (const spec of LETTERS) expect(spec.verified, spec.letter).toBe(true);
+  });
+
   it("teaches no letter with movement or excluded by the team", () => {
     for (const letter of [...DYNAMIC_LETTERS, ...EXCLUDED_LETTERS]) {
       expect(getLetterSpec(letter), letter).toBeUndefined();
