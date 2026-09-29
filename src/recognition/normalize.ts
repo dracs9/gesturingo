@@ -16,35 +16,65 @@ export function trueHandedness(frame: HandFrame): Handedness {
   return frame.handedness === "Left" ? "Right" : "Left";
 }
 
-export function normalizeHand(frame: HandFrame): NormalizedHand {
+/** Parameters that map a camera frame onto the canonical frame (and back, for the ghost hand). */
+export interface HandTransform {
+  aspect: number;
+  /** Wrist in aspect-corrected, y-up image coordinates. */
+  wrist: Point3;
+  /** |wrist → middle MCP| in the same units. */
+  length: number;
+  /** In-plane rotation that makes wrist → middle MCP point to +Y. */
+  beta: number;
+  mirror: 1 | -1;
+}
+
+export function handTransform(frame: HandFrame): HandTransform {
   const aspect = frame.videoHeight > 0 ? frame.videoWidth / frame.videoHeight : 1;
-  const handedness = trueHandedness(frame);
-
-  // 1. Aspect-correct, y-up.
-  const raw = frame.landmarks.map((p) => ({ x: p.x * aspect, y: -p.y, z: p.z * aspect }));
-  const wrist = raw[LM.WRIST] ?? { x: 0, y: 0, z: 0 };
-
-  // 2. Wrist at origin.
-  const centered = raw.map((p) => ({ x: p.x - wrist.x, y: p.y - wrist.y, z: p.z - wrist.z }));
-
-  // 3. Scale by |wrist → middle MCP|.
-  const mid = centered[LM.MIDDLE_MCP] ?? { x: 0, y: 1, z: 0 };
+  const w = frame.landmarks[LM.WRIST] ?? { x: 0, y: 0, z: 0 };
+  const m = frame.landmarks[LM.MIDDLE_MCP] ?? { x: 0, y: -1, z: 0 };
+  const wrist = { x: w.x * aspect, y: -w.y, z: w.z * aspect };
+  const mid = { x: m.x * aspect - wrist.x, y: -m.y - wrist.y, z: m.z * aspect - wrist.z };
   const length = Math.hypot(mid.x, mid.y, mid.z);
-  const scale = length > 1e-9 ? 1 / length : 1;
+  return {
+    aspect,
+    wrist,
+    length: length > 1e-9 ? length : 1,
+    beta: Math.PI / 2 - Math.atan2(mid.y, mid.x),
+    mirror: trueHandedness(frame) === "Left" ? -1 : 1,
+  };
+}
 
-  // 4. Rotate in the image plane so wrist → middle MCP points to +Y.
-  const beta = Math.PI / 2 - Math.atan2(mid.y, mid.x);
+export function normalizeHand(frame: HandFrame): NormalizedHand {
+  const { aspect, wrist, length, beta, mirror } = handTransform(frame);
   const cos = Math.cos(beta);
   const sin = Math.sin(beta);
-  const mirror = handedness === "Left" ? -1 : 1;
 
-  const points = centered.map((p) => ({
-    x: mirror * (p.x * cos - p.y * sin) * scale,
-    y: (p.x * sin + p.y * cos) * scale,
-    z: p.z * scale,
-  }));
+  // Aspect-correct and y-up → wrist at origin → rotate 0→9 to +Y → scale to palm = 1 → mirror left hands.
+  const points = frame.landmarks.map((p) => {
+    const x = p.x * aspect - wrist.x;
+    const y = -p.y - wrist.y;
+    const z = p.z * aspect - wrist.z;
+    return {
+      x: (mirror * (x * cos - y * sin)) / length,
+      y: (x * sin + y * cos) / length,
+      z: z / length,
+    };
+  });
 
-  return { points, handedness };
+  return { points, handedness: trueHandedness(frame) };
+}
+
+/** Inverse of `normalizeHand`: canonical points → image-normalized landmarks of the hand described by `t`. */
+export function denormalizePoints(points: readonly Point3[], t: HandTransform): Point3[] {
+  const cos = Math.cos(-t.beta);
+  const sin = Math.sin(-t.beta);
+  return points.map((p) => {
+    const x0 = t.mirror * p.x * t.length;
+    const y0 = p.y * t.length;
+    const x = x0 * cos - y0 * sin + t.wrist.x;
+    const y = x0 * sin + y0 * cos + t.wrist.y;
+    return { x: x / t.aspect, y: -y, z: (p.z * t.length + t.wrist.z) / t.aspect };
+  });
 }
 
 /** 21 points → 63 numbers [x0, y0, z0, x1, …]. */

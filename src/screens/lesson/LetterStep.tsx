@@ -4,13 +4,16 @@ import { GestureButton } from "../../components/GestureButton";
 import { HintBanner } from "../../components/HintBanner";
 import { HoldRing } from "../../components/HoldRing";
 import { SkeletonPreview } from "../../components/SkeletonPreview";
+import { hintText } from "../../data/hintText";
 import { getReference } from "../../data/references";
+import type { LetterModels } from "../../data/samples";
 import { strings } from "../../data/strings.ru";
 import { createLetterPractice, starsForHints, type HintLogEntry } from "../../recognition/letters/practice";
 import type { LetterSpec } from "../../recognition/letters/spec";
 import { onFrame } from "../../recognition/pipeline";
 import { setHighlight } from "../../store/highlight";
 import type { LetterResult } from "../../store/lessonRun";
+import { clearLetterStats, setLetterStats } from "../../store/letterStats";
 import l from "./Lesson.module.css";
 
 const SUCCESS_MS = 1300;
@@ -56,13 +59,15 @@ interface LetterStepProps {
   spec: LetterSpec;
   index: number;
   total: number;
+  /** kNN + sample medoids; null while loading (the rules work alone meanwhile). */
+  models: LetterModels | null;
   onDone(result: LetterResult, hintLog: readonly HintLogEntry[]): void;
 }
 
-/** One letter of a lesson: camera + skeleton on the left, letter card with hold ring, checklist and hint. */
-export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
+/** One letter of a lesson: camera + skeleton + ghost hand on the left, letter card with hold ring, checklist and hint. */
+export function LetterStep({ spec, index, total, models, onDone }: LetterStepProps) {
   const [practice] = useState(() => createLetterPractice(spec));
-  const [hintCode, setHintCode] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
   const [checks, setChecks] = useState({ frameOk: false, failing: [] as string[] });
   const [stars, setStars] = useState<1 | 2 | 3 | null>(null);
   const [canSkip, setCanSkip] = useState(false);
@@ -74,7 +79,11 @@ export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
     onDoneRef.current = onDone;
   });
 
-  // Per frame: rules → hint engine → hold ring. React state changes only on events.
+  useEffect(() => {
+    practice.setKnn(models?.knn ?? null);
+  }, [practice, models]);
+
+  // Per frame: rules + kNN → hint engine → hold ring. React state changes only on events.
   useEffect(() => {
     startRef.current = performance.now();
     let shownHint: string | null = null;
@@ -86,11 +95,12 @@ export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
       const u = practice.update(observation, performance.now());
       ringRef.current?.style.setProperty("--progress", u.holdProgress.toFixed(3));
       setHighlight(u.hint?.landmarkIds);
+      setLetterStats(spec.letter, u.decision);
 
-      const code = u.hint?.hintCode ?? null;
-      if (code !== shownHint) {
-        shownHint = code;
-        setHintCode(code);
+      const text = hintText(u.hint);
+      if (text !== shownHint) {
+        shownHint = text;
+        setHint(text);
       }
       const key = `${u.frameOk}|${u.failing.join(",")}`;
       if (key !== checksKey) {
@@ -100,7 +110,7 @@ export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
       if (u.accepted) {
         finished = true;
         setHighlight(null);
-        setHintCode(null);
+        setHint(null);
         setStars(starsForHints(practice.hintLog.length));
       }
     });
@@ -110,8 +120,9 @@ export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
       unsubscribe();
       window.clearTimeout(skipTimer);
       setHighlight(null);
+      clearLetterStats();
     };
-  }, [practice]);
+  }, [practice, spec.letter]);
 
   // Letter accepted: celebrate, then report to the lesson.
   useEffect(() => {
@@ -131,14 +142,15 @@ export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
       practice.hintLog,
     );
 
-  const reference = getReference(spec.letter);
-  const hintText = hintCode ? (strings.hints[hintCode] ?? null) : null;
+  // Ghost hand: the checked reference file, else the most typical recorded sample (§8.3).
+  const ghost = getReference(spec.letter)?.frame ?? models?.medoids.get(spec.letter) ?? null;
   const t = strings.lesson;
 
   return (
     <div className={l.layout}>
       <section className={l.camera}>
-        <CameraView variant="large" />
+        <CameraView variant="large" ghost={stars === null ? ghost : null} />
+        {ghost && <p className={l.ghostLegend}>{strings.ghost.legend}</p>}
         {stars !== null && (
           <div className={l.success} role="status">
             <span className={l.successTitle}>
@@ -160,11 +172,11 @@ export function LetterStep({ spec, index, total, onDone }: LetterStepProps) {
         <h1 className={l.show}>{t.show(spec.letter)}</h1>
         <p className={l.sub}>{t.hold}</p>
 
-        <HintBanner text={stars === null ? hintText : null} />
+        <HintBanner text={stars === null ? hint : null} />
 
         <div className={l.howTo}>
           <h2>{t.howTo}</h2>
-          {reference && <SkeletonPreview frame={reference.frame} className={l.reference} />}
+          {ghost && <SkeletonPreview frame={ghost} className={l.reference} />}
           <ul className={l.rules}>
             {rulesOf(spec).map((rule) => {
               const state = !checks.frameOk ? "unknown" : checks.failing.includes(rule.code) ? "fail" : "ok";

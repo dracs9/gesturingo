@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { canonicalHand, toFrame, type SyntheticHandOptions } from "../__fixtures__/syntheticHand";
+import { flattenPoints } from "../normalize";
 import { buildObservation, type HandObservation } from "../observation";
+import { createKnn } from "./knn";
 import { createLetterPractice, starsForHints, type PracticeUpdate } from "./practice";
 import type { LetterSpec } from "./spec";
 
@@ -65,5 +67,26 @@ describe("letter practice", () => {
     expect(starsForHints(0)).toBe(3);
     expect(starsForHints(1)).toBe(2);
     expect(starsForHints(4)).toBe(1);
+  });
+});
+
+describe("letter practice with kNN", () => {
+  const LOOSE: LetterSpec = { ...SPEC, extra: [], confusedWith: ["Ь"] };
+  const sample = (label: string, hand: SyntheticHandOptions) =>
+    Array.from({ length: 6 }, () => ({ label, vector: flattenPoints(canonicalHand(hand)) }));
+  const knn = createKnn([...sample("Т", { thumb: "across" }), ...sample("Ь", { thumb: "side" })]);
+
+  it("does not accept a confusable letter and says what it looks like", () => {
+    const p = createLetterPractice(LOOSE);
+    p.setKnn(knn);
+    const out = run(p, obs({ thumb: "side" }), 0, 2000);
+    expect(out.some((o) => o.accepted)).toBe(false);
+    expect(out.at(-1)?.hint).toMatchObject({ level: "confusion", params: { letter: "Ь" } });
+    expect(out.at(-1)?.decision?.knn?.prediction.ranking[0]?.label).toBe("Ь");
+  });
+
+  it("accepts when rules and kNN agree", () => {
+    const p = createLetterPractice(LOOSE, knn);
+    expect(run(p, RIGHT, 0, 2000).filter((o) => o.accepted)).toHaveLength(1);
   });
 });

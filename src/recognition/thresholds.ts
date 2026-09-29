@@ -97,3 +97,16 @@ export const LETTER_VOTE_SHARE = 0.6;
 /** The letter must be held correctly this long to count (shorter than the 1.5 s open-palm "back"). */
 export const LETTER_HOLD_MS = 1000;
 export const LETTER_HOLD_GRACE_MS = 150;
+
+// --- kNN (second layer after the rules, CLAUDE.md §8.2) ---
+export const KNN_K = 5;
+/** kNN "agrees" with the expected letter when at least this many of the k neighbours are that letter. */
+export const KNN_MIN_VOTES = 2;
+/** A confusable letter is reported when it holds at least this many of the k neighbours. */
+export const KNN_CONFUSION_VOTES = 3;
+/** Nearest sample further than this (63-dim distance, palm units): the hand is unlike any sample, kNN abstains. */
+export const KNN_MAX_DISTANCE = 2.5;
+
+// --- Ghost hand ---
+/** A finger matches the reference when its state is the same or its angle is within this many degrees. */
+export const GHOST_ANGLE_TOLERANCE = 20;

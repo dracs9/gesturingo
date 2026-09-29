@@ -4,6 +4,7 @@ import { palmSize } from "../recognition/errors/frameChecks";
 import { FINGERS } from "../recognition/features";
 import { getStats } from "../recognition/pipeline";
 import { getControlStats } from "../store/controlStats";
+import { getLetterStats } from "../store/letterStats";
 import s from "./DebugPanel.module.css";
 
 const REFRESH_MS = 250;
@@ -49,6 +50,23 @@ export function DebugPanel() {
           `${t.speed}: ${wristSpeed.toFixed(2)}`,
           `${t.pose}: ${pose}`,
           `${t.dwell}: ${(control.cursor.dwell * 100).toFixed(0)}%`,
+        );
+      }
+
+      const letter = getLetterStats();
+      if (letter) {
+        const d = letter.decision;
+        const knn = d?.knn
+          ? d.knn.prediction.ranking
+              .slice(0, 3)
+              .map((r) => `${r.label} ${r.votes}`)
+              .join(" · ")
+          : t.knnOff;
+        lines.push(
+          "",
+          `${t.letter}: ${letter.letter}`,
+          `${t.rules}: ${d ? (d.rulesOk ? "✓" : "✗") : t.none}`,
+          `kNN: ${knn}${d?.knn ? ` (${d.knn.prediction.neighbors[0]?.distance.toFixed(2) ?? ""})` : ""}`,
         );
       }
       el.textContent = lines.join("\n");

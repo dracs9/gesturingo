@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canonicalHand, toFrame } from "./__fixtures__/syntheticHand";
 import { LM, type Point3 } from "./landmarks";
-import { flattenPoints, normalizeHand, unflattenPoints } from "./normalize";
+import { denormalizePoints, flattenPoints, handTransform, normalizeHand, unflattenPoints } from "./normalize";
 
 function expectPointsClose(actual: readonly Point3[], expected: readonly Point3[], digits = 6) {
   expect(actual).toHaveLength(expected.length);
@@ -51,5 +51,16 @@ describe("flatten / unflatten", () => {
     expect(flat).toHaveLength(63);
     expect(flat.slice(3, 6)).toEqual([pts[1]?.x, pts[1]?.y, pts[1]?.z]);
     expect(unflattenPoints(flat)).toEqual(pts);
+  });
+});
+
+describe("denormalizePoints", () => {
+  it("maps the normalized hand back onto the camera frame (right and left hands)", () => {
+    const hand = canonicalHand({ fingers: { index: "half" }, thumb: "across" });
+    for (const handedness of ["Right", "Left"] as const) {
+      const frame = toFrame(hand, { handedness, roll: 40, scale: 0.25, wrist: { x: 0.3, y: 0.6 }, width: 1280, height: 720 });
+      const back = denormalizePoints(normalizeHand(frame).points, handTransform(frame));
+      expectPointsClose(back, frame.landmarks);
+    }
   });
 });

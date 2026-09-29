@@ -15,6 +15,8 @@ export interface HintError {
   finger?: Finger;
   /** Landmarks to highlight on the skeleton. */
   landmarkIds?: readonly number[];
+  /** Values for templated hints, e.g. `{ letter: "О", advice: "tips.touch.thumb-index" }`. */
+  params?: Readonly<Record<string, string>>;
 }
 
 export function compareHints(a: HintError, b: HintError): number {

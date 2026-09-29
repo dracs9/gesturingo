@@ -3,7 +3,8 @@ import { createHintEngine, type HintError } from "../errors/hintEngine";
 import type { HandObservation } from "../observation";
 import { createHold, createMajorityVote } from "../smoothing";
 import { LETTER_HOLD_GRACE_MS, LETTER_HOLD_MS, LETTER_VOTE_SHARE, LETTER_VOTE_WINDOW } from "../thresholds";
-import { checkLetter } from "./rules";
+import { classifyLetter, type LetterDecision } from "./classifier";
+import type { Knn } from "./knn";
 import type { LetterSpec } from "./spec";
 
 /** One shown hint, for the results screen and "repeat weak letters" (CLAUDE.md §9.2). */
@@ -24,10 +25,14 @@ export interface PracticeUpdate {
   holdProgress: number;
   /** True on the frame the letter is accepted. */
   accepted: boolean;
+  /** Rules + kNN decision of this frame (null while the frame is not usable). */
+  decision: LetterDecision | null;
 }
 
 export interface LetterPractice {
   update(observation: HandObservation | null, timestamp: number): PracticeUpdate;
+  /** Plug in kNN once the samples are loaded (without samples the rules decide alone). */
+  setKnn(knn: Knn | null): void;
   /** Letter-level hints shown so far (frame hints like «подойди ближе» are not the learner's mistake). */
   readonly hintLog: readonly HintLogEntry[];
 }
@@ -37,25 +42,26 @@ export function starsForHints(hints: number): 1 | 2 | 3 {
   return hints === 0 ? 3 : hints === 1 ? 2 : 1;
 }
 
-/** Practising one letter: rules → voting → 1 s hold, with one stable hint at a time. */
-export function createLetterPractice(spec: LetterSpec): LetterPractice {
+/** Practising one letter: rules (+ kNN) → voting → 1 s hold, with one stable hint at a time. */
+export function createLetterPractice(spec: LetterSpec, initialKnn: Knn | null = null): LetterPractice {
   const vote = createMajorityVote<boolean>(LETTER_VOTE_WINDOW, LETTER_VOTE_SHARE);
   const hold = createHold(LETTER_HOLD_MS, LETTER_HOLD_GRACE_MS);
   const hints = createHintEngine();
   const hintLog: HintLogEntry[] = [];
+  let knn = initialKnn;
   let shownCode: string | null = null;
 
   return {
     update(obs, t) {
       const frame = frameErrors(obs?.frame ?? null);
-      const shape = frame.length === 0 && obs ? checkLetter(spec, obs.features) : [];
-      const correct = obs !== null && frame.length === 0 && shape.length === 0;
+      const decision = frame.length === 0 && obs ? classifyLetter(spec, obs, knn) : null;
+      const correct = decision?.correct === true;
 
       const stable = vote.push(correct) === true;
       const { progress, fired } = hold.update(stable, t);
 
       // Top-down: while the frame is wrong, letter errors are not shown.
-      const hint = hints.update(correct ? [] : frame.length > 0 ? frame : shape, t);
+      const hint = hints.update(correct ? [] : frame.length > 0 ? frame : (decision?.errors ?? []), t);
       const code = hint?.hintCode ?? null;
       if (code !== shownCode) {
         shownCode = code;
@@ -64,11 +70,15 @@ export function createLetterPractice(spec: LetterSpec): LetterPractice {
 
       return {
         hint,
-        failing: shape.map((e) => e.code),
-        frameOk: frame.length === 0 && obs !== null,
+        failing: (decision?.errors ?? []).flatMap((e) => ("code" in e && typeof e.code === "string" ? [e.code] : [])),
+        frameOk: decision !== null,
         holdProgress: progress,
         accepted: fired,
+        decision,
       };
+    },
+    setKnn(next) {
+      knn = next;
     },
     get hintLog() {
       return hintLog;

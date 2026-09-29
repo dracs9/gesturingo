@@ -183,3 +183,9 @@
     animation: none;
   }
 }
+
+.ghostLegend {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}

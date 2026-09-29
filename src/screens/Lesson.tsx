@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getLesson, lessonNumber } from "../data/lessons";
 import { getLetterSpec } from "../data/letters";
+import { loadLetterModels, type LetterModels } from "../data/samples";
 import { strings } from "../data/strings.ru";
 import type { HintLogEntry } from "../recognition/letters/practice";
 import { navigate, paths } from "../router";
@@ -27,6 +28,18 @@ export function Lesson({ lessonId }: { lessonId: string }) {
     return () => setDockHidden(false);
   }, [setDockHidden]);
 
+  // kNN samples load in the background; the rules work alone until they arrive.
+  const [models, setModels] = useState<LetterModels | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void loadLetterModels().then((m) => {
+      if (!cancelled) setModels(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const spec = specs[index];
   if (!lesson || !spec) {
     return (
@@ -50,7 +63,7 @@ export function Lesson({ lessonId }: { lessonId: string }) {
 
   return (
     <main aria-label={strings.lesson.title(lessonNumber(lessonId))}>
-      <LetterStep key={index} spec={spec} index={index} total={specs.length} onDone={onDone} />
+      <LetterStep key={index} spec={spec} index={index} total={specs.length} models={models} onDone={onDone} />
     </main>
   );
 }

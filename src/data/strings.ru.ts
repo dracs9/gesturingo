@@ -50,6 +50,9 @@ export const strings = {
     speed: "Скорость запястья",
     pose: "Поза",
     dwell: "Задержка",
+    letter: "Буква",
+    rules: "Правила",
+    knnOff: "нет образцов / не участвует",
     none: "—",
   },
 
@@ -194,6 +197,15 @@ export const strings = {
     back: "Назад",
   },
 
+  confusion: {
+    looksLike: (letter: string, advice: string | null) =>
+      advice ? `Похоже на «${letter}» — ${advice}` : `Похоже на «${letter}»`,
+  },
+
+  ghost: {
+    legend: "Призрачная рука — образец. Зелёный палец — как в образце, красный — поправь.",
+  },
+
   // Hint texts by hintCode. Wording is always «что сделать», never «что не так» (CLAUDE.md §9.2).
   hints: {
     // Frame
@@ -239,5 +251,8 @@ export const strings = {
     "tips.touch.index-middle": "Прижми указательный и средний пальцы друг к другу",
     "tips.apart.thumb-index": "Разведи большой и указательный пальцы",
     "tips.apart.index-middle": "Разведи указательный и средний пальцы",
+    // Letter confusion / ghost hand
+    "ghost.match": "Сверь пальцы с призрачной рукой — красные поправь",
+    "confusion.looksLike": "Получилась похожая буква",
   } as Record<string, string>,
 } as const;
