@@ -1,6 +1,7 @@
 import { palmSize } from "../errors/frameChecks";
 import { LM } from "../landmarks";
 import type { HandObservation } from "../observation";
+import { createHold } from "../smoothing";
 import {
   OPEN_PALM_HOLD_MS,
   PINCH_LOOKBACK_MS,
@@ -11,7 +12,7 @@ import {
 import { createCursor, type CursorState, type Viewport } from "./cursor";
 import { createDwell } from "./dwell";
 import { createPinch, pinchRatio, type PinchState } from "./pinch";
-import { createHold, isOpenPalm, isThumbsUp } from "./poses";
+import { isOpenPalm, isThumbsUp } from "./poses";
 
 export type Command = "ok" | "back";
 

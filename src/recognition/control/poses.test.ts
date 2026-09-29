@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { canonicalHand, toFrame, type SyntheticHandOptions, type ProjectionOptions } from "../__fixtures__/syntheticHand";
 import { buildObservation } from "../observation";
-import { createHold, isOpenPalm, isThumbsUp } from "./poses";
+import { createHold } from "../smoothing";
+import { isOpenPalm, isThumbsUp } from "./poses";
 
 const obs = (hand: SyntheticHandOptions, proj: ProjectionOptions = {}) =>
   buildObservation(toFrame(canonicalHand(hand), proj));

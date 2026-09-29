@@ -148,3 +148,46 @@ export function createMajorityVote<T>(size: number, minShare = 0.5): MajorityVot
     },
   };
 }
+
+export interface HoldUpdate {
+  /** 0..1 while holding (0 once fired, until the pose is released). */
+  progress: number;
+  fired: boolean;
+}
+
+export interface Hold {
+  update(active: boolean, timestamp: number): HoldUpdate;
+  reset(): void;
+}
+
+/** Fires once after `holdMs` of continuous pose; brief dropouts up to `graceMs` are tolerated. */
+export function createHold(holdMs: number, graceMs: number): Hold {
+  let start: number | null = null;
+  let lastActive = 0;
+  let done = false;
+
+  const reset = () => {
+    start = null;
+    done = false;
+  };
+
+  return {
+    update(active, t) {
+      if (active) {
+        start ??= t;
+        lastActive = t;
+      } else if (start !== null && t - lastActive > graceMs) {
+        reset();
+      }
+
+      if (start === null || done) return { progress: 0, fired: false };
+      const progress = Math.min(1, (t - start) / holdMs);
+      if (active && progress >= 1) {
+        done = true;
+        return { progress: 1, fired: true };
+      }
+      return { progress, fired: false };
+    },
+    reset,
+  };
+}

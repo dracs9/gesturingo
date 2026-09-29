@@ -85,3 +85,15 @@ export const TUTORIAL_MOVE_HINT_MS = 5000;
 export const TUTORIAL_DWELL_FALLBACK_MS = 12000;
 /** Step 2: how long the "aim first" hint stays relevant after a pinch that missed. */
 export const PINCH_AIM_HINT_MS = 1500;
+
+// --- Letters ---
+/** Fingertips count as touching below this distance (palm units). */
+export const TIPS_TOUCH_MAX = 0.25;
+/** Fingertips count as apart above this distance (palm units). */
+export const TIPS_APART_MIN = 0.4;
+/** Majority vote over the last N frames decides whether the letter is shown correctly. */
+export const LETTER_VOTE_WINDOW = 8;
+export const LETTER_VOTE_SHARE = 0.6;
+/** The letter must be held correctly this long to count (shorter than the 1.5 s open-palm "back"). */
+export const LETTER_HOLD_MS = 1000;
+export const LETTER_HOLD_GRACE_MS = 150;
