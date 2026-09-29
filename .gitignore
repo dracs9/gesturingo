@@ -10,3 +10,10 @@ dist
 *.webm
 *.mov
 *.avi
+
+scripts/data/
+
+# python tooling for scripts/extract_landmarks.py
+scripts/.venv/
+scripts/models/
+__pycache__/

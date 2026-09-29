@@ -1,0 +1,5 @@
+# Offline landmark extraction (scripts/extract_landmarks.py). Python 3.11 recommended.
+# mediapipe version matches @mediapipe/tasks-vision used in the browser (src/config.ts).
+mediapipe==1.0.1
+opencv-python==5.0.0.93
+numpy==2.4.6
