@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canonicalHand, toFrame, type ProjectionOptions, type SyntheticHandOptions } from "../__fixtures__/syntheticHand";
 import { buildObservation, type HandObservation } from "../observation";
+import { DWELL_MS, OPEN_PALM_HOLD_MS } from "../thresholds";
 import { createControlLayer, type ControlContext, type ControlOutput } from "./controller";
 
 const VIEW = { width: 1000, height: 1000 };
@@ -75,26 +76,28 @@ describe("control layer", () => {
     expect(outs.every((o) => !o.cursor.visible)).toBe(true);
   });
 
-  it("dwell clicks after 1 s and does not chain onto the next screen's button", () => {
+  it("dwell clicks after DWELL_MS and does not chain onto the next screen's button", () => {
     let target = "start";
     const layer = createControlLayer<string>({ hitTest: () => target });
-    const first = run(layer, () => POINT, 0, 1200);
+    const clickedAt = DWELL_MS + 200;
+    const first = run(layer, () => POINT, 0, clickedAt);
     expect(clicks(first).map((o) => o.click?.target)).toEqual(["start"]);
 
     target = "next"; // navigation put another button under the resting cursor
-    expect(clicks(run(layer, () => POINT, 1200, 4000))).toHaveLength(0);
+    const movedAt = clickedAt + 2 * DWELL_MS;
+    expect(clicks(run(layer, () => POINT, clickedAt, movedAt))).toHaveLength(0);
 
     // Moving the hand re-arms dwell.
     const moved = obs({ fingers: { middle: "bent", ring: "bent", pinky: "bent" }, thumb: "across" }, { wrist: { x: 0.3, y: 0.7 } });
-    expect(clicks(run(layer, () => moved, 4000, 6000)).map((o) => o.click?.target)).toEqual(["next"]);
+    expect(clicks(run(layer, () => moved, movedAt, movedAt + DWELL_MS + 1000)).map((o) => o.click?.target)).toEqual(["next"]);
   });
 
-  it("a still open palm held 1.5 s means back — once", () => {
+  it("a still open palm held 3 s means back — once", () => {
     const layer = createControlLayer<string>({ hitTest: () => null });
-    const outs = run(layer, () => OPEN_PALM, 0, 3000);
+    const outs = run(layer, () => OPEN_PALM, 0, 6000);
     expect(commands(outs)).toEqual(["back"]);
     const firedAt = outs.find((o) => o.command)?.t ?? 0;
-    expect(firedAt).toBeGreaterThanOrEqual(1500);
+    expect(firedAt).toBeGreaterThanOrEqual(OPEN_PALM_HOLD_MS);
     expect(outs.some((o) => o.pose?.kind === "back" && o.pose.progress > 0.5)).toBe(true);
   });
 

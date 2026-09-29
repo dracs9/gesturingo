@@ -58,13 +58,13 @@ export const PINCH_MIN_INTERVAL_MS = 400;
 export const PINCH_LOOKBACK_MS = 100;
 
 // --- Control: dwell click ---
-export const DWELL_MS = 1000;
+export const DWELL_MS = 3000;
 /** After any click, dwell stays disarmed until the cursor moves this far (px) or leaves the target. */
 export const DWELL_REARM_PX = 48;
 
 // --- Control: poses ---
 export const THUMBS_UP_HOLD_MS = 800;
-export const OPEN_PALM_HOLD_MS = 1500;
+export const OPEN_PALM_HOLD_MS = 3000;
 /** Max angle (degrees) between the thumb (MCP → tip) and image-up. */
 export const THUMB_UP_MAX_ANGLE = 35;
 /** A pose may flicker off for this long without losing its hold progress. */
@@ -98,7 +98,7 @@ export const TIPS_APART_MIN = 0.4;
 /** Majority vote over the last N frames decides whether the letter is shown correctly. */
 export const LETTER_VOTE_WINDOW = 8;
 export const LETTER_VOTE_SHARE = 0.6;
-/** The letter must be held correctly this long to count (shorter than the 1.5 s open-palm "back"). */
+/** The letter must be held correctly this long to count (shorter than the 3 s open-palm "back"). */
 export const LETTER_HOLD_MS = 1000;
 export const LETTER_HOLD_GRACE_MS = 150;
 

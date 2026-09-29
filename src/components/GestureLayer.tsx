@@ -29,13 +29,12 @@ interface GestureLayerProps {
 }
 
 /**
- * Hand-control overlay: cursor, dwell ring, click ripple and pose hold indicator.
+ * Hand-control overlay: cursor, dwell ring and pose hold indicator.
  * Runs on every tracker frame and writes to the DOM directly — React only re-renders on context change.
  */
 export function GestureLayer({ context }: GestureLayerProps) {
   const contextRef = useRef(context);
   const cursorRef = useRef<HTMLDivElement>(null);
-  const rippleHostRef = useRef<HTMLDivElement>(null);
   const poseRef = useRef<HTMLDivElement>(null);
   const poseRingRef = useRef<HTMLDivElement>(null);
 
@@ -57,16 +56,6 @@ export function GestureLayer({ context }: GestureLayerProps) {
         hovered = el;
       }
       el?.style.setProperty("--dwell", dwell.toFixed(3));
-    };
-
-    const ripple = (x: number, y: number) => {
-      const host = rippleHostRef.current;
-      if (!host) return;
-      const el = document.createElement("div");
-      el.className = s.ripple ?? "";
-      el.style.transform = `translate(${x}px, ${y}px)`;
-      el.addEventListener("animationend", () => el.remove());
-      host.appendChild(el);
     };
 
     let lastFrameAt = performance.now();
@@ -111,7 +100,6 @@ export function GestureLayer({ context }: GestureLayerProps) {
       }
 
       if (out.click) {
-        ripple(out.click.x, out.click.y);
         if (out.click.target) playSound("click");
         out.click.target?.click();
       }
@@ -135,7 +123,6 @@ export function GestureLayer({ context }: GestureLayerProps) {
         <span className={`${s.poseLabel} ${s.poseOk}`}>{strings.poses.ok}</span>
         <span className={`${s.poseLabel} ${s.poseBack}`}>{strings.poses.back}</span>
       </div>
-      <div ref={rippleHostRef} className={s.layer} aria-hidden="true" />
       <div ref={cursorRef} className={s.cursor} data-visible="false" aria-hidden="true">
         <svg className={s.dwell} viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="44" />

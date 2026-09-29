@@ -10,7 +10,7 @@ export interface GestureContext {
   dwell: boolean;
   /** Thumbs up → OK. */
   ok: boolean;
-  /** Open palm held 1.5 s → back. */
+  /** Open palm held 3 s → back. */
   back: boolean;
   letters: LetterMode;
 }
@@ -23,7 +23,7 @@ export const GESTURE_CONTEXTS: Readonly<Record<ScreenName, GestureContext>> = {
   results: NAVIGATION,
   // The tutorial narrows this per step via the UI store override (only the gesture being trained).
   tutorial: NAVIGATION,
-  // Letters may look like the open palm: "back" needs 1.5 s, longer than the 1 s letter hold.
+  // Letters may look like the open palm: "back" needs 3 s, longer than the 1 s letter hold.
   lesson: { cursor: false, dwell: false, ok: false, back: true, letters: "current" },
   bridge: { cursor: false, dwell: false, ok: false, back: true, letters: "learned" },
   record: { cursor: true, dwell: true, ok: false, back: true, letters: "none" },
