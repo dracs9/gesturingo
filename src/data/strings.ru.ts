@@ -43,8 +43,41 @@ export const strings = {
     delegate: "Делегат",
     hand: "Рука",
     score: "Уверенность",
-    palm: "Ладонь",
+    palmSize: "Размер ладони",
+    palmFacing: "Ладонь",
+    thumbPosition: "Большой палец",
     none: "—",
+  },
+
+  hand: {
+    Left: "левая",
+    Right: "правая",
+  },
+
+  fingers: {
+    thumb: "Большой",
+    index: "Указательный",
+    middle: "Средний",
+    ring: "Безымянный",
+    pinky: "Мизинец",
+  },
+
+  fingerStates: {
+    straight: "прямой",
+    half: "полусогнут",
+    bent: "согнут",
+  },
+
+  palmFacing: {
+    camera: "к камере",
+    side: "боком",
+    away: "от камеры",
+  },
+
+  thumbPosition: {
+    acrossPalm: "поперёк ладони",
+    side: "в сторону",
+    up: "вверх",
   },
 
   tutorial: {
@@ -82,6 +115,23 @@ export const strings = {
 
   record: {
     title: "Запись образцов",
+    intro: "Служебная страница: образцы для kNN и эталоны для призрачной руки.",
+    letter: "Буква",
+    signer: "Кто показывает",
+    signerPlaceholder: "S01",
+    frameCount: "Кадров",
+    start: "Записать",
+    cancel: "Отмена",
+    getReady: "Приготовься",
+    recording: (n: number, total: number) => `Запись… ${n}/${total}`,
+    showHand: "Покажи руку в кадре",
+    preview: "Превью",
+    frameOf: (i: number, n: number) => `Кадр ${i} из ${n}`,
+    handedness: (hand: string) => `Рука: ${hand}`,
+    downloadSamples: "Скачать образцы (JSON)",
+    saveReference: "Сохранить эталон",
+    again: "Записать заново",
+    referenceHint: "Эталон — выбранный кадр. По умолчанию — самый типичный.",
   },
 
   handStatus: {

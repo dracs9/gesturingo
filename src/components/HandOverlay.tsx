@@ -52,7 +52,7 @@ export function HandOverlay({ className }: { className?: string }) {
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
 
-    const unsubscribe = onFrame((frame) => draw(ctx, frame));
+    const unsubscribe = onFrame((observation) => draw(ctx, observation?.frame ?? null));
     return () => {
       unsubscribe();
       observer.disconnect();

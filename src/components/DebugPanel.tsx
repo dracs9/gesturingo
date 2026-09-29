@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { strings } from "../data/strings.ru";
 import { palmSize } from "../recognition/errors/frameChecks";
+import { FINGERS } from "../recognition/features";
 import { getStats } from "../recognition/pipeline";
 import s from "./DebugPanel.module.css";
 
@@ -15,14 +16,28 @@ export function DebugPanel() {
     const id = window.setInterval(() => {
       const el = ref.current;
       if (!el) return;
-      const { fps, delegate, frame } = getStats();
-      el.textContent = [
-        `${t.fps}: ${fps.toFixed(1)}`,
-        `${t.delegate}: ${delegate ?? t.none}`,
-        `${t.hand}: ${frame ? frame.handedness : t.none}`,
-        `${t.score}: ${frame ? frame.score.toFixed(2) : t.none}`,
-        `${t.palm}: ${frame ? palmSize(frame).toFixed(3) : t.none}`,
-      ].join("\n");
+      const { fps, delegate, observation } = getStats();
+      const lines = [`${t.fps}: ${fps.toFixed(1)}`, `${t.delegate}: ${delegate ?? t.none}`];
+
+      if (observation) {
+        const { frame, features } = observation;
+        lines.push(
+          `${t.hand}: ${frame.handedness} (${frame.score.toFixed(2)})`,
+          `${t.palmSize}: ${palmSize(frame).toFixed(3)}`,
+          `${t.palmFacing}: ${strings.palmFacing[features.palmFacing]} (n.z ${features.palmNormal.z.toFixed(2)})`,
+          `${t.thumbPosition}: ${strings.thumbPosition[features.thumbPosition]}`,
+          "",
+          ...FINGERS.map((f) => {
+            const { angles, angle, state } = features.fingers[f];
+            const name = strings.fingers[f].padEnd(12);
+            const joints = angles.map((a) => a.toFixed(0).padStart(3)).join(" ");
+            return `${name} ${strings.fingerStates[state].padEnd(10)} ${angle.toFixed(0).padStart(3)}° [${joints}]`;
+          }),
+        );
+      } else {
+        lines.push(`${t.hand}: ${t.none}`);
+      }
+      el.textContent = lines.join("\n");
     }, REFRESH_MS);
     return () => window.clearInterval(id);
   }, []);

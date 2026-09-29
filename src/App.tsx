@@ -72,9 +72,11 @@ export function App() {
           <div className={s.status}>
             <HandStatus />
           </div>
-          <div className={s.dock}>
-            <CameraView variant="mini" />
-          </div>
+          {route.name !== "record" && (
+            <div className={s.dock}>
+              <CameraView variant="mini" />
+            </div>
+          )}
         </>
       )}
       {debug && ready && <DebugPanel />}

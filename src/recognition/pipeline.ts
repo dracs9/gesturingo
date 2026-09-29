@@ -2,9 +2,11 @@ import { HAND_MODEL_URL, MEDIAPIPE_WASM_URL } from "../config";
 import { CameraError } from "./camera";
 import { getHandStatus, type HandStatus } from "./errors/frameChecks";
 import { createHandTracker, type Delegate, type HandTracker } from "./handTracker";
+import { computeFeatures, type HandFeatures } from "./features";
 import type { HandFrame } from "./landmarks";
-import { createStableValue } from "./smoothing";
-import { HAND_STATUS_HOLD_MS } from "./thresholds";
+import { normalizeHand, type NormalizedHand } from "./normalize";
+import { createPointsEma, createStableValue } from "./smoothing";
+import { HAND_STATUS_HOLD_MS, LANDMARK_EMA_ALPHA } from "./thresholds";
 
 /**
  * Recognition loop singleton: owns the camera stream, a hidden <video> used for
@@ -14,14 +16,23 @@ import { HAND_STATUS_HOLD_MS } from "./thresholds";
 
 export type PipelineError = CameraError | Error;
 
-type FrameListener = (frame: HandFrame | null) => void;
+/** Everything known about the hand in one frame. */
+export interface HandObservation {
+  /** Raw tracker output — use for drawing (no smoothing lag). */
+  frame: HandFrame;
+  /** Normalized, EMA-smoothed landmarks — use for recognition. */
+  normalized: NormalizedHand;
+  features: HandFeatures;
+}
+
+type FrameListener = (observation: HandObservation | null) => void;
 type StatusListener = (status: HandStatus) => void;
 type ErrorListener = (error: PipelineError) => void;
 
 export interface PipelineStats {
   fps: number;
   delegate: Delegate | null;
-  frame: HandFrame | null;
+  observation: HandObservation | null;
 }
 
 const frameListeners = new Set<FrameListener>();
@@ -38,7 +49,8 @@ let rafId: number | null = null;
 let lastVideoTime = -1;
 let lastTimestamp = 0;
 
-let lastFrame: HandFrame | null = null;
+let lastObservation: HandObservation | null = null;
+const landmarkEma = createPointsEma(LANDMARK_EMA_ALPHA);
 const handStatus = createStableValue<HandStatus>("noHand", HAND_STATUS_HOLD_MS);
 let emittedStatus: HandStatus = "noHand";
 
@@ -62,7 +74,7 @@ export function getStream(): MediaStream | null {
 }
 
 export function getStats(): PipelineStats {
-  return { fps, delegate: tracker?.delegate ?? null, frame: lastFrame };
+  return { fps, delegate: tracker?.delegate ?? null, observation: lastObservation };
 }
 
 /** Starts loading the model (idempotent). Safe to call early, e.g. on the Welcome screen. */
@@ -158,6 +170,14 @@ function recoverFromDetectError(err: unknown): void {
   );
 }
 
+function observe(frame: HandFrame): HandObservation {
+  // Never blend landmarks of a different hand.
+  if (lastObservation?.frame.handedness !== frame.handedness) landmarkEma.reset();
+  const smoothed: HandFrame = { ...frame, landmarks: landmarkEma.update(frame.landmarks) };
+  const normalized = normalizeHand(smoothed);
+  return { frame, normalized, features: computeFeatures(normalized) };
+}
+
 function tick(): void {
   rafId = requestAnimationFrame(tick);
   if (!video || !tracker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
@@ -182,8 +202,10 @@ function tick(): void {
     fpsWindowStart = now;
   }
 
-  lastFrame = frame;
-  for (const fn of frameListeners) fn(frame);
+  const observation = frame ? observe(frame) : null;
+  if (!frame) landmarkEma.reset();
+  lastObservation = observation;
+  for (const fn of frameListeners) fn(observation);
 
   const status = handStatus.update(getHandStatus(frame), now);
   if (status !== emittedStatus) {
