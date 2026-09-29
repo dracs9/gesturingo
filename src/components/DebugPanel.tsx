@@ -3,6 +3,7 @@ import { strings } from "../data/strings.ru";
 import { palmSize } from "../recognition/errors/frameChecks";
 import { FINGERS } from "../recognition/features";
 import { getStats } from "../recognition/pipeline";
+import { getControlStats } from "../store/controlStats";
 import s from "./DebugPanel.module.css";
 
 const REFRESH_MS = 250;
@@ -36,6 +37,19 @@ export function DebugPanel() {
         );
       } else {
         lines.push(`${t.hand}: ${t.none}`);
+      }
+
+      const control = getControlStats();
+      if (control) {
+        const { pinchRatio, pinchState, wristSpeed } = control.debug;
+        const pose = control.pose ? `${control.pose.kind} ${(control.pose.progress * 100).toFixed(0)}%` : t.none;
+        lines.push(
+          "",
+          `${t.pinch}: ${pinchRatio === null ? t.none : pinchRatio.toFixed(2)} (${pinchState})`,
+          `${t.speed}: ${wristSpeed.toFixed(2)}`,
+          `${t.pose}: ${pose}`,
+          `${t.dwell}: ${(control.cursor.dwell * 100).toFixed(0)}%`,
+        );
       }
       el.textContent = lines.join("\n");
     }, REFRESH_MS);

@@ -46,6 +46,10 @@ export const strings = {
     palmSize: "Размер ладони",
     palmFacing: "Ладонь",
     thumbPosition: "Большой палец",
+    pinch: "Щипок",
+    speed: "Скорость запястья",
+    pose: "Поза",
+    dwell: "Задержка",
     none: "—",
   },
 
@@ -142,10 +146,17 @@ export const strings = {
   },
 
   gestureLegend: {
+    title: "Жесты управления",
     cursor: "Указательный палец — курсор",
-    pinch: "Щипок — нажать",
+    pinch: "Щипок или задержка 1 с — нажать",
     thumbUp: "Палец вверх — ОК",
-    openPalm: "Ладонь — назад",
+    openPalm: "Ладонь 1,5 с — назад",
+    unavailable: "сейчас выключено",
+  },
+
+  poses: {
+    ok: "ОК",
+    back: "Назад",
   },
 
   // Hint texts by hintCode (filled in Phase 4–5). Wording is always "what to do".

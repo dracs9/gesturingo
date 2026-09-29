@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CameraView } from "../components/CameraView";
+import { GestureButton } from "../components/GestureButton";
 import { SkeletonPreview } from "../components/SkeletonPreview";
 import { ALPHABET } from "../data/alphabet";
 import { strings } from "../data/strings.ru";
@@ -16,6 +17,8 @@ import {
   serializeReferenceFile,
   serializeSampleFile,
 } from "../recognition/samples";
+import { navigate, paths } from "../router";
+import { useGestureCommands } from "../store/gestureCommands";
 import { useSession } from "../store/session";
 import r from "./Record.module.css";
 import s from "./Screen.module.css";
@@ -133,6 +136,8 @@ export function Record() {
   };
 
   const busy = phase === "countdown" || phase === "recording";
+  // While recording, a letter that looks like an open palm must not leave the page.
+  useGestureCommands({ back: busy ? undefined : () => navigate(paths.map()) });
 
   return (
     <main className={r.layout}>
@@ -191,13 +196,14 @@ export function Record() {
 
         <div className={r.actions}>
           {busy ? (
-            <button className={s.button} onClick={cancel}>
+            // Mouse only: the hand is busy showing the letter and must not cancel by accident.
+            <GestureButton noGesture onClick={cancel}>
               {t.cancel}
-            </button>
+            </GestureButton>
           ) : (
-            <button className={`${s.button} ${s.primary}`} onClick={start}>
+            <GestureButton variant="primary" onClick={start}>
               {recording ? t.again : t.start}
-            </button>
+            </GestureButton>
           )}
         </div>
 
@@ -218,12 +224,10 @@ export function Record() {
             </p>
             <p className={r.hint}>{t.referenceHint}</p>
             <div className={r.actions}>
-              <button className={`${s.button} ${s.primary}`} onClick={downloadSamples}>
+              <GestureButton variant="primary" onClick={downloadSamples}>
                 {t.downloadSamples}
-              </button>
-              <button className={s.button} onClick={saveReference}>
-                {t.saveReference}
-              </button>
+              </GestureButton>
+              <GestureButton onClick={saveReference}>{t.saveReference}</GestureButton>
             </div>
           </div>
         )}

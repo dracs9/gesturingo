@@ -41,34 +41,3 @@
   gap: var(--gap);
 }
 
-.button {
-  min-width: var(--btn-min);
-  min-height: var(--btn-min);
-  padding: 16px 28px;
-  border: 3px solid transparent;
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.button:hover {
-  background: var(--surface-hover);
-  border-color: var(--accent);
-}
-
-.primary {
-  background: var(--accent);
-  color: var(--accent-text);
-}
-
-.primary:hover {
-  background: var(--accent);
-  border-color: var(--text);
-}
-
-.button:disabled {
-  opacity: 0.6;
-  cursor: progress;
-}

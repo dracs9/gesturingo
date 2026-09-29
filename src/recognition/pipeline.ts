@@ -2,9 +2,8 @@ import { HAND_MODEL_URL, MEDIAPIPE_WASM_URL } from "../config";
 import { CameraError } from "./camera";
 import { getHandStatus, type HandStatus } from "./errors/frameChecks";
 import { createHandTracker, type Delegate, type HandTracker } from "./handTracker";
-import { computeFeatures, type HandFeatures } from "./features";
 import type { HandFrame } from "./landmarks";
-import { normalizeHand, type NormalizedHand } from "./normalize";
+import { buildObservation, type HandObservation } from "./observation";
 import { createPointsEma, createStableValue } from "./smoothing";
 import { HAND_STATUS_HOLD_MS, LANDMARK_EMA_ALPHA } from "./thresholds";
 
@@ -15,15 +14,7 @@ import { HAND_STATUS_HOLD_MS, LANDMARK_EMA_ALPHA } from "./thresholds";
  */
 
 export type PipelineError = CameraError | Error;
-
-/** Everything known about the hand in one frame. */
-export interface HandObservation {
-  /** Raw tracker output — use for drawing (no smoothing lag). */
-  frame: HandFrame;
-  /** Normalized, EMA-smoothed landmarks — use for recognition. */
-  normalized: NormalizedHand;
-  features: HandFeatures;
-}
+export type { HandObservation };
 
 type FrameListener = (observation: HandObservation | null) => void;
 type StatusListener = (status: HandStatus) => void;
@@ -173,9 +164,7 @@ function recoverFromDetectError(err: unknown): void {
 function observe(frame: HandFrame): HandObservation {
   // Never blend landmarks of a different hand.
   if (lastObservation?.frame.handedness !== frame.handedness) landmarkEma.reset();
-  const smoothed: HandFrame = { ...frame, landmarks: landmarkEma.update(frame.landmarks) };
-  const normalized = normalizeHand(smoothed);
-  return { frame, normalized, features: computeFeatures(normalized) };
+  return buildObservation(frame, landmarkEma.update(frame.landmarks));
 }
 
 function tick(): void {

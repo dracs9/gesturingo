@@ -2,7 +2,8 @@
 import type { Finger, FingerState } from "../features";
 import { LANDMARK_COUNT, LM, type HandFrame, type Handedness, type Point3 } from "../landmarks";
 
-export type ThumbPreset = "side" | "up" | "across";
+/** `pinch` = thumb tip touching the index tip. */
+export type ThumbPreset = "side" | "up" | "across" | "pinch";
 
 export interface SyntheticHandOptions {
   fingers?: Partial<Record<Exclude<Finger, "thumb">, FingerState>>;
@@ -34,7 +35,7 @@ const MCP_INDEX: Record<Exclude<Finger, "thumb">, number> = {
 
 const SEGMENTS: [number, number, number] = [0.45, 0.28, 0.22];
 
-const THUMBS: Record<ThumbPreset, [Point3, Point3, Point3, Point3]> = {
+const THUMBS: Record<Exclude<ThumbPreset, "pinch">, [Point3, Point3, Point3, Point3]> = {
   side: [
     { x: 0.25, y: 0.2, z: 0 },
     { x: 0.5, y: 0.35, z: 0 },
@@ -59,7 +60,7 @@ const THUMBS: Record<ThumbPreset, [Point3, Point3, Point3, Point3]> = {
 export function canonicalHand({ fingers = {}, thumb = "side", yaw = 0 }: SyntheticHandOptions = {}): Point3[] {
   const pts: Point3[] = Array.from({ length: LANDMARK_COUNT }, () => ({ x: 0, y: 0, z: 0 }));
 
-  const [cmc, mcp, ip, tip] = THUMBS[thumb];
+  const [cmc, mcp, ip, tip] = THUMBS[thumb === "pinch" ? "side" : thumb];
   pts[LM.THUMB_CMC] = cmc;
   pts[LM.THUMB_MCP] = mcp;
   pts[LM.THUMB_IP] = ip;
@@ -84,6 +85,17 @@ export function canonicalHand({ fingers = {}, thumb = "side", yaw = 0 }: Synthet
       };
       pts[start + j + 1] = pos;
     }
+  }
+
+  if (thumb === "pinch") {
+    const indexTip = pts[LM.INDEX_TIP] ?? { x: 0, y: 0, z: 0 };
+    const thumbMcp = pts[LM.THUMB_MCP] ?? { x: 0, y: 0, z: 0 };
+    pts[LM.THUMB_TIP] = { x: indexTip.x + 0.03, y: indexTip.y - 0.03, z: indexTip.z };
+    pts[LM.THUMB_IP] = {
+      x: (thumbMcp.x + indexTip.x) / 2,
+      y: (thumbMcp.y + indexTip.y) / 2,
+      z: (thumbMcp.z + indexTip.z) / 2,
+    };
   }
 
   const a = (yaw * Math.PI) / 180;

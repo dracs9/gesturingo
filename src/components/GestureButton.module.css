@@ -1,0 +1,73 @@
+.button {
+  --dwell: 0;
+  position: relative;
+  min-width: var(--btn-min);
+  min-height: var(--btn-min);
+  padding: 16px 28px;
+  border: 3px solid transparent;
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+/* Dwell progress: a ring drawn around the button border. */
+.button::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: calc(var(--radius) + 8px);
+  padding: 5px;
+  background: conic-gradient(var(--accent) calc(var(--dwell) * 360deg), transparent 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.button[data-gesture-hover]::after {
+  opacity: 1;
+}
+
+.button:hover,
+.button[data-gesture-hover] {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+  transform: scale(1.04);
+}
+
+.primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.primary:hover,
+.primary[data-gesture-hover] {
+  background: var(--accent);
+  border-color: var(--text);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button:hover,
+  .button[data-gesture-hover] {
+    transform: none;
+  }
+}

@@ -1,7 +1,9 @@
 import { useEffect } from "react";
+import { GestureButton } from "../components/GestureButton";
 import { strings } from "../data/strings.ru";
 import { preloadTracker } from "../recognition/pipeline";
 import { navigate, paths } from "../router";
+import { useGestureCommands } from "../store/gestureCommands";
 import { useSession } from "../store/session";
 import s from "./Screen.module.css";
 import w from "./Welcome.module.css";
@@ -28,6 +30,11 @@ export function Welcome({ gate = false }: WelcomeProps) {
     if (!gate && useSession.getState().cameraStatus === "ready") navigate(paths.tutorial());
   };
 
+  // Coming back to Welcome with the camera already on: thumbs up continues.
+  useGestureCommands({
+    ok: cameraStatus === "ready" && !gate ? () => navigate(paths.tutorial()) : undefined,
+  });
+
   const label =
     cameraStatus === "ready"
       ? strings.welcome.start
@@ -41,9 +48,9 @@ export function Welcome({ gate = false }: WelcomeProps) {
       <p className={s.text}>{gate ? strings.welcome.gateText : strings.welcome.description}</p>
 
       <div className={s.actions}>
-        <button className={`${s.button} ${s.primary}`} onClick={onStart} disabled={busy}>
+        <GestureButton variant="primary" onClick={onStart} disabled={busy}>
           {label}
-        </button>
+        </GestureButton>
       </div>
 
       {busy && (

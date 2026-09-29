@@ -1,8 +1,13 @@
+import { GestureButton } from "../components/GestureButton";
 import { strings } from "../data/strings.ru";
 import { navigate, paths } from "../router";
+import { useGestureCommands } from "../store/gestureCommands";
 import s from "./Screen.module.css";
 
 export function ControlTutorial() {
+  const skip = () => navigate(paths.map());
+  useGestureCommands({ ok: skip, back: () => navigate(paths.welcome()) });
+
   return (
     <main className={s.screen}>
       <h1 className={s.title}>{strings.tutorial.title}</h1>
@@ -13,9 +18,9 @@ export function ControlTutorial() {
       </ol>
       <p className={s.placeholder}>{strings.common.wip}</p>
       <div className={s.actions}>
-        <button className={`${s.button} ${s.primary}`} onClick={() => navigate(paths.map())}>
+        <GestureButton variant="primary" onClick={skip}>
           {strings.common.skip}
-        </button>
+        </GestureButton>
       </div>
     </main>
   );

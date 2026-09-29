@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import s from "./App.module.css";
 import { CameraView } from "./components/CameraView";
 import { DebugPanel } from "./components/DebugPanel";
+import { GestureLayer } from "./components/GestureLayer";
+import { GestureLegend } from "./components/GestureLegend";
 import { HandStatus } from "./components/HandStatus";
 import { isDebug } from "./config";
+import { getGestureContext } from "./recognition/gestureContext";
 import { useRoute, type Route } from "./router";
 import { Bridge } from "./screens/Bridge";
 import { ControlTutorial } from "./screens/ControlTutorial";
@@ -51,6 +54,7 @@ export function App() {
 
   const needsCamera = route.name !== "welcome";
   const ready = cameraStatus === "ready";
+  const gestureContext = getGestureContext(route.name);
 
   // After a reload on an inner screen, restart the camera silently if permission was already given.
   useEffect(() => {
@@ -77,6 +81,8 @@ export function App() {
               <CameraView variant="mini" />
             </div>
           )}
+          <GestureLegend context={gestureContext} />
+          <GestureLayer context={gestureContext} />
         </>
       )}
       {debug && ready && <DebugPanel />}
