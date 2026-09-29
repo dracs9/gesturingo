@@ -1,23 +1,42 @@
+import { useEffect } from "react";
+import { playSound } from "../audio/sounds";
+import { Confetti } from "../components/Confetti";
 import { GestureButton } from "../components/GestureButton";
-import { getNextLesson, lessonNumber } from "../data/lessons";
+import { Stars } from "../components/Stars";
+import { XpCounter } from "../components/XpCounter";
+import { getNextLesson, LESSONS } from "../data/lessons";
 import { strings } from "../data/strings.ru";
 import { navigate, paths } from "../router";
 import { useGestureCommands } from "../store/gestureCommands";
 import { useLessonRun } from "../store/lessonRun";
+import { useProgress } from "../store/progress";
+import { isLessonUnlocked } from "../store/progressLogic";
+import { lessonTitle } from "./lesson/lessonTitle";
 import r from "./results/Results.module.css";
 import { summarizeLesson } from "./results/summary";
 import s from "./Screen.module.css";
 
+/** Good enough for confetti: at least two thirds of the stars. */
+const CELEBRATE_ACCURACY = 67;
+
 export function Results({ lessonId }: { lessonId: string }) {
   const t = strings.results;
   const result = useLessonRun((st) => st.lastResult);
+  const progress = useProgress();
   const toMap = () => navigate(paths.map());
+  // «Дальше» = the next lesson if the one just played opened it, otherwise back to the map.
   const next = getNextLesson(lessonId);
-  const goNext = () => navigate(next ? paths.lesson(next.id) : paths.map());
+  const nextOpen = next !== undefined && isLessonUnlocked(progress, LESSONS, LESSONS.indexOf(next));
+  const goNext = () => navigate(next && nextOpen ? paths.lesson(next.id) : paths.map());
 
   useGestureCommands({ ok: goNext, back: toMap });
 
-  if (!result || result.lessonId !== lessonId) {
+  const valid = result !== null && result.lessonId === lessonId;
+  useEffect(() => {
+    if (valid) playSound("fanfare");
+  }, [valid]);
+
+  if (!result || !valid) {
     return (
       <main className={s.screen}>
         <h1 className={s.title}>{t.title}</h1>
@@ -36,9 +55,11 @@ export function Results({ lessonId }: { lessonId: string }) {
 
   return (
     <main className={s.screen}>
+      <Confetti burst={summary.accuracy >= CELEBRATE_ACCURACY ? 1 : 0} count={160} />
       <h1 className={s.title}>
-        {t.title} · {strings.lesson.title(lessonNumber(lessonId))}
+        {t.title} · {lessonTitle(lessonId)}
       </h1>
+      <XpCounter value={progress.xp} from={progress.xp - summary.xp} />
 
       <dl className={r.stats}>
         <div>
@@ -67,10 +88,7 @@ export function Results({ lessonId }: { lessonId: string }) {
           {result.letters.map((l) => (
             <li key={l.letter}>
               <span className={r.letter}>{l.letter}</span>
-              <span className={r.stars} aria-label={strings.lesson.starsLabel(l.stars)}>
-                {"★".repeat(l.stars)}
-                <span className={r.starsOff}>{"★".repeat(3 - l.stars)}</span>
-              </span>
+              <Stars value={l.stars} className={r.stars} />
               {l.stars === 0 && <span className={r.muted}>{t.skipped}</span>}
             </li>
           ))}

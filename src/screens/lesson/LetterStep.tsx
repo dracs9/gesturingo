@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { playSound } from "../../audio/sounds";
 import { CameraView } from "../../components/CameraView";
+import { Confetti } from "../../components/Confetti";
 import { GestureButton } from "../../components/GestureButton";
 import { HintBanner } from "../../components/HintBanner";
 import { HoldRing } from "../../components/HoldRing";
@@ -99,6 +101,8 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
 
       const text = hintText(u.hint);
       if (text !== shownHint) {
+        // A soft tone for a new letter hint (not for «подойди ближе» and the like).
+        if (text && u.hint?.level !== "frame") playSound("hint");
         shownHint = text;
         setHint(text);
       }
@@ -109,6 +113,7 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
       }
       if (u.accepted) {
         finished = true;
+        playSound("success");
         setHighlight(null);
         setHint(null);
         setStars(starsForHints(practice.hintLog.length));
@@ -151,6 +156,7 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
       <section className={l.camera}>
         <CameraView variant="large" ghost={stars === null ? ghost : null} />
         {ghost && <p className={l.ghostLegend}>{strings.ghost.legend}</p>}
+        <Confetti burst={stars ?? 0} originX={0.3} count={stars === 3 ? 140 : 70} />
         {stars !== null && (
           <div className={l.success} role="status">
             <span className={l.successTitle}>

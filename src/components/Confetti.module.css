@@ -1,0 +1,8 @@
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+}

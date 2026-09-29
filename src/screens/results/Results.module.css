@@ -59,12 +59,7 @@
 }
 
 .stars {
-  color: #ffd166;
   font-size: 1.2rem;
-}
-
-.starsOff {
-  color: rgb(255 255 255 / 0.25);
 }
 
 .errors {

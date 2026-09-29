@@ -21,6 +21,8 @@ export const strings = {
       "Научись управлять приложением руками за 30 секунд, а потом — показывать буквы русской дактильной азбуки. Камера подскажет, что поправить.",
     enableCamera: "Включить камеру",
     start: "Начать",
+    toMap: "К урокам",
+    tutorialAgain: "Обучение жестам",
     gateText: "Чтобы продолжить, включи камеру.",
     privacy: "Видео не покидает твой браузер.",
     requesting: "Разреши доступ к камере в окне браузера…",
@@ -109,8 +111,29 @@ export const strings = {
     lesson: (n: number) => `Урок ${n}`,
     lessonLetters: (letters: readonly string[]) => letters.join(" · "),
     bridge: "Мост",
+    bridgeLocked: "Пройди урок 1, чтобы открыть",
     weakLetters: "Повтори слабые буквы",
-    hint: "Наведи курсор на урок и сделай щипок. Большой палец вверх — начать первый урок.",
+    weakLettersList: (letters: readonly string[]) => letters.join(" · "),
+    noWeakLetters: "Слабых букв нет",
+    locked: (n: number) => `Пройди урок ${n}`,
+    lockedLabel: "закрыт",
+    hint: "Наведи курсор на урок и сделай щипок. Большой палец вверх — продолжить.",
+    totalStars: (n: number) => `Звёзд: ${n}`,
+  },
+
+  progress: {
+    xpLabel: (n: number) => `Опыт: ${n}`,
+    starsLabel: (n: number) => `Звёзд: ${n} из 3`,
+    soundOn: "🔊 Звук: вкл",
+    soundOff: "🔇 Звук: выкл",
+    reset: "Сбросить прогресс",
+    resetConfirm: "Нажми ещё раз — сотрёт всё",
+    resetDone: "Прогресс сброшен",
+  },
+
+  review: {
+    title: "Повторение",
+    empty: "Слабых букв нет — все буквы на 3 звезды!",
   },
 
   lesson: {

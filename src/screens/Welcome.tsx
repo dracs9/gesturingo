@@ -1,9 +1,11 @@
 import { useEffect } from "react";
+import { unlockAudio } from "../audio/sounds";
 import { GestureButton } from "../components/GestureButton";
 import { strings } from "../data/strings.ru";
 import { preloadTracker } from "../recognition/pipeline";
 import { navigate, paths } from "../router";
 import { useGestureCommands } from "../store/gestureCommands";
+import { useProgress } from "../store/progress";
 import { useSession } from "../store/session";
 import s from "./Screen.module.css";
 import w from "./Welcome.module.css";
@@ -24,15 +26,20 @@ export function Welcome({ gate = false }: WelcomeProps) {
   }, []);
 
   const busy = cameraStatus === "requesting" || cameraStatus === "loadingModel";
+  // Returning users go straight to the lessons; the tutorial stays one button away.
+  const tutorialDone = useProgress((st) => st.tutorialDone);
+  const mainTarget = tutorialDone ? paths.map() : paths.tutorial();
 
-  const onStart = async () => {
+  const start = async (target: string) => {
+    // This click is the one real user gesture: browsers only allow sound after it.
+    unlockAudio();
     await startCamera();
-    if (!gate && useSession.getState().cameraStatus === "ready") navigate(paths.tutorial());
+    if (!gate && useSession.getState().cameraStatus === "ready") navigate(target);
   };
 
   // Coming back to Welcome with the camera already on: thumbs up continues.
   useGestureCommands({
-    ok: cameraStatus === "ready" && !gate ? () => navigate(paths.tutorial()) : undefined,
+    ok: cameraStatus === "ready" && !gate ? () => navigate(mainTarget) : undefined,
   });
 
   const label =
@@ -48,9 +55,14 @@ export function Welcome({ gate = false }: WelcomeProps) {
       <p className={s.text}>{gate ? strings.welcome.gateText : strings.welcome.description}</p>
 
       <div className={s.actions}>
-        <GestureButton variant="primary" onClick={onStart} disabled={busy}>
+        <GestureButton variant="primary" onClick={() => void start(mainTarget)} disabled={busy}>
           {label}
         </GestureButton>
+        {tutorialDone && !gate && (
+          <GestureButton onClick={() => void start(paths.tutorial())} disabled={busy}>
+            {strings.welcome.tutorialAgain}
+          </GestureButton>
+        )}
       </div>
 
       {busy && (

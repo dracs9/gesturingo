@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { playSound } from "../audio/sounds";
 import { strings } from "../data/strings.ru";
 import { createControlLayer } from "../recognition/control/controller";
 import type { GestureContext } from "../recognition/gestureContext";
@@ -91,9 +92,10 @@ export function GestureLayer({ context }: GestureLayerProps) {
 
       if (out.click) {
         ripple(out.click.x, out.click.y);
+        if (out.click.target) playSound("click");
         out.click.target?.click();
       }
-      if (out.command) runCommand(out.command);
+      if (out.command && runCommand(out.command)) playSound("click");
     });
 
     return () => {

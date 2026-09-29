@@ -1,6 +1,5 @@
 import type { LessonResult } from "../../store/lessonRun";
-
-export const XP_PER_STAR = 10;
+import { XP_PER_STAR } from "../../store/progressLogic";
 
 export interface LessonSummary {
   stars: number;

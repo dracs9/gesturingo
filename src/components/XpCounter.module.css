@@ -1,0 +1,16 @@
+.xp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  color: var(--text-muted);
+  font-size: 0.8em;
+}

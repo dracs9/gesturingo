@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getLesson, lessonNumber } from "../data/lessons";
+import { getLesson } from "../data/lessons";
 import { getLetterSpec } from "../data/letters";
 import { loadLetterModels, type LetterModels } from "../data/samples";
 import { strings } from "../data/strings.ru";
@@ -7,17 +7,27 @@ import type { HintLogEntry } from "../recognition/letters/practice";
 import { navigate, paths } from "../router";
 import { useGestureCommands } from "../store/gestureCommands";
 import { useLessonRun, type LetterResult } from "../store/lessonRun";
+import { progressSnapshot, useProgress } from "../store/progress";
+import { REVIEW_LESSON_ID, weakLetters } from "../store/progressLogic";
 import { useUi } from "../store/ui";
+import { lessonTitle } from "./lesson/lessonTitle";
 import { LetterStep } from "./lesson/LetterStep";
 import s from "./Screen.module.css";
 
+/** Letters of a lesson; the review lesson takes the weakest letters at the moment it opens. */
+function lessonLetters(lessonId: string): readonly string[] {
+  if (lessonId === REVIEW_LESSON_ID) return weakLetters(progressSnapshot());
+  return getLesson(lessonId)?.letters ?? [];
+}
+
 export function Lesson({ lessonId }: { lessonId: string }) {
-  const lesson = getLesson(lessonId);
-  const specs = (lesson?.letters ?? []).flatMap((letter) => getLetterSpec(letter) ?? []);
+  const [letters] = useState(() => lessonLetters(lessonId));
+  const specs = letters.flatMap((letter) => getLetterSpec(letter) ?? []);
   const [index, setIndex] = useState(0);
   const results = useRef<LetterResult[]>([]);
   const hintLog = useRef<HintLogEntry[]>([]);
   const setLastResult = useLessonRun((st) => st.setLastResult);
+  const recordLesson = useProgress((st) => st.recordLesson);
   const setDockHidden = useUi((st) => st.setDockHidden);
 
   // Exit is the open palm (the cursor is off in lessons, CLAUDE.md §7.5).
@@ -41,10 +51,11 @@ export function Lesson({ lessonId }: { lessonId: string }) {
   }, []);
 
   const spec = specs[index];
-  if (!lesson || !spec) {
+  if (!spec) {
+    const empty = lessonId === REVIEW_LESSON_ID ? strings.review.empty : strings.lesson.notFound;
     return (
       <main className={s.screen}>
-        <h1 className={s.title}>{strings.lesson.notFound}</h1>
+        <h1 className={s.title}>{empty}</h1>
         <p className={s.text}>{strings.lesson.exitHint}</p>
       </main>
     );
@@ -57,12 +68,14 @@ export function Lesson({ lessonId }: { lessonId: string }) {
       setIndex(index + 1);
       return;
     }
-    setLastResult({ lessonId, letters: results.current, hintLog: hintLog.current });
+    const lessonResult = { lessonId, letters: results.current, hintLog: hintLog.current };
+    recordLesson(lessonResult);
+    setLastResult(lessonResult);
     navigate(paths.results(lessonId));
   };
 
   return (
-    <main aria-label={strings.lesson.title(lessonNumber(lessonId))}>
+    <main aria-label={lessonTitle(lessonId)}>
       <LetterStep key={index} spec={spec} index={index} total={specs.length} models={models} onDone={onDone} />
     </main>
   );

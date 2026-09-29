@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { playSound } from "../audio/sounds";
 import { CameraView } from "../components/CameraView";
 import { GestureButton } from "../components/GestureButton";
 import { HintBanner } from "../components/HintBanner";
@@ -10,6 +11,7 @@ import { onControl } from "../store/controlStats";
 import { GESTURE_ENTER } from "../store/gestureEvents";
 import { useGestureCommands } from "../store/gestureCommands";
 import { setHighlight } from "../store/highlight";
+import { useProgress } from "../store/progress";
 import { useUi } from "../store/ui";
 import t from "./ControlTutorial.module.css";
 import s from "./Screen.module.css";
@@ -79,8 +81,22 @@ export function ControlTutorial() {
     celebratingRef.current = celebrating;
   }, [celebrating]);
 
-  const toMap = useCallback(() => navigate(paths.map()), []);
-  const succeed = useCallback(() => setCelebrating(true), []);
+  // Finishing or skipping the tutorial: next visits start from the lessons.
+  const markTutorialDone = useProgress((st) => st.markTutorialDone);
+  const toMap = useCallback(() => {
+    markTutorialDone();
+    navigate(paths.map());
+  }, [markTutorialDone]);
+  const succeed = useCallback(() => {
+    playSound("success");
+    setCelebrating(true);
+  }, []);
+
+  useEffect(() => {
+    if (step !== "done") return;
+    markTutorialDone();
+    playSound("fanfare");
+  }, [step, markTutorialDone]);
 
   // Success → «Отлично!» → next step.
   useEffect(() => {
