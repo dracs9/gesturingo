@@ -1,5 +1,6 @@
 import { GestureButton } from "../../components/GestureButton";
 import { SkeletonPreview } from "../../components/SkeletonPreview";
+import { getLetterPhoto } from "../../data/letterPhotos";
 import { getReference } from "../../data/references";
 import { strings } from "../../data/strings.ru";
 import { FINGERS } from "../../recognition/features";
@@ -22,6 +23,7 @@ interface LetterCardProps {
 export function LetterCard({ spec, info, verified, onToggleVerified, onTryLive }: LetterCardProps) {
   const t = strings.lettersPage;
   const reference = getReference(spec.letter)?.frame ?? null;
+  const photo = getLetterPhoto(spec.letter);
   const touches = (spec.extra ?? []).flatMap((e) =>
     e.type === "tipsTouch" ? [`${strings.fingers[e.a].toLowerCase()} + ${strings.fingers[e.b].toLowerCase()}`] : [],
   );
@@ -34,11 +36,14 @@ export function LetterCard({ spec, info, verified, onToggleVerified, onTryLive }
         <span className={verified ? c.badgeOk : c.badgeTodo}>{verified ? t.verified : t.notVerified}</span>
       </header>
 
-      {reference ? (
-        <SkeletonPreview frame={reference} className={c.skeleton} />
-      ) : (
-        <p className={c.muted}>{t.noReference}</p>
-      )}
+      <div className={c.visuals}>
+        {photo && <img className={c.photo} src={photo} alt={strings.lesson.photoAlt(spec.letter)} />}
+        {reference ? (
+          <SkeletonPreview frame={reference} className={c.skeleton} />
+        ) : (
+          <p className={c.muted}>{t.noReference}</p>
+        )}
+      </div>
 
       {info && (
         <p className={c.meta}>

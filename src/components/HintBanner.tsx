@@ -13,7 +13,7 @@ export function HintBanner({ text, className }: HintBannerProps) {
       {text && (
         <p key={text} className={s.banner}>
           <span className={s.icon} aria-hidden="true">
-            💡
+            !
           </span>
           {text}
         </p>

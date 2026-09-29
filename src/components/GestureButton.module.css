@@ -4,11 +4,13 @@
   min-width: var(--btn-min);
   min-height: var(--btn-min);
   padding: 16px 28px;
-  border: 3px solid transparent;
+  border: 2px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  font-size: 1.2rem;
+  box-shadow: var(--shadow);
+  font-size: 1.15rem;
   font-weight: 700;
+  line-height: 1.25;
   cursor: pointer;
   transition:
     transform 0.12s ease,
@@ -40,24 +42,29 @@
 .button:hover,
 .button[data-gesture-hover] {
   background: var(--surface-hover);
-  border-color: var(--accent);
-  transform: scale(1.04);
+  border-color: var(--text);
+  transform: scale(1.03);
 }
 
+/* The main action of a screen: navy ink, like the letters on a card. */
 .primary {
-  background: var(--accent);
-  color: var(--accent-text);
+  border-color: var(--text);
+  background: var(--text);
+  color: #fff;
 }
 
 .primary:hover,
 .primary[data-gesture-hover] {
-  background: var(--accent);
-  border-color: var(--text);
+  background: #2a3560;
+  border-color: var(--mark);
 }
 
 .button:disabled {
-  opacity: 0.6;
-  cursor: progress;
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: default;
   transform: none;
 }
 

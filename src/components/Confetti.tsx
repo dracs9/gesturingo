@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import s from "./Confetti.module.css";
 
-const COLORS = ["#4dd4ac", "#ffd166", "#ff6b6b", "#7aa2ff", "#f5f6f8"];
+const COLORS = ["#16804f", "#ffc53d", "#1b2340", "#e0604f", "#4a78d6"];
 const DURATION_MS = 1800;
 const GRAVITY = 1400; // px/s²
 

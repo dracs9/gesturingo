@@ -59,7 +59,10 @@ export function LevelMap() {
   return (
     <main className={s.screen}>
       <header className={m.header}>
-        <h1 className={s.title}>{t.title}</h1>
+        <div className={m.intro}>
+          <h1 className={s.title}>{t.title}</h1>
+          <p className={m.hint}>{t.hint}</p>
+        </div>
         <div className={m.totals}>
           <XpCounter value={progress.xp} />
           <span className={m.totalStars}>
@@ -67,7 +70,6 @@ export function LevelMap() {
           </span>
         </div>
       </header>
-      <p className={s.text}>{t.hint}</p>
 
       <div className={m.grid}>
         {LESSONS.map((lesson, i) => {
@@ -93,7 +95,8 @@ export function LevelMap() {
 
         <GestureButton className={m.tile} disabled={!bridgeOpen} onClick={() => navigate(paths.bridge())}>
           <span className={m.tileTitle}>
-            {!bridgeOpen && <span aria-hidden="true">🔒 </span>}🌉 {t.bridge}
+            {!bridgeOpen && <span aria-hidden="true">🔒 </span>}
+            {t.bridge}
           </span>
           {!bridgeOpen && <span className={m.muted}>{t.bridgeLocked}</span>}
         </GestureButton>
@@ -103,17 +106,18 @@ export function LevelMap() {
           disabled={weak.length === 0}
           onClick={() => navigate(paths.lesson(REVIEW_LESSON_ID))}
         >
-          <span className={m.tileTitle}>🔁 {t.weakLetters}</span>
-          <span className={m.tileLetters}>{weak.length > 0 ? t.weakLettersList(weak) : t.noWeakLetters}</span>
+          <span className={m.tileTitle}>{t.weakLetters}</span>
+          {weak.length > 0 ? (
+            <span className={m.tileLetters}>{t.weakLettersList(weak)}</span>
+          ) : (
+            <span className={m.muted}>{t.noWeakLetters}</span>
+          )}
         </GestureButton>
 
         {comingSoon.length > 0 && (
           <GestureButton className={m.tile} disabled>
-            <span className={m.tileTitle}>
-              <span aria-hidden="true">⏳ </span>
-              {t.comingSoon}
-            </span>
-            <span className={m.tileLetters}>{t.lessonLetters(comingSoon)}</span>
+            <span className={m.tileTitle}>{t.comingSoon}</span>
+            <span className={`${m.tileLetters} ${m.tileLettersMany}`}>{t.lessonLetters(comingSoon)}</span>
             <span className={m.muted}>{t.comingSoonHint}</span>
           </GestureButton>
         )}

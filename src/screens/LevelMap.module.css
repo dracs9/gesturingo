@@ -1,59 +1,86 @@
 .header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  width: 100%;
+  max-width: 760px;
+  text-align: left;
+}
+
+.intro {
+  display: grid;
+  gap: 6px;
+}
+
+.hint {
+  max-width: 30rem;
+  color: var(--text-muted);
 }
 
 .totals {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .totalStars {
   padding: 6px 14px;
+  border: 2px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
-  color: #ffd166;
   font-size: 1.1rem;
   font-weight: 800;
 }
 
+.totalStars > span {
+  color: var(--star);
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
-  justify-content: center;
-  gap: var(--gap);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
   width: 100%;
   max-width: 760px;
 }
 
+/* A lesson tile reads like a flash card: small title, the letters large. */
 .tile {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 6px;
   min-height: 150px;
+  padding: 16px 20px;
+  text-align: left;
 }
 
 .tileTitle {
-  font-size: 1.3rem;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .tileLetters {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+/* "Coming soon" lists up to ten letters. */
+.tileLettersMany {
   font-size: 1.1rem;
-  font-weight: 600;
-  opacity: 0.85;
 }
 
 .muted {
   font-size: 0.9rem;
   font-weight: 600;
-  opacity: 0.8;
+  color: var(--text-muted);
 }
 
 .settings {
@@ -81,14 +108,14 @@
 
   .tile {
     min-height: 120px;
-    padding: 12px;
-  }
-
-  .tileTitle {
-    font-size: 1.1rem;
+    padding: 12px 14px;
   }
 
   .tileLetters {
+    font-size: 1.3rem;
+  }
+
+  .tileLettersMany {
     font-size: 1rem;
   }
 }

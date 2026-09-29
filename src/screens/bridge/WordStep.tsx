@@ -5,6 +5,7 @@ import { Confetti } from "../../components/Confetti";
 import { HintBanner } from "../../components/HintBanner";
 import { HoldRing } from "../../components/HoldRing";
 import { hintText } from "../../data/hintText";
+import { getLetterPhoto } from "../../data/letterPhotos";
 import { getLetterSpec } from "../../data/letters";
 import type { LetterModels } from "../../data/samples";
 import { strings } from "../../data/strings.ru";
@@ -100,6 +101,7 @@ export function WordStep({ word, warmup, header, models, onDone }: WordStepProps
 
   const letters = speller.letters;
   const current = letters[index];
+  const photo = current ? getLetterPhoto(current) : undefined;
   const t = strings.bridge;
 
   const speechNote =
@@ -149,9 +151,12 @@ export function WordStep({ word, warmup, header, models, onDone }: WordStepProps
           current && (
             <>
               <p className={b.counter}>{t.letterOf(index + 1, letters.length)}</p>
-              <HoldRing ref={ringRef} className={b.ring}>
-                <span className={b.letter}>{current}</span>
-              </HoldRing>
+              <div className={b.sample}>
+                <HoldRing ref={ringRef} className={b.ring}>
+                  <span className={b.letter}>{current}</span>
+                </HoldRing>
+                {photo && <img className={b.photo} src={photo} alt={strings.lesson.photoAlt(current)} />}
+              </div>
               <p className={b.show}>{t.showLetter(current)}</p>
               <HintBanner text={hint} />
             </>

@@ -71,7 +71,7 @@ export function Bridge() {
         key={round}
         word={word}
         warmup={words.length === 0}
-        header={`🌉 ${strings.bridge.title} · ${strings.bridge.wordsDone(spelled)}`}
+        header={`${strings.bridge.title}. ${strings.bridge.wordsDone(spelled)}`}
         models={models}
         onDone={next}
       />

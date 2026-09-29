@@ -5,9 +5,8 @@ import { Confetti } from "../../components/Confetti";
 import { GestureButton } from "../../components/GestureButton";
 import { HintBanner } from "../../components/HintBanner";
 import { HoldRing } from "../../components/HoldRing";
-import { SkeletonPreview } from "../../components/SkeletonPreview";
 import { hintText } from "../../data/hintText";
-import { getReference } from "../../data/references";
+import { getLetterPhoto } from "../../data/letterPhotos";
 import type { LetterModels } from "../../data/samples";
 import { strings } from "../../data/strings.ru";
 import { createLetterPractice, starsForHints, type HintLogEntry } from "../../recognition/letters/practice";
@@ -66,7 +65,7 @@ interface LetterStepProps {
   onDone(result: LetterResult, hintLog: readonly HintLogEntry[]): void;
 }
 
-/** One letter of a lesson: camera + skeleton on the left, letter card with sample, hold ring, checklist and hint. */
+/** One letter of a lesson: camera on the left, letter card with the chart drawing, hold ring, hint and checklist. */
 export function LetterStep({ spec, index, total, models, onDone }: LetterStepProps) {
   const [practice] = useState(() => createLetterPractice(spec));
   const [hint, setHint] = useState<string | null>(null);
@@ -147,67 +146,85 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
       practice.hintLog,
     );
 
-  // Sample drawing on the letter card: the reference file, else the most typical recorded sample.
-  // Not drawn over the camera — an overlay there hid the user's own hand.
-  const reference = getReference(spec.letter)?.frame ?? models?.medoids.get(spec.letter) ?? null;
+  const photo = getLetterPhoto(spec.letter);
   const t = strings.lesson;
 
+  // Everything fits one screen (no scrolling): the camera and the drawing shrink with the window height.
   return (
     <div className={l.layout}>
       <section className={l.camera}>
-        <CameraView variant="large" />
+        <CameraView variant="large" className={l.cameraView}>
+          {stars !== null && (
+            <div className={l.success} role="status">
+              <span className={l.successTitle}>
+                <span aria-hidden="true">✓</span> {t.done}
+              </span>
+              <span className={l.stars} aria-label={t.starsLabel(stars)}>
+                {"★".repeat(stars)}
+                <span className={l.starsOff}>{"★".repeat(3 - stars)}</span>
+              </span>
+            </div>
+          )}
+        </CameraView>
         <Confetti burst={stars ?? 0} originX={0.3} count={stars === 3 ? 140 : 70} />
-        {stars !== null && (
-          <div className={l.success} role="status">
-            <span className={l.successTitle}>
-              <span aria-hidden="true">✓</span> {t.done}
-            </span>
-            <span className={l.stars} aria-label={t.starsLabel(stars)}>
-              {"★".repeat(stars)}
-              <span className={l.starsOff}>{"★".repeat(3 - stars)}</span>
-            </span>
-          </div>
-        )}
       </section>
 
       <section className={l.card}>
-        <p className={l.counter}>{t.letterOf(index + 1, total)}</p>
-        <HoldRing ref={ringRef} className={l.ring}>
-          <span className={l.letter}>{spec.letter}</span>
-        </HoldRing>
-        <h1 className={l.show}>{t.show(spec.letter)}</h1>
-        <p className={l.sub}>{t.hold}</p>
+        <header className={l.top}>
+          <p className={l.counter}>{t.letterOf(index + 1, total)}</p>
+          <ol className={l.dots} aria-hidden="true">
+            {Array.from({ length: total }, (_, i) => (
+              <li key={i} className={i < index ? l.dotDone : i === index ? l.dotNow : undefined} />
+            ))}
+          </ol>
+        </header>
 
-        <HintBanner text={stars === null ? hint : null} />
-
-        <div className={l.howTo}>
-          <h2>{t.howTo}</h2>
-          {reference && <SkeletonPreview frame={reference} className={l.reference} />}
-          <ul className={l.rules}>
-            {rulesOf(spec).map((rule) => {
-              const state = !checks.frameOk ? "unknown" : checks.failing.includes(rule.code) ? "fail" : "ok";
-              const mark = state === "ok" ? "✓" : state === "fail" ? "✗" : "○";
-              const label = state === "ok" ? t.ruleOk : state === "fail" ? t.ruleFail : t.ruleUnknown;
-              return (
-                <li key={rule.code} className={l[`rule_${state}`]}>
-                  <span className={l.mark} aria-hidden="true">
-                    {mark}
-                  </span>
-                  {rule.label}
-                  <span className={l.srOnly}> — {label}</span>
-                </li>
-              );
-            })}
-          </ul>
-          {!spec.verified && <p className={l.unverified}>⚠️ {t.unverified}</p>}
+        <div className={l.sample}>
+          <HoldRing ref={ringRef} className={l.ring}>
+            <span className={l.letter}>{spec.letter}</span>
+          </HoldRing>
+          {photo && (
+            <figure className={l.photo}>
+              <img src={photo} alt={t.photoAlt(spec.letter)} />
+            </figure>
+          )}
         </div>
 
-        <p className={l.exit}>✋ {t.exitHint}</p>
-        {canSkip && stars === null && (
-          <GestureButton noGesture onClick={skip}>
-            {t.skipLetter}
-          </GestureButton>
-        )}
+        <div className={l.task}>
+          <h1 className={l.show}>{t.show(spec.letter)}</h1>
+          <p className={l.sub}>{t.hold}</p>
+        </div>
+
+        <HintBanner className={l.hint} text={stars === null ? hint : null} />
+
+        <ul className={l.rules} aria-label={t.howTo}>
+          {rulesOf(spec).map((rule) => {
+            const state = !checks.frameOk ? "unknown" : checks.failing.includes(rule.code) ? "fail" : "ok";
+            const mark = state === "ok" ? "✓" : state === "fail" ? "✗" : "○";
+            const label = state === "ok" ? t.ruleOk : state === "fail" ? t.ruleFail : t.ruleUnknown;
+            return (
+              <li key={rule.code} className={l[`rule_${state}`]}>
+                <span className={l.mark} aria-hidden="true">
+                  {mark}
+                </span>
+                {rule.label}
+                <span className={l.srOnly}> — {label}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        <footer className={l.footer}>
+          <p className={l.exit}>
+            <span aria-hidden="true">✋</span> {t.exitHint}
+          </p>
+          {canSkip && stars === null && (
+            <GestureButton noGesture className={l.skip} onClick={skip}>
+              {t.skipLetter}
+            </GestureButton>
+          )}
+        </footer>
+        {!spec.verified && <p className={l.unverified}>{t.unverified}</p>}
       </section>
     </div>
   );

@@ -3,3 +3,6 @@
 mediapipe==1.0.1
 opencv-python==5.0.0.93
 numpy==2.4.6
+
+# Chart slicing (scripts/slice-alphabet.py).
+pillow==12.3.0

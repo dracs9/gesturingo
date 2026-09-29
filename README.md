@@ -123,6 +123,10 @@ React, покрытый юнит-тестами на синтетических 
 - **исключены** — М, П (в данных ни один палец не держится одинаково у ≥ 80% людей, правил нет),
   Ц, Ъ, Ь (нет в датасетах) — `src/data/excludedLetters.ts`.
 
+**Как показать букву**, видно на рисунке из классической таблицы дактильной азбуки — он есть на карточке
+каждой буквы в уроке, в «Мосте» и на `/letters` (`src/data/letterPhotos/`, нарезка —
+`python scripts/slice-alphabet.py`).
+
 **Формы букв не придуманы, а выведены из данных** — и пока **не сверены с официальной таблицей**
 (`verified: false`). Команда сверяет их на служебной странице `/letters` (её нет в меню): для каждой
 буквы — эталон, правила и доля людей за каждым правилом, похожие буквы, точность, живая проверка
@@ -191,6 +195,9 @@ npm run build:letters
 | [Russian Sign Language](https://www.kaggle.com/datasets/mandartayade/russian-sign-language) (Kaggle, Mandar Tayade) | кадры видео букв → координаты точек, kNN | MIT |
 | mediapipe (Python), opencv-python, numpy | офлайн-извлечение точек в `scripts/` | Apache-2.0, Apache-2.0, BSD-3-Clause |
 | tsx, @types/node | запуск и типы скрипта сборки данных | MIT |
+| Таблица русской дактильной азбуки (классическая схема, 32 рисунка) — `scripts/assets/dactyl-table.png` | рисунок руки на карточке каждой буквы; нарезана `scripts/slice-alphabet.py` | _TODO (команда): указать источник и условия_ |
+| [Unbounded](https://github.com/googlefonts/unbounded), [Onest](https://github.com/simpals/onest) | шрифты (заголовки и текст), лежат в `public/fonts/` | SIL OFL 1.1 |
+| Pillow | нарезка таблицы на рисунки в `scripts/` | MIT-CMU (HPND) |
 
 - **Звуки** синтезируются в коде через Web Audio: аудиофайлов нет.
 - **Конфетти** — свои, на canvas.

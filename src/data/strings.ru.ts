@@ -34,6 +34,9 @@ export const strings = {
 
   welcome: {
     title: "Gesturingo",
+    // Spelled in chart drawings above the title.
+    heroWord: "ПРИВЕТ",
+    heroAlt: "Слово «привет» буквами дактильной азбуки",
     description:
       "Научись управлять приложением руками за 30 секунд, а потом — показывать буквы русской дактильной азбуки. Камера подскажет, что поправить.",
     enableCamera: "Включить камеру",
@@ -126,11 +129,11 @@ export const strings = {
   levelMap: {
     title: "Карта уроков",
     lesson: (n: number) => `Урок ${n}`,
-    lessonLetters: (letters: readonly string[]) => letters.join(" · "),
+    lessonLetters: (letters: readonly string[]) => letters.join(" "),
     bridge: "Мост",
     bridgeLocked: "Пройди урок 1, чтобы открыть",
     weakLetters: "Повтори слабые буквы",
-    weakLettersList: (letters: readonly string[]) => letters.join(" · "),
+    weakLettersList: (letters: readonly string[]) => letters.join(" "),
     noWeakLetters: "Слабых букв нет",
     locked: (n: number) => `Пройди урок ${n}`,
     lockedLabel: "закрыт",
@@ -143,8 +146,8 @@ export const strings = {
   progress: {
     xpLabel: (n: number) => `Опыт: ${n}`,
     starsLabel: (n: number) => `Звёзд: ${n} из 3`,
-    soundOn: "🔊 Звук: вкл",
-    soundOff: "🔇 Звук: выкл",
+    soundOn: "Звук: вкл",
+    soundOff: "Звук: выкл",
     reset: "Сбросить прогресс",
     resetConfirm: "Нажми ещё раз — сотрёт всё",
     resetDone: "Прогресс сброшен",
@@ -159,6 +162,7 @@ export const strings = {
     title: (n: number) => `Урок ${n}`,
     letterOf: (i: number, n: number) => `Буква ${i} из ${n}`,
     show: (letter: string) => `Покажи букву «${letter}»`,
+    photoAlt: (letter: string) => `Рисунок: как показать букву «${letter}»`,
     howTo: "Как показать",
     hold: "Держи — засчитаю через секунду",
     exitHint: "Выйти — открытая ладонь 3 с",
@@ -202,8 +206,8 @@ export const strings = {
     letterOf: (i: number, n: number) => `Буква ${i} из ${n}`,
     showLetter: (letter: string) => `Покажи «${letter}»`,
     done: "Слово собрано!",
-    speaking: "🔊 Озвучиваю…",
-    spoken: "🔊 Сказано вслух",
+    speaking: "Озвучиваю…",
+    spoken: "Сказано вслух",
     noVoice: "Озвучка недоступна в этом браузере — слово показано текстом.",
     muted: "Звук выключен — слово показано текстом.",
     next: "Следующее слово через пару секунд…",

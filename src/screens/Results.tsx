@@ -56,9 +56,8 @@ export function Results({ lessonId }: { lessonId: string }) {
   return (
     <main className={s.screen}>
       <Confetti burst={summary.accuracy >= CELEBRATE_ACCURACY ? 1 : 0} count={160} />
-      <h1 className={s.title}>
-        {t.title} · {lessonTitle(lessonId)}
-      </h1>
+      <h1 className={s.title}>{lessonTitle(lessonId)}</h1>
+      <p className={s.text}>{t.title}</p>
       <XpCounter value={progress.xp} from={progress.xp - summary.xp} />
 
       <dl className={r.stats}>

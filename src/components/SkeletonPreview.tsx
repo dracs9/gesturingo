@@ -38,7 +38,7 @@ export function SkeletonPreview({ frame, mirror = true, className }: SkeletonPre
     });
 
     const unit = Math.max(2, Math.min(width, height) / 90);
-    ctx.strokeStyle = "rgba(77, 212, 172, 0.95)";
+    ctx.strokeStyle = "rgba(27, 35, 64, 0.85)";
     ctx.lineWidth = unit;
     ctx.lineCap = "round";
     ctx.beginPath();
@@ -51,7 +51,7 @@ export function SkeletonPreview({ frame, mirror = true, className }: SkeletonPre
     }
     ctx.stroke();
 
-    ctx.fillStyle = "#f5f6f8";
+    ctx.fillStyle = "#16804f";
     for (const [x, y] of pts) {
       ctx.beginPath();
       ctx.arc(x, y, unit * 1.3, 0, Math.PI * 2);

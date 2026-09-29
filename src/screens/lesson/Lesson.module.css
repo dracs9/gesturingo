@@ -1,96 +1,174 @@
+/*
+ * The lesson fits exactly one screen: no scrolling while the hands are busy.
+ * Top padding leaves room for the hand status, bottom padding for the compact gesture legend.
+ * The camera and the letter drawing are the flexible parts; they shrink with the window height.
+ */
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 3fr) minmax(340px, 2fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--gap);
-  align-items: start;
-  min-height: 100dvh;
-  padding: 72px 24px 24px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: 72px 24px calc(76px + env(safe-area-inset-bottom));
 }
 
 .camera {
-  position: relative;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  min-height: 0;
 }
 
+/* Largest size of the video's aspect ratio that fits the cell. */
+.camera .cameraView {
+  width: min(100cqw, 100cqh * var(--aspect, 1.333));
+}
+
+/* The letter card. */
 .card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto auto;
+  gap: 14px;
+  min-height: 0;
+  padding: 20px 24px;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.top {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  text-align: center;
 }
 
 .counter {
-  margin: 0;
   color: var(--text-muted);
   font-weight: 700;
 }
 
-.ring {
-  --ring-size: 168px;
-  font-size: 1rem;
-}
-
-.letter {
-  font-size: 5.5rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.show {
-  font-size: clamp(1.5rem, 3.5vw, 2.2rem);
-  font-weight: 800;
-}
-
-.sub {
-  color: var(--text-muted);
-}
-
-.howTo {
-  display: grid;
-  gap: 8px;
-  width: 100%;
-  max-width: 26rem;
-  padding: 14px 18px;
-  border-radius: var(--radius);
-  background: var(--surface);
-  text-align: left;
-}
-
-.howTo h2 {
-  font-size: 1.1rem;
-}
-
-.reference {
-  width: 160px;
-  aspect-ratio: 1;
-  justify-self: center;
-  border-radius: 12px;
-  background: var(--bg);
-}
-
-.rules {
-  display: grid;
+.dots {
+  display: flex;
   gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.rules li {
-  display: flex;
+.dots li {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+}
+
+.dots .dotDone {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.dots .dotNow {
+  width: 28px;
+  border-color: var(--text);
+  border-radius: 999px;
+  background: var(--text);
+}
+
+/* Letter in the hold ring + the chart drawing of the hand. */
+.sample {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
-  font-size: 1.05rem;
+  gap: 20px;
+  min-height: 0;
+}
+
+.ring {
+  --ring-size: clamp(104px, 20vh, 176px);
+}
+
+.letter {
+  font-family: var(--font-display);
+  font-size: calc(var(--ring-size) * 0.46);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.photo {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  min-height: 0;
+  max-height: 320px;
+  margin: 0;
+  padding: 8px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.photo img {
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.task {
+  display: grid;
+  gap: 2px;
+}
+
+.show {
+  font-size: clamp(1.25rem, 2.4vw, 1.8rem);
+}
+
+.sub {
+  color: var(--text-muted);
+}
+
+.card .hint {
+  justify-content: flex-start;
+  min-height: 64px;
+}
+
+/* Checklist as chips: sign + text, not color alone. */
+.rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rules li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px 3px 4px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .mark {
-  width: 1.6em;
-  height: 1.6em;
   display: inline-grid;
   flex: none;
   place-items: center;
+  width: 1.5em;
+  height: 1.5em;
   border-radius: 50%;
   font-weight: 800;
+}
+
+.rules .rule_ok {
+  border-color: var(--accent);
 }
 
 .rule_ok .mark {
@@ -98,9 +176,14 @@
   color: var(--accent-text);
 }
 
+.rules .rule_fail {
+  border-color: var(--mark);
+  background: var(--mark-soft);
+}
+
 .rule_fail .mark {
-  background: var(--focus);
-  color: #1a1400;
+  background: var(--mark);
+  color: var(--text);
 }
 
 .rule_unknown {
@@ -108,7 +191,7 @@
 }
 
 .rule_unknown .mark {
-  border: 2px solid var(--text-muted);
+  border: 2px dashed var(--text-muted);
 }
 
 .srOnly {
@@ -119,16 +202,32 @@
   clip: rect(0 0 0 0);
 }
 
-.unverified {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
 }
 
 .exit {
   color: var(--text-muted);
+  font-weight: 600;
 }
 
+.footer .skip {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+}
+
+.unverified {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Success over the video. */
 .success {
   position: absolute;
   inset: 0;
@@ -137,8 +236,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: var(--radius);
-  background: rgb(15 17 21 / 0.65);
+  background: rgb(27 35 64 / 0.55);
   animation: pop 0.25s ease-out;
 }
 
@@ -147,18 +245,19 @@
   border-radius: var(--radius);
   background: var(--accent);
   color: var(--accent-text);
+  font-family: var(--font-display);
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .stars {
-  color: #ffd166;
+  color: var(--mark);
   font-size: 3rem;
   letter-spacing: 6px;
 }
 
 .starsOff {
-  color: rgb(255 255 255 / 0.25);
+  color: rgb(255 255 255 / 0.35);
 }
 
 @keyframes pop {
@@ -172,24 +271,92 @@
   }
 }
 
-@media (max-width: 800px) {
+/* Short laptop screens (1366×768, 1280×720 projectors): tighter spacing, the drawing keeps the rest. */
+@media (min-width: 801px) and (max-height: 800px) {
   .layout {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 64px 16px 96px;
+    padding-top: 64px;
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
   }
 
-  /* Phones: keep letter, instruction and hint on the first screen under the camera. */
-  .ring {
-    --ring-size: 104px;
-  }
-
-  .letter {
-    font-size: 3.4rem;
+  .card {
+    gap: 10px;
+    padding: 16px 20px;
   }
 
   .sub {
     display: none;
+  }
+
+  .card .hint {
+    min-height: 56px;
+  }
+}
+
+/* Phones and narrow windows: the camera on top takes what the card leaves. */
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(160px, 1fr) auto;
+    gap: 10px;
+    padding: 60px 12px calc(60px + env(safe-area-inset-bottom));
+  }
+
+  .card {
+    grid-template-rows: none;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .sample {
+    height: clamp(96px, 17dvh, 150px);
+    gap: 12px;
+  }
+
+  .ring {
+    --ring-size: clamp(88px, 15dvh, 130px);
+  }
+
+  .photo {
+    padding: 4px;
+  }
+
+  .sub {
+    display: none;
+  }
+
+  .card .hint {
+    min-height: 48px;
+  }
+
+  .card .hint > p {
+    padding: 8px 14px 8px 10px;
+    font-size: 1rem;
+  }
+
+  .rules {
+    gap: 4px;
+  }
+
+  .rules li {
+    padding: 1px 8px 1px 2px;
+    font-size: 0.75rem;
+  }
+
+  .exit {
+    font-size: 0.85rem;
+  }
+
+  /* The team's note; on a phone every line goes to the camera. */
+  .unverified {
+    display: none;
+  }
+
+  .successTitle {
+    font-size: 1.4rem;
+  }
+
+  .stars {
+    font-size: 2rem;
   }
 }
 

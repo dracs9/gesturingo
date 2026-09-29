@@ -11,8 +11,8 @@
 
 .mini {
   width: min(280px, 38vw);
-  border: 3px solid var(--surface-hover);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+  border: 3px solid var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .mirror {

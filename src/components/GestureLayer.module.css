@@ -25,8 +25,8 @@
   height: 24px;
   border: 3px solid var(--text);
   border-radius: 50%;
-  background: rgb(77 212 172 / 0.35);
-  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.5);
+  background: rgb(255 197 61 / 0.55);
+  box-shadow: 0 0 0 2px #fff;
   transition:
     transform 0.12s ease,
     background-color 0.12s ease;
@@ -34,7 +34,8 @@
 
 .cursor[data-hover="true"] .dot {
   transform: scale(1.5);
-  border-color: var(--accent);
+  border-color: var(--text);
+  background: var(--mark);
 }
 
 .cursor[data-pinched="true"] .dot {
@@ -71,7 +72,7 @@
   font-size: 22px;
   line-height: 1;
   text-align: center;
-  text-shadow: 0 0 4px rgb(0 0 0 / 0.8);
+  text-shadow: 0 0 4px #fff;
 }
 
 .scrollUp {
@@ -98,7 +99,9 @@
   gap: 12px;
   padding: 8px 20px 8px 8px;
   border-radius: 999px;
-  background: rgb(26 29 36 / 0.92);
+  border: 2px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
   font-size: 1.3rem;
   font-weight: 800;
   transform: translateX(-50%);

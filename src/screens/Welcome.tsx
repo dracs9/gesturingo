@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { unlockAudio } from "../audio/sounds";
 import { GestureButton } from "../components/GestureButton";
+import { getLetterPhoto } from "../data/letterPhotos";
 import { strings } from "../data/strings.ru";
 import { preloadTracker } from "../recognition/pipeline";
 import { navigate, paths } from "../router";
@@ -53,6 +54,11 @@ export function Welcome({ gate = false }: WelcomeProps) {
 
   return (
     <main className={s.screen}>
+      <figure className={w.hero} aria-label={strings.welcome.heroAlt}>
+        {Array.from(strings.welcome.heroWord).map((letter, i) => (
+          <img key={i} className={w.heroCard} src={getLetterPhoto(letter)} alt="" style={{ "--i": i } as CSSProperties} />
+        ))}
+      </figure>
       <h1 className={s.title}>{strings.welcome.title}</h1>
       <p className={s.text}>{gate ? strings.welcome.gateText : strings.welcome.description}</p>
 
@@ -76,7 +82,7 @@ export function Welcome({ gate = false }: WelcomeProps) {
 
       {cameraStatus === "error" && cameraError && (
         <p className={w.error} role="alert">
-          <span aria-hidden="true">⚠️</span> {strings.cameraErrors[cameraError]}
+          {strings.cameraErrors[cameraError]}
         </p>
       )}
 

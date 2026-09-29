@@ -2,10 +2,11 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 18px;
+  padding: 8px 18px;
   border: 2px solid currentColor;
   border-radius: 999px;
   background: var(--surface);
+  box-shadow: var(--shadow);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -19,6 +20,9 @@
   color: var(--accent);
 }
 
+/* Yellow is too light for text on white: the pill turns yellow, the text stays ink. */
 .warn {
-  color: var(--focus);
+  border-color: var(--mark);
+  background: var(--mark-soft);
+  color: var(--text);
 }

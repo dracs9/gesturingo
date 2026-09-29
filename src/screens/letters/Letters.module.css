@@ -51,7 +51,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 16px;
-  border: 2px solid var(--surface-hover);
+  border: 2px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
 }
@@ -68,8 +68,9 @@
 }
 
 .letter {
-  font-size: 3rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -87,15 +88,32 @@
 }
 
 .badgeTodo {
-  border: 2px solid var(--focus);
-  color: var(--focus);
+  border: 2px solid var(--mark);
+  background: var(--mark-soft);
+  color: var(--text);
+}
+
+/* Chart drawing next to the recorded reference: easy to compare the two. */
+.visuals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.photo {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #fff;
 }
 
 .skeleton {
   width: 100%;
   max-width: 220px;
   aspect-ratio: 1;
-  align-self: center;
+  justify-self: center;
 }
 
 .meta {

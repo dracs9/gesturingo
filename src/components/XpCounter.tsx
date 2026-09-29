@@ -41,7 +41,6 @@ export function XpCounter({ value, from = value }: XpCounterProps) {
 
   return (
     <span className={s.xp} aria-label={strings.progress.xpLabel(value)}>
-      <span aria-hidden="true">✨</span>
       <span ref={numberRef}>{from}</span>
       <span className={s.unit}>XP</span>
     </span>
