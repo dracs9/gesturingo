@@ -302,6 +302,11 @@ export const strings = {
     "tips.touch.thumb-ring": "Соедини кончики большого и безымянного пальцев",
     "tips.touch.thumb-pinky": "Соедини кончики большого пальца и мизинца",
     "tips.touch.index-middle": "Прижми указательный и средний пальцы друг к другу",
+    "tips.touch.index-ring": "Соедини кончики указательного и безымянного пальцев",
+    "tips.touch.index-pinky": "Соедини кончики указательного пальца и мизинца",
+    "tips.touch.middle-ring": "Прижми средний и безымянный пальцы друг к другу",
+    "tips.touch.middle-pinky": "Соедини кончики среднего пальца и мизинца",
+    "tips.touch.ring-pinky": "Прижми безымянный палец и мизинец друг к другу",
     "tips.apart.thumb-index": "Разведи большой и указательный пальцы",
     "tips.apart.index-middle": "Разведи указательный и средний пальцы",
     // Letter confusion / ghost hand

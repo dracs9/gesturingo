@@ -6,7 +6,7 @@ import { reactRefresh } from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  globalIgnores(["dist", "node_modules"]),
+  globalIgnores(["dist", "node_modules", "scripts/.venv", "scripts/data"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -19,5 +19,9 @@ export default defineConfig(
       ecmaVersion: 2022,
       globals: globals.browser,
     },
+  },
+  {
+    files: ["scripts/**/*.ts"],
+    languageOptions: { globals: globals.node },
   },
 );
