@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { playSound } from "../audio/sounds";
 import { strings } from "../data/strings.ru";
 import { createControlLayer } from "../recognition/control/controller";
+import { edgeScrollVelocity } from "../recognition/control/cursor";
+import { CURSOR_SCROLL_SPEED } from "../recognition/thresholds";
 import type { GestureContext } from "../recognition/gestureContext";
 import { onFrame } from "../recognition/pipeline";
 import { clearControlStats, emitControl } from "../store/controlStats";
@@ -67,13 +69,30 @@ export function GestureLayer({ context }: GestureLayerProps) {
       host.appendChild(el);
     };
 
+    let lastFrameAt = performance.now();
+
+    /** Hands have no wheel: the cursor at the top/bottom edge scrolls a page taller than the screen. */
+    const edgeScroll = (y: number, dt: number): "up" | "down" | "none" => {
+      const v = edgeScrollVelocity(y, window.innerHeight);
+      const root = document.documentElement;
+      const canDown = window.scrollY + window.innerHeight < root.scrollHeight - 1;
+      const canUp = window.scrollY > 0;
+      if ((v > 0 && !canDown) || (v < 0 && !canUp) || v === 0) return "none";
+      window.scrollBy(0, v * CURSOR_SCROLL_SPEED * dt);
+      return v > 0 ? "down" : "up";
+    };
+
     const unsubscribe = onFrame((observation) => {
-      const out = layer.update(observation, performance.now(), contextRef.current, {
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastFrameAt) / 1000);
+      lastFrameAt = now;
+      const out = layer.update(observation, now, contextRef.current, {
         width: window.innerWidth,
         height: window.innerHeight,
       });
       emitControl(out, observation);
 
+      const scrolling = out.cursor.visible ? edgeScroll(out.cursor.y, dt) : "none";
       const cursor = cursorRef.current;
       if (cursor) {
         cursor.style.transform = `translate(${out.cursor.x}px, ${out.cursor.y}px)`;
@@ -81,6 +100,7 @@ export function GestureLayer({ context }: GestureLayerProps) {
         setData(cursor, "visible", String(out.cursor.visible));
         setData(cursor, "hover", String(out.cursor.hover !== null));
         setData(cursor, "pinched", String(out.cursor.pinched));
+        setData(cursor, "scroll", scrolling);
       }
       setHovered(out.cursor.visible ? out.cursor.hover : null, out.cursor.dwell);
 
@@ -121,6 +141,8 @@ export function GestureLayer({ context }: GestureLayerProps) {
           <circle cx="50" cy="50" r="44" />
         </svg>
         <div className={s.dot} />
+        <span className={`${s.scroll} ${s.scrollUp}`}>▲</span>
+        <span className={`${s.scroll} ${s.scrollDown}`}>▼</span>
       </div>
     </>
   );

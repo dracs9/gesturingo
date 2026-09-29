@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCursor, mapToScreen } from "./cursor";
+import { createCursor, edgeScrollVelocity, mapToScreen } from "./cursor";
 
 const VIEW = { width: 1000, height: 800 };
 
@@ -46,5 +46,22 @@ describe("createCursor", () => {
     expect(c.update(null, 300, VIEW).visible).toBe(true);
     expect(c.update(null, 600, VIEW).visible).toBe(false);
     expect(c.positionAt(600)).toBeNull();
+  });
+});
+
+describe("edgeScrollVelocity", () => {
+  it("is zero in the middle and grows toward the edges", () => {
+    expect(edgeScrollVelocity(400, 800, 0.12)).toBe(0);
+    expect(edgeScrollVelocity(800 - 96, 800, 0.12)).toBeCloseTo(0);
+    expect(edgeScrollVelocity(800 - 48, 800, 0.12)).toBeCloseTo(0.5);
+    expect(edgeScrollVelocity(800, 800, 0.12)).toBe(1);
+    expect(edgeScrollVelocity(0, 800, 0.12)).toBe(-1);
+    expect(edgeScrollVelocity(48, 800, 0.12)).toBeCloseTo(-0.5);
+  });
+
+  it("stays within -1..1 and handles an empty screen", () => {
+    expect(edgeScrollVelocity(2000, 800, 0.12)).toBe(1);
+    expect(edgeScrollVelocity(-50, 800, 0.12)).toBe(-1);
+    expect(edgeScrollVelocity(10, 0, 0.12)).toBe(0);
   });
 });

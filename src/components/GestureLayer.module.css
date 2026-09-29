@@ -68,6 +68,32 @@
   stroke-dashoffset: calc(276.46 * (1 - var(--dwell)));
 }
 
+/* Edge scrolling arrow next to the cursor */
+.scroll {
+  position: absolute;
+  left: -12px;
+  display: none;
+  width: 24px;
+  color: var(--accent);
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 0 4px rgb(0 0 0 / 0.8);
+}
+
+.scrollUp {
+  top: -52px;
+}
+
+.scrollDown {
+  top: 30px;
+}
+
+.cursor[data-scroll="up"] .scrollUp,
+.cursor[data-scroll="down"] .scrollDown {
+  display: block;
+}
+
 /* --- Click ripple --- */
 .ripple {
   position: absolute;

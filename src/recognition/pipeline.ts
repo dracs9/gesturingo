@@ -194,11 +194,34 @@ function tick(): void {
   const observation = frame ? observe(frame) : null;
   if (!frame) landmarkEma.reset();
   lastObservation = observation;
-  for (const fn of frameListeners) fn(observation);
+  for (const fn of frameListeners) safeCall(fn, observation);
 
   const status = handStatus.update(getHandStatus(frame), now);
   if (status !== emittedStatus) {
     emittedStatus = status;
-    for (const fn of statusListeners) fn(status);
+    for (const fn of statusListeners) safeCall(fn, status);
   }
+}
+
+const reported = new WeakSet<object>();
+
+/** One broken listener (a drawer, a screen) must not stop the others or the loop. Logged once per listener. */
+function safeCall<T>(fn: (value: T) => void, value: T): void {
+  try {
+    fn(value);
+  } catch (err) {
+    if (!reported.has(fn)) {
+      reported.add(fn);
+      console.error("Gesturingo frame listener failed:", err);
+    }
+  }
+}
+
+// iOS Safari pauses camera video in background tabs: resume when the page is visible again.
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && video?.paused && stream) {
+      video.play().catch(() => {});
+    }
+  });
 }

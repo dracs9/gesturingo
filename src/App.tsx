@@ -6,6 +6,7 @@ import { GestureLayer } from "./components/GestureLayer";
 import { GestureLegend } from "./components/GestureLegend";
 import { HandStatus } from "./components/HandStatus";
 import { isDebug } from "./config";
+import { strings } from "./data/strings.ru";
 import { getGestureContext } from "./recognition/gestureContext";
 import { useRoute, type Route } from "./router";
 import { Bridge } from "./screens/Bridge";
@@ -50,6 +51,10 @@ async function isCameraPermissionGranted(): Promise<boolean> {
 
 export function App() {
   const route = useRoute();
+
+  useEffect(() => {
+    document.title = strings.titles[route.name];
+  }, [route.name]);
   const cameraStatus = useSession((st) => st.cameraStatus);
   const startCamera = useSession((st) => st.startCamera);
 
@@ -87,7 +92,7 @@ export function App() {
               <CameraView variant="mini" />
             </div>
           )}
-          <GestureLegend context={gestureContext} />
+          <GestureLegend context={gestureContext} compact={dockHidden} />
           <GestureLayer context={gestureContext} />
         </>
       )}

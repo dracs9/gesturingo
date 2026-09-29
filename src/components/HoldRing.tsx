@@ -4,6 +4,7 @@ import s from "./HoldRing.module.css";
 interface HoldRingProps {
   /** 0..1. Omit to drive it imperatively: `ref.current.style.setProperty("--progress", "0.4")`. */
   progress?: number;
+  /** Size in px. Omit to size it from CSS via `--ring-size` (e.g. smaller on phones). */
   size?: number;
   className?: string;
   children?: ReactNode;
@@ -14,12 +15,11 @@ const CIRCUMFERENCE = 2 * Math.PI * R;
 
 /** Circular hold-progress ring with content (icon) in the middle. */
 export const HoldRing = forwardRef<HTMLDivElement, HoldRingProps>(function HoldRing(
-  { progress, size = 72, className, children },
+  { progress, size, className, children },
   ref,
 ) {
   const style = {
-    width: size,
-    height: size,
+    ...(size !== undefined ? { "--ring-size": `${size}px` } : {}),
     "--circumference": CIRCUMFERENCE,
     ...(progress !== undefined ? { "--progress": progress } : {}),
   } as CSSProperties;

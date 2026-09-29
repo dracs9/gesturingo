@@ -172,7 +172,7 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
 
       <section className={l.card}>
         <p className={l.counter}>{t.letterOf(index + 1, total)}</p>
-        <HoldRing ref={ringRef} size={168} className={l.ring}>
+        <HoldRing ref={ringRef} className={l.ring}>
           <span className={l.letter}>{spec.letter}</span>
         </HoldRing>
         <h1 className={l.show}>{t.show(spec.letter)}</h1>

@@ -1,5 +1,7 @@
 .ring {
   --progress: 0;
+  width: var(--ring-size, 72px);
+  height: var(--ring-size, 72px);
   position: relative;
   display: inline-grid;
   place-items: center;

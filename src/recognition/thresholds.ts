@@ -45,6 +45,10 @@ export const CURSOR_BETA = 3.0;
 export const CURSOR_D_CUTOFF = 1.0;
 /** Cursor fades out after the hand is lost for this long. */
 export const CURSOR_HIDE_MS = 500;
+/** Top/bottom share of the screen where the cursor scrolls a long page (no wheel with hands). */
+export const CURSOR_SCROLL_EDGE = 0.12;
+/** Page scroll speed at the very edge, px per second. */
+export const CURSOR_SCROLL_SPEED = 900;
 
 // --- Control: pinch (|thumb tip − index tip| in palm units) ---
 export const PINCH_CLOSE_BELOW = 0.35;

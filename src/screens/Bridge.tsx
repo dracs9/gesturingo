@@ -9,7 +9,6 @@ import { useGestureCommands } from "../store/gestureCommands";
 import { progressSnapshot } from "../store/progress";
 import { learnedLetters } from "../store/progressLogic";
 import { useUi } from "../store/ui";
-import b from "./bridge/Bridge.module.css";
 import { WordStep } from "./bridge/WordStep";
 import s from "./Screen.module.css";
 
@@ -68,10 +67,14 @@ export function Bridge() {
 
   return (
     <main aria-label={strings.bridge.title}>
-      <p className={b.header}>
-        🌉 {strings.bridge.title} · {strings.bridge.wordsDone(spelled)}
-      </p>
-      <WordStep key={round} word={word} warmup={words.length === 0} models={models} onDone={next} />
+      <WordStep
+        key={round}
+        word={word}
+        warmup={words.length === 0}
+        header={`🌉 ${strings.bridge.title} · ${strings.bridge.wordsDone(spelled)}`}
+        models={models}
+        onDone={next}
+      />
     </main>
   );
 }

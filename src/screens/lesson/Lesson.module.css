@@ -26,6 +26,7 @@
 }
 
 .ring {
+  --ring-size: 168px;
   font-size: 1rem;
 }
 
@@ -174,7 +175,21 @@
 @media (max-width: 800px) {
   .layout {
     grid-template-columns: 1fr;
+    gap: 12px;
     padding: 64px 16px 96px;
+  }
+
+  /* Phones: keep letter, instruction and hint on the first screen under the camera. */
+  .ring {
+    --ring-size: 104px;
+  }
+
+  .letter {
+    font-size: 3.4rem;
+  }
+
+  .sub {
+    display: none;
   }
 }
 

@@ -4,6 +4,7 @@ import {
   CURSOR_D_CUTOFF,
   CURSOR_HIDE_MS,
   CURSOR_MIN_CUTOFF,
+  CURSOR_SCROLL_EDGE,
   CURSOR_ZONE,
 } from "../thresholds";
 
@@ -33,6 +34,18 @@ export function mapToScreen(imageX: number, imageY: number, zone = CURSOR_ZONE):
     x: clamp01((1 - imageX - margin) / zone),
     y: clamp01((imageY - margin) / zone),
   };
+}
+
+/**
+ * Scrolling by hand (there is no wheel): the cursor in the top/bottom `edge` share of the screen scrolls
+ * the page. Returns -1..1 — 0 in the middle, growing toward the very edge.
+ */
+export function edgeScrollVelocity(y: number, height: number, edge = CURSOR_SCROLL_EDGE): number {
+  if (height <= 0 || edge <= 0) return 0;
+  const zone = height * edge;
+  if (y > height - zone) return Math.min(1, (y - (height - zone)) / zone);
+  if (y < zone) return -Math.min(1, (zone - y) / zone);
+  return 0;
 }
 
 export interface CursorOptions {

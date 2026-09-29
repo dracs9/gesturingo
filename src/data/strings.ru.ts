@@ -6,6 +6,22 @@ export const strings = {
     tagline: "Учись жестам и говори жестами",
   },
 
+  crash: {
+    title: "Что-то пошло не так",
+    text: "Приложение столкнулось с ошибкой. Прогресс сохранён — просто начни заново.",
+    reload: "Начать заново",
+  },
+
+  titles: {
+    welcome: "Gesturingo — учись жестам",
+    tutorial: "Обучение жестам · Gesturingo",
+    map: "Карта уроков · Gesturingo",
+    lesson: "Урок · Gesturingo",
+    results: "Итоги · Gesturingo",
+    bridge: "Мост · Gesturingo",
+    record: "Запись образцов · Gesturingo",
+  },
+
   common: {
     back: "Назад",
     next: "Дальше",

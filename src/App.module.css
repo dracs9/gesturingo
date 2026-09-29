@@ -1,6 +1,6 @@
 .status {
   position: fixed;
-  top: 12px;
+  top: calc(12px + env(safe-area-inset-top));
   left: 50%;
   z-index: 60;
   transform: translateX(-50%);
@@ -9,6 +9,14 @@
 .dock {
   position: fixed;
   right: 16px;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
   z-index: 50;
+}
+
+/* Phones: the status goes to the left corner so it never covers titles or the top-right button. */
+@media (max-width: 600px) {
+  .status {
+    left: 12px;
+    transform: none;
+  }
 }

@@ -5,7 +5,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--gap);
-  padding: 32px 16px;
+  /* Room for the hand status on top and the gesture legend + camera dock at the bottom. */
+  padding: 84px 16px calc(150px + env(safe-area-inset-bottom));
   text-align: center;
 }
 

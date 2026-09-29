@@ -4,10 +4,12 @@ import s from "./GestureLegend.module.css";
 
 interface GestureLegendProps {
   context: GestureContext;
+  /** One row; inactive gestures keep only their icon (screens with a big camera view). */
+  compact?: boolean;
 }
 
 /** Always-visible reminder of the control gestures; unavailable ones are dimmed and labelled. */
-export function GestureLegend({ context }: GestureLegendProps) {
+export function GestureLegend({ context, compact = false }: GestureLegendProps) {
   const t = strings.gestureLegend;
   const items = [
     { icon: "☝️", label: t.cursor, active: context.cursor },
@@ -17,7 +19,7 @@ export function GestureLegend({ context }: GestureLegendProps) {
   ];
 
   return (
-    <ul className={s.legend} aria-label={t.title}>
+    <ul className={compact ? `${s.legend} ${s.compact}` : s.legend} aria-label={t.title}>
       {items.map((item) => (
         <li key={item.label} className={item.active ? s.item : `${s.item} ${s.off}`}>
           <span className={s.icon} aria-hidden="true">

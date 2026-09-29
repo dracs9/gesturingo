@@ -23,12 +23,14 @@ interface WordStepProps {
   word: string;
   /** Warm-up sequence of letters (not a real word): shown, but not spoken. */
   warmup: boolean;
+  /** Small status line above the word (e.g. words spelled so far). */
+  header: string;
   models: LetterModels | null;
   onDone(): void;
 }
 
 /** Spelling one word: camera + ghost on the left, word tiles + current letter + hint on the right. */
-export function WordStep({ word, warmup, models, onDone }: WordStepProps) {
+export function WordStep({ word, warmup, header, models, onDone }: WordStepProps) {
   const [speller] = useState(() => createWordSpeller(word, getLetterSpec));
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
@@ -122,6 +124,7 @@ export function WordStep({ word, warmup, models, onDone }: WordStepProps) {
       </section>
 
       <section className={b.card}>
+        <p className={b.header}>{header}</p>
         <h1 className={b.title}>{warmup ? t.warmup : t.write(word)}</h1>
         {warmup && <p className={b.note}>{t.warmupNote}</p>}
 
@@ -149,7 +152,7 @@ export function WordStep({ word, warmup, models, onDone }: WordStepProps) {
           current && (
             <>
               <p className={b.counter}>{t.letterOf(index + 1, letters.length)}</p>
-              <HoldRing ref={ringRef} size={150}>
+              <HoldRing ref={ringRef} className={b.ring}>
                 <span className={b.letter}>{current}</span>
               </HoldRing>
               <p className={b.show}>{t.showLetter(current)}</p>

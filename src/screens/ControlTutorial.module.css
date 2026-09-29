@@ -4,7 +4,7 @@
   align-items: center;
   gap: 16px;
   min-height: 100dvh;
-  padding: 72px 16px 24px;
+  padding: 84px 16px calc(150px + env(safe-area-inset-bottom));
   text-align: center;
 }
 
@@ -192,6 +192,19 @@
   font-size: 2rem;
   font-weight: 800;
   animation: pop 0.25s ease-out;
+}
+
+/* Phones: a smaller skip button so it never meets the hand status in the top-left corner. */
+@media (max-width: 600px) {
+  .skip {
+    min-width: 110px;
+    min-height: 56px;
+    padding: 8px 16px;
+  }
+
+  .icon {
+    font-size: 3rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

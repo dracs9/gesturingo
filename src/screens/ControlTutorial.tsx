@@ -18,10 +18,10 @@ import s from "./Screen.module.css";
 import { nextStep, stepContext, stepErrors, TRAINING_STEPS, type TutorialStep } from "./tutorial/steps";
 
 const SUCCESS_MS = 1100;
-/** Step 1 circles, in % of the viewport: right, left, bottom — so the user reaches the edges. */
+/** Step 1 circles, in % of the viewport: right, left, bottom — so the user reaches the edges (below the hint banner). */
 const CURSOR_TARGETS = [
-  { x: 78, y: 52 },
-  { x: 22, y: 52 },
+  { x: 78, y: 62 },
+  { x: 22, y: 62 },
   { x: 50, y: 78 },
 ] as const;
 const ICONS: Record<TutorialStep, string> = { cursor: "☝️", pinch: "🤏", thumbsUp: "👍", openPalm: "✋", done: "🎉" };
