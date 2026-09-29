@@ -66,7 +66,7 @@ interface LetterStepProps {
   onDone(result: LetterResult, hintLog: readonly HintLogEntry[]): void;
 }
 
-/** One letter of a lesson: camera + skeleton + ghost hand on the left, letter card with hold ring, checklist and hint. */
+/** One letter of a lesson: camera + skeleton on the left, letter card with sample, hold ring, checklist and hint. */
 export function LetterStep({ spec, index, total, models, onDone }: LetterStepProps) {
   const [practice] = useState(() => createLetterPractice(spec));
   const [hint, setHint] = useState<string | null>(null);
@@ -147,15 +147,15 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
       practice.hintLog,
     );
 
-  // Ghost hand: the checked reference file, else the most typical recorded sample (§8.3).
-  const ghost = getReference(spec.letter)?.frame ?? models?.medoids.get(spec.letter) ?? null;
+  // Sample drawing on the letter card: the reference file, else the most typical recorded sample.
+  // Not drawn over the camera — an overlay there hid the user's own hand.
+  const reference = getReference(spec.letter)?.frame ?? models?.medoids.get(spec.letter) ?? null;
   const t = strings.lesson;
 
   return (
     <div className={l.layout}>
       <section className={l.camera}>
-        <CameraView variant="large" ghost={stars === null ? ghost : null} />
-        {ghost && <p className={l.ghostLegend}>{strings.ghost.legend}</p>}
+        <CameraView variant="large" />
         <Confetti burst={stars ?? 0} originX={0.3} count={stars === 3 ? 140 : 70} />
         {stars !== null && (
           <div className={l.success} role="status">
@@ -182,7 +182,7 @@ export function LetterStep({ spec, index, total, models, onDone }: LetterStepPro
 
         <div className={l.howTo}>
           <h2>{t.howTo}</h2>
-          {ghost && <SkeletonPreview frame={ghost} className={l.reference} />}
+          {reference && <SkeletonPreview frame={reference} className={l.reference} />}
           <ul className={l.rules}>
             {rulesOf(spec).map((rule) => {
               const state = !checks.frameOk ? "unknown" : checks.failing.includes(rule.code) ? "fail" : "ok";

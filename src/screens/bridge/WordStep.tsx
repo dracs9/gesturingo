@@ -6,7 +6,6 @@ import { HintBanner } from "../../components/HintBanner";
 import { HoldRing } from "../../components/HoldRing";
 import { hintText } from "../../data/hintText";
 import { getLetterSpec } from "../../data/letters";
-import { getReference } from "../../data/references";
 import type { LetterModels } from "../../data/samples";
 import { strings } from "../../data/strings.ru";
 import { createWordSpeller } from "../../recognition/letters/speller";
@@ -29,7 +28,7 @@ interface WordStepProps {
   onDone(): void;
 }
 
-/** Spelling one word: camera + ghost on the left, word tiles + current letter + hint on the right. */
+/** Spelling one word: camera on the left, word tiles + current letter + hint on the right. */
 export function WordStep({ word, warmup, header, models, onDone }: WordStepProps) {
   const [speller] = useState(() => createWordSpeller(word, getLetterSpec));
   const [index, setIndex] = useState(0);
@@ -101,7 +100,6 @@ export function WordStep({ word, warmup, header, models, onDone }: WordStepProps
 
   const letters = speller.letters;
   const current = letters[index];
-  const ghost = current ? (getReference(current)?.frame ?? models?.medoids.get(current) ?? null) : null;
   const t = strings.bridge;
 
   const speechNote =
@@ -118,8 +116,7 @@ export function WordStep({ word, warmup, header, models, onDone }: WordStepProps
   return (
     <div className={b.layout}>
       <section className={b.camera}>
-        <CameraView variant="large" ghost={done ? null : ghost} />
-        {ghost && !done && <p className={b.note}>{strings.ghost.legend}</p>}
+        <CameraView variant="large" />
         <Confetti burst={done ? 1 : 0} originX={0.5} originY={0.35} count={160} />
       </section>
 
