@@ -1,0 +1,12 @@
+node_modules
+dist
+.vercel
+*.log
+*.local
+.DS_Store
+
+# raw video is never committed (CLAUDE.md §13)
+*.mp4
+*.webm
+*.mov
+*.avi
