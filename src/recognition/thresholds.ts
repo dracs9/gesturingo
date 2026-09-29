@@ -103,11 +103,19 @@ export const LETTER_HOLD_MS = 1000;
 export const LETTER_HOLD_GRACE_MS = 150;
 
 // --- kNN (second layer after the rules, CLAUDE.md §8.2) ---
-export const KNN_K = 5;
+export const KNN_K = 3;
 /** kNN "agrees" with the expected letter when at least this many of the k neighbours are that letter. */
 export const KNN_MIN_VOTES = 2;
 /** A confusable letter is reported when it holds at least this many of the k neighbours. */
-export const KNN_CONFUSION_VOTES = 3;
+export const KNN_CONFUSION_VOTES = 2;
+/**
+ * Augmentation of the kNN samples at load time (in the normalized frame): photos come from few
+ * people and angles, so each sample also enters mirrored, slightly rotated around the wrist and noisy.
+ */
+export const KNN_AUG_MIRROR = true;
+export const KNN_AUG_ROTATIONS_DEG: readonly number[] = [-15, -10, 10, 15];
+export const KNN_AUG_NOISE_SIGMA = 0.02;
+export const KNN_AUG_NOISE_COPIES = 1;
 /** Nearest sample further than this (63-dim distance, palm units): the hand is unlike any sample, kNN abstains. */
 export const KNN_MAX_DISTANCE = 2.5;
 

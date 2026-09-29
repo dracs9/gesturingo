@@ -1,8 +1,11 @@
+import { augmentFrame, seededRandom } from "../recognition/letters/augment";
 import { createKnn, type Knn } from "../recognition/letters/knn";
 import { pickMedoid, type SampleFile } from "../recognition/samples";
 
+const AUGMENT_SEED = 20260930;
+
 /**
- * kNN samples recorded on /record and dropped into data/samples/. Loaded lazily (they can be large),
+ * kNN samples in data/samples/ (built by `npm run build:letters`, or recorded on /record). Loaded lazily (they can be large),
  * so the first screen stays fast; lessons start with the rules alone until this resolves.
  */
 const files = import.meta.glob<SampleFile>("./samples/*.json", { import: "default" });
@@ -22,6 +25,9 @@ export function loadLetterModels(): Promise<LetterModels> {
   models ??= Promise.all(Object.values(files).map((load) => load())).then(
     (sampleFiles) => {
       const vectors = sampleFiles.flatMap((f) => f.frames.map((vector) => ({ label: f.letter, vector })));
+      // kNN sees every sample mirrored, rotated and noisy too; the medoid stays a real frame.
+      const random = seededRandom(AUGMENT_SEED);
+      const augmented = vectors.flatMap((v) => augmentFrame(v.vector, random).map((vector) => ({ label: v.label, vector })));
       const byLetter = new Map<string, number[][]>();
       for (const v of vectors) {
         const list = byLetter.get(v.label);
@@ -36,7 +42,7 @@ export function loadLetterModels(): Promise<LetterModels> {
         const frame = pool[pickMedoid(pool)];
         if (frame) medoids.set(letter, frame);
       }
-      return { knn: vectors.length > 0 ? createKnn(vectors) : null, medoids };
+      return { knn: augmented.length > 0 ? createKnn(augmented) : null, medoids };
     },
     // Broken sample files must never break a lesson: fall back to rules only.
     () => ({ knn: null, medoids: new Map() }),

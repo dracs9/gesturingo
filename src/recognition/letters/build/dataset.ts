@@ -1,5 +1,6 @@
 import type { Handedness, HandFrame } from "../../landmarks";
 import { flattenPoints, normalizeHand } from "../../normalize";
+import { mirrorFrame } from "../augment";
 
 /** One photo from scripts/landmarks/<source>.json (written by scripts/extract_landmarks.py). */
 export interface RawSample {
@@ -47,9 +48,7 @@ export function normalizeRaw(raw: RawSample): number[] {
 }
 
 /** The same hand with the opposite handedness label: in the canonical frame that is x → −x. */
-export function mirrorVector(vector: readonly number[]): number[] {
-  return vector.map((v, i) => (i % 3 === 0 ? -v : v));
-}
+export const mirrorVector = mirrorFrame;
 
 /**
  * Keeps at most `max` samples per (letter, signer), evenly spaced in file order, so one person

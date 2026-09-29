@@ -134,7 +134,7 @@ export const strings = {
     locked: (n: number) => `Пройди урок ${n}`,
     lockedLabel: "закрыт",
     comingSoon: "Скоро",
-    comingSoonHint: "Буквы с движением — камера пока учит только неподвижные",
+    comingSoonHint: "Эти буквы камера пока не проверяет",
     hint: "Наведи курсор на урок и сделай щипок. Большой палец вверх — продолжить.",
     totalStars: (n: number) => `Звёзд: ${n}`,
   },

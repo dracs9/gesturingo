@@ -51,6 +51,26 @@ describe("classifyLetter", () => {
     expect(d.errors.find((e) => e.level === "confusion")?.params?.advice).toBe("finger.straighten.index");
   });
 
+  it("names the finger furthest from the typical shape when the rules pass", () => {
+    // The data says the middle finger of "Ъ" is usually bent, though it is no rule.
+    const spec: LetterSpec = { ...LOOSE, typical: { index: "straight", middle: "bent" } };
+    const knn = createKnn([...samples("Ъ", FLAT_THUMB_IN), ...samples("Ь", FLAT_THUMB_OUT)]);
+    const d = classifyLetter(spec, obs(FLAT_THUMB_OUT), knn);
+    expect(d.rulesOk).toBe(true);
+    expect(d.errors.find((e) => e.level === "confusion")).toMatchObject({
+      params: { letter: "Ь", advice: "finger.bend.middle" },
+      finger: "middle",
+    });
+  });
+
+  it("gives a shape hint when kNN sees a letter that is not a known look-alike", () => {
+    const spec: LetterSpec = { ...LOOSE, typical: { middle: "bent" } };
+    const knn = createKnn([...samples("Ъ", FLAT_THUMB_IN), ...samples("Я", FLAT_THUMB_OUT)]);
+    const d = classifyLetter(spec, obs(FLAT_THUMB_OUT), knn);
+    expect(d.correct).toBe(false);
+    expect(d.errors).toEqual([expect.objectContaining({ level: "shape", hintCode: "finger.bend.middle", finger: "middle" })]);
+  });
+
   it("abstains when the hand is unlike any sample", () => {
     const far = { label: "Ъ", vector: Array.from({ length: 63 }, () => 50) };
     const d = classifyLetter(LOOSE, obs(FLAT_THUMB_OUT), createKnn([far, far, far]));

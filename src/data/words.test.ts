@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { DYNAMIC_LETTERS } from "./dynamicLetters";
+import { getLetterSpec } from "./letters";
 import { availableWords, pickWord, WORDS } from "./words";
 
 describe("words", () => {
   it("are upper-case Russian letters only", () => {
     for (const w of WORDS) expect(w, w).toMatch(/^[А-ЯЁ]+$/);
+  });
+
+  it("use only letters the app teaches", () => {
+    for (const w of WORDS) for (const l of w) expect(getLetterSpec(l), `${w}: ${l}`).toBeDefined();
   });
 
   it("offers only words made of learned letters that have a spec", () => {

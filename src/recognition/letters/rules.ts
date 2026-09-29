@@ -9,6 +9,7 @@ import {
   TIPS_APART_MIN,
   TIPS_TOUCH_MAX,
 } from "../thresholds";
+import { fingerHintCode } from "./hintCodes";
 import type { Finger, LetterSpec } from "./spec";
 
 /** A violated condition of a letter spec (CLAUDE.md §8.2): `{ code, finger?, severity, hintCode, landmarkIds }`. */
@@ -36,6 +37,33 @@ function stateDeviation(finger: Finger, angle: number, required: FingerState): n
 
 /** Bigger mistakes first: 0.5 for a borderline miss, up to 1 for a finger far off. */
 const severityFor = (deviationDeg: number) => 0.5 + Math.min(0.5, deviationDeg / 120);
+
+/** The finger that most needs fixing to look like the letter's typical shape (`spec.typical`). */
+export interface TypicalAdvice {
+  finger: Finger;
+  hintCode: string;
+  landmarkIds: number[];
+}
+
+/**
+ * The finger whose angle is furthest from the band of its typical state — also fingers without a
+ * rule. Gives a concrete hint when the rules pass but kNN sees another letter; null if all match.
+ */
+export function typicalDeviation(spec: LetterSpec, features: HandFeatures): TypicalAdvice | null {
+  let best: { finger: Finger; state: FingerState; deviation: number } | null = null;
+  for (const finger of FINGERS) {
+    const state = spec.typical?.[finger];
+    if (!state) continue;
+    const deviation = stateDeviation(finger, features.fingers[finger].angle, state);
+    if (deviation > 0 && deviation > (best?.deviation ?? 0)) best = { finger, state, deviation };
+  }
+  if (!best) return null;
+  return {
+    finger: best.finger,
+    hintCode: fingerHintCode(best.finger, best.state),
+    landmarkIds: fingerLandmarkIds(best.finger),
+  };
+}
 
 /** Checks every condition of the letter; each violation becomes one error with its own hint. */
 export function checkLetter(spec: LetterSpec, features: HandFeatures): LetterError[] {

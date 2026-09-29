@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { canonicalHand, toFrame, type SyntheticHandOptions } from "../__fixtures__/syntheticHand";
 import { LM } from "../landmarks";
 import { buildObservation } from "../observation";
-import { checkLetter } from "./rules";
+import { checkLetter, typicalDeviation } from "./rules";
 import type { LetterSpec } from "./spec";
 
 const features = (hand: SyntheticHandOptions) => buildObservation(toFrame(canonicalHand(hand), { roll: 10 })).features;
@@ -70,5 +70,21 @@ describe("checkLetter", () => {
     };
     expect(checkLetter(apart, features({ thumb: "side" }))).toEqual([]);
     expect(codes(checkLetter(apart, features({ thumb: "pinch" })))).toEqual(["tipsApart.thumb-index"]);
+  });
+});
+
+describe("typicalDeviation", () => {
+  const spec: LetterSpec = { letter: "T3", verified: false, fingers: {}, typical: { index: "bent", ring: "straight" }, reference: "" };
+
+  it("picks the finger furthest from its typical state", () => {
+    // Index straight instead of bent (~80° off) outweighs the ring (half instead of straight).
+    const advice = typicalDeviation(spec, features({ fingers: { index: "straight", ring: "half" } }));
+    expect(advice).toMatchObject({ finger: "index", hintCode: "finger.bend.index" });
+    expect(advice?.landmarkIds).toContain(LM.INDEX_TIP);
+  });
+
+  it("is null when every finger matches or nothing is known", () => {
+    expect(typicalDeviation(spec, features({ fingers: { index: "bent", ring: "straight" } }))).toBeNull();
+    expect(typicalDeviation({ ...spec, typical: undefined }, features({}))).toBeNull();
   });
 });

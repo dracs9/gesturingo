@@ -1,23 +1,10 @@
 import { FINGERS, type Finger, type FingerState } from "../../features";
+import { fingerHintCode, touchHintCode } from "../hintCodes";
 import type { LetterExtra, LetterSpec } from "../spec";
 import { FINGER_PAIRS, type LetterStats } from "./stats";
 
 /** A rule is only drafted when at least this share of samples agree (otherwise people differ). */
 export const RULE_MIN_SHARE = 0.8;
-
-const STATE_HINT: Record<FingerState, string> = {
-  straight: "finger.straighten",
-  half: "finger.round",
-  bent: "finger.bend",
-};
-
-export function fingerHintCode(finger: Finger, state: FingerState): string {
-  return `${STATE_HINT[state]}.${finger}`;
-}
-
-export function touchHintCode(a: Finger, b: Finger): string {
-  return `tips.touch.${a}-${b}`;
-}
 
 export interface SpecDraft {
   spec: LetterSpec;
@@ -34,12 +21,14 @@ export interface SpecDraft {
  */
 export function draftSpec(letter: string, stats: LetterStats, minShare = RULE_MIN_SHARE): SpecDraft {
   const fingers: LetterSpec["fingers"] = {};
+  const typical: Partial<Record<Finger, FingerState>> = {};
   const freeFingers: Finger[] = [];
   for (const f of FINGERS) {
     const states = stats.fingers[f].states;
     const [state, share] = (Object.entries(states) as [FingerState, number][]).reduce((best, cur) =>
       cur[1] > best[1] ? cur : best,
     );
+    typical[f] = state;
     if (share >= minShare) fingers[f] = { state, hintCode: fingerHintCode(f, state) };
     else freeFingers.push(f);
   }
@@ -60,6 +49,7 @@ export function draftSpec(letter: string, stats: LetterStats, minShare = RULE_MI
     verified: false,
     fingers,
     ...(extra.length > 0 ? { extra } : {}),
+    typical,
     reference: `references/${letter}.json`,
   };
   return { spec, freeFingers, impliedTouches };

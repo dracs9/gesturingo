@@ -16,8 +16,13 @@ export interface LetterSpec {
   verified: boolean;
   fingers: Partial<Record<Finger, { state: FingerState; hintCode: string }>>;
   extra?: LetterExtra[];
-  /** Similar letters (kNN tells them apart in Phase 6). */
+  /** Similar letters: kNN tells them apart, a hit gives the "looks like …" hint. */
   confusedWith?: string[];
+  /**
+   * The most common state of every finger in the data, rules or not. When kNN disagrees but the
+   * rules pass, the finger furthest from its typical state becomes the hint.
+   */
+  typical?: Partial<Record<Finger, FingerState>>;
   /** Path to the ghost-hand reference, e.g. "references/А.json". */
   reference: string;
 }

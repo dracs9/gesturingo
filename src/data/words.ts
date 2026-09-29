@@ -3,37 +3,35 @@ import { isDynamicLetter } from "./dynamicLetters";
 // Words for the Bridge. Only words whose every letter is static, described in letters.ts AND learned
 // are offered, so letters with movement (dynamicLetters.ts) never appear.
 
+// Only letters the app teaches (no Д З Ё Й Щ — movement; no М П Ц Ъ Ь — excluded); a test checks it.
 export const WORDS: readonly string[] = [
   "ВОВА",
-  "МАМА",
-  "ПАПА",
-  "ВОДА",
-  "ДОМ",
   "КОТ",
-  "МИР",
-  "ДА",
   "НЕТ",
   "ЛЕС",
-  "САД",
   "ЛУК",
   "СОК",
   "НОС",
   "РОТ",
+  "ОСА",
   "ЛИСА",
   "РУКА",
   "НОГА",
-  "МОРЕ",
-  "ЛАМПА",
+  "РЫБА",
+  "ХЛЕБ",
+  "ЖУК",
+  "ЛЕТО",
+  "ГОРА",
+  "СОВА",
+  "ЭХО",
   "КНИГА",
   "ШКОЛА",
   "СЕСТРА",
   "БРАТ",
-  "ДРУГ",
   "ИРА",
   "ОЛЯ",
+  "ЮЛЯ",
   "АННА",
-  "ПРИВЕТ",
-  "СПАСИБО",
 ];
 
 /** Words the learner can spell: every letter is static, has a spec and is learned. */
