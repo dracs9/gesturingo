@@ -18,7 +18,7 @@ export const strings = {
     map: "Карта уроков · Gesturingo",
     lesson: "Урок · Gesturingo",
     results: "Итоги · Gesturingo",
-    bridge: "Мост · Gesturingo",
+    bridge: "Тренажёр · Gesturingo",
     record: "Запись образцов · Gesturingo",
     letters: "Проверка букв · Gesturingo",
   },
@@ -130,7 +130,7 @@ export const strings = {
     title: "Карта уроков",
     lesson: (n: number) => `Урок ${n}`,
     lessonLetters: (letters: readonly string[]) => letters.join(" "),
-    bridge: "Мост",
+    bridge: "Тренажёр",
     bridgeLocked: "Пройди урок 1, чтобы открыть",
     weakLetters: "Повтори слабые буквы",
     weakLettersList: (letters: readonly string[]) => letters.join(" "),
@@ -197,7 +197,7 @@ export const strings = {
   },
 
   bridge: {
-    title: "Мост",
+    title: "Тренажёр",
     description: "Напиши слово жестами — оно превратится в текст и голос.",
     write: (word: string) => `Напиши слово «${word}»`,
     warmup: "Разминка: покажи выученные буквы по очереди",

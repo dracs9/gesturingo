@@ -14,7 +14,7 @@ import s from "./Screen.module.css";
 
 const hasSpec = (letter: string) => getLetterSpec(letter) !== undefined;
 
-/** «Мост»: learned letters become words — text on screen and voice (CLAUDE.md §10.5). */
+/** «Тренажёр» (the "Bridge" of CLAUDE.md): learned letters become words — text on screen and voice (CLAUDE.md §10.5). */
 export function Bridge() {
   const setDockHidden = useUi((st) => st.setDockHidden);
 
