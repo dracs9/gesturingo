@@ -67,3 +67,8 @@
   background: var(--accent);
   border-color: var(--text);
 }
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

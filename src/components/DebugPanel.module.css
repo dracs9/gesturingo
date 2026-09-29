@@ -1,0 +1,13 @@
+.panel {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.75);
+  color: #7dffb2;
+  font: 13px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  pointer-events: none;
+}
