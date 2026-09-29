@@ -1,5 +1,6 @@
 import { LM, type HandFrame } from "../landmarks";
-import { MIN_HAND_SCORE, PALM_SIZE_MAX, PALM_SIZE_MIN } from "../thresholds";
+import { FRAME_EDGE_MARGIN, MIN_HAND_SCORE, PALM_SIZE_MAX, PALM_SIZE_MIN } from "../thresholds";
+import type { HintError } from "./hintEngine";
 
 export type HandStatus = "noHand" | "tooFar" | "tooClose" | "ok";
 
@@ -19,4 +20,22 @@ export function getHandStatus(frame: HandFrame | null): HandStatus {
   if (size < PALM_SIZE_MIN) return "tooFar";
   if (size > PALM_SIZE_MAX) return "tooClose";
   return "ok";
+}
+
+/** Landmarks that touch the frame border (the hand is cut off there). */
+export function landmarksOutOfFrame(frame: HandFrame, margin = FRAME_EDGE_MARGIN): number[] {
+  const out: number[] = [];
+  frame.landmarks.forEach((p, i) => {
+    if (p.x < margin || p.x > 1 - margin || p.y < margin || p.y > 1 - margin) out.push(i);
+  });
+  return out;
+}
+
+/** Frame-level errors (CLAUDE.md §9.1): when any is present, gesture/letter hints are not shown. */
+export function frameErrors(frame: HandFrame | null): HintError[] {
+  const status = getHandStatus(frame);
+  if (status !== "ok") return [{ level: "frame", hintCode: `frame.${status}`, severity: 1 }];
+  if (!frame) return [];
+  const out = landmarksOutOfFrame(frame);
+  return out.length > 0 ? [{ level: "frame", hintCode: "frame.partlyOut", severity: 0.8, landmarkIds: out }] : [];
 }

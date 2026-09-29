@@ -67,3 +67,21 @@ export const THUMB_UP_MAX_ANGLE = 35;
 export const POSE_GRACE_MS = 150;
 /** Pose holds need a steady hand: wrist speed below this (palm sizes per second). */
 export const POSE_MAX_SPEED = 1.5;
+
+// --- Hints (error mode, CLAUDE.md §9.2) ---
+/** An error must last this long before its hint appears (no blinking). */
+export const HINT_APPEAR_MS = 700;
+/** The shown hint changes at most this often. */
+export const HINT_MIN_SWITCH_MS = 1000;
+/** An error that disappears for less than this still counts as present. */
+export const HINT_GRACE_MS = 250;
+/** A landmark closer than this to the frame edge (image-normalized) → "hand partly out of frame". */
+export const FRAME_EDGE_MARGIN = 0.02;
+
+// --- Control tutorial ---
+/** Step 1: nudge toward the circle after this long. */
+export const TUTORIAL_MOVE_HINT_MS = 5000;
+/** Step 2: after this long without a pinch, dwell turns on as the fallback. */
+export const TUTORIAL_DWELL_FALLBACK_MS = 12000;
+/** Step 2: how long the "aim first" hint stays relevant after a pinch that missed. */
+export const PINCH_AIM_HINT_MS = 1500;

@@ -93,6 +93,12 @@ export const strings = {
       "Покажи открытую ладонь",
     ],
     done: "Готово! Теперь ты управляешь руками",
+    doneText: "Покажи большой палец вверх или нажми кнопку, чтобы перейти к урокам.",
+    stepOf: (n: number, total: number) => `Шаг ${n} из ${total}`,
+    success: "Отлично!",
+    press: "Нажми",
+    toLessons: "К урокам",
+    targetsLeft: (n: number) => `Осталось кружков: ${n}`,
   },
 
   levelMap: {
@@ -159,6 +165,27 @@ export const strings = {
     back: "Назад",
   },
 
-  // Hint texts by hintCode (filled in Phase 4–5). Wording is always "what to do".
-  hints: {} as Record<string, string>,
+  // Hint texts by hintCode. Wording is always «что сделать», never «что не так» (CLAUDE.md §9.2).
+  hints: {
+    // Frame
+    "frame.noHand": "Подними руку перед камерой",
+    "frame.tooFar": "Рука слишком далеко — подойди ближе",
+    "frame.tooClose": "Рука слишком близко — отодвинь её от камеры",
+    "frame.partlyOut": "Покажи руку целиком — она выходит за край кадра",
+    // Fingers
+    "finger.straighten.thumb": "Выпрями большой палец",
+    "finger.straighten.index": "Выпрями указательный палец",
+    "finger.straighten.middle": "Выпрями средний палец",
+    "finger.straighten.ring": "Выпрями безымянный палец",
+    "finger.straighten.pinky": "Выпрями мизинец",
+    // Control gestures
+    "cursor.moveToTarget": "Веди пальцем к кружку — курсор повторяет движение руки",
+    "pinch.closer": "Щипок не засчитан — соедини кончики пальцев ближе",
+    "pinch.aim": "Сначала наведи курсор на кружок, потом сделай щипок",
+    "pinch.useDwell": "Не выходит щипок? Задержи курсор на кружке 1 секунду",
+    "thumb.foldOthers": "Сожми остальные пальцы в кулак",
+    "thumb.pointUp": "Поверни кисть — большой палец должен смотреть вверх",
+    "palm.faceCamera": "Поверни ладонь к камере",
+    "pose.holdStill": "Держи руку неподвижно",
+  } as Record<string, string>,
 } as const;

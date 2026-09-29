@@ -3,7 +3,8 @@ import { strings } from "../data/strings.ru";
 import { createControlLayer } from "../recognition/control/controller";
 import type { GestureContext } from "../recognition/gestureContext";
 import { onFrame } from "../recognition/pipeline";
-import { setControlStats } from "../store/controlStats";
+import { clearControlStats, emitControl } from "../store/controlStats";
+import { GESTURE_ENTER, GESTURE_LEAVE } from "../store/gestureEvents";
 import { runCommand } from "../store/gestureCommands";
 import s from "./GestureLayer.module.css";
 import { HoldRing } from "./HoldRing";
@@ -47,7 +48,9 @@ export function GestureLayer({ context }: GestureLayerProps) {
       if (hovered !== el) {
         hovered?.removeAttribute("data-gesture-hover");
         hovered?.style.removeProperty("--dwell");
+        hovered?.dispatchEvent(new CustomEvent(GESTURE_LEAVE));
         el?.setAttribute("data-gesture-hover", "");
+        el?.dispatchEvent(new CustomEvent(GESTURE_ENTER));
         hovered = el;
       }
       el?.style.setProperty("--dwell", dwell.toFixed(3));
@@ -68,7 +71,7 @@ export function GestureLayer({ context }: GestureLayerProps) {
         width: window.innerWidth,
         height: window.innerHeight,
       });
-      setControlStats(out);
+      emitControl(out, observation);
 
       const cursor = cursorRef.current;
       if (cursor) {
@@ -96,7 +99,7 @@ export function GestureLayer({ context }: GestureLayerProps) {
     return () => {
       unsubscribe();
       setHovered(null, 0);
-      setControlStats(null);
+      clearControlStats();
     };
   }, []);
 

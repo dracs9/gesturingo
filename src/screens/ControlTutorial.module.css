@@ -1,0 +1,204 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-height: 100dvh;
+  padding: 72px 16px 24px;
+  text-align: center;
+}
+
+.skip {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 70;
+  min-width: 120px;
+  min-height: 72px;
+  font-size: 1rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+}
+
+.dotOn {
+  background: var(--accent);
+}
+
+.instruction {
+  max-width: 32rem;
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+}
+
+.sub {
+  color: var(--text-muted);
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  width: 100%;
+}
+
+/* --- Step icon animations --- */
+.icon {
+  display: inline-block;
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.icon_cursor {
+  animation: glide 2s ease-in-out infinite;
+}
+
+.icon_pinch {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.icon_thumbsUp {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.icon_openPalm {
+  transform-origin: 50% 90%;
+  animation: wave 1.4s ease-in-out infinite;
+}
+
+.iconDone {
+  font-size: 5rem;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes glide {
+  0%,
+  100% {
+    transform: translate(-24px, 0);
+  }
+  50% {
+    transform: translate(24px, -8px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
+/* --- Step 1: cursor targets --- */
+.target {
+  position: fixed;
+  z-index: 30;
+  width: 120px;
+  height: 120px;
+  margin: -60px 0 0 -60px;
+  border: 6px solid var(--accent);
+  border-radius: 50%;
+  background: rgb(77 212 172 / 0.2);
+  animation:
+    pop 0.3s ease-out,
+    ring 1.6s ease-in-out 0.3s infinite;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(77 212 172 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 18px rgb(77 212 172 / 0);
+  }
+}
+
+/* --- Step 2: pinch target --- */
+.pinchTarget {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+}
+
+/* --- Steps 3–4: camera --- */
+.camera {
+  width: min(460px, 92vw);
+}
+
+.success {
+  position: absolute;
+  z-index: 5;
+  margin: 0;
+  padding: 18px 32px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 2rem;
+  font-weight: 800;
+  animation: pop 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon,
+  .iconDone,
+  .target,
+  .success {
+    animation: none;
+  }
+}

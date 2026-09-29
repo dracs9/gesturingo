@@ -17,6 +17,8 @@ export type Command = "ok" | "back";
 
 export interface ControlContext {
   cursor: boolean;
+  /** Dwell click (only with the cursor). Off e.g. while the tutorial teaches the pinch. */
+  dwell: boolean;
   ok: boolean;
   back: boolean;
 }
@@ -127,6 +129,8 @@ export function createControlLayer<T>({ hitTest }: ControlLayerOptions<T>): Cont
       let dwellProgress = 0;
       if (poseActive) {
         dwell.disarm(cur);
+      } else if (!ctx.dwell) {
+        dwell.reset();
       } else {
         const d = dwell.update(hover, cur, t);
         dwellProgress = d.progress;

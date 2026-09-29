@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import s from "./App.module.css";
 import { CameraView } from "./components/CameraView";
 import { DebugPanel } from "./components/DebugPanel";
@@ -16,6 +16,7 @@ import { Record } from "./screens/Record";
 import { Results } from "./screens/Results";
 import { Welcome } from "./screens/Welcome";
 import { useSession } from "./store/session";
+import { useUi } from "./store/ui";
 
 const debug = isDebug();
 
@@ -54,7 +55,12 @@ export function App() {
 
   const needsCamera = route.name !== "welcome";
   const ready = cameraStatus === "ready";
-  const gestureContext = getGestureContext(route.name);
+  const gestureOverride = useUi((st) => st.gestureOverride);
+  const dockHidden = useUi((st) => st.dockHidden);
+  const gestureContext = useMemo(
+    () => ({ ...getGestureContext(route.name), ...gestureOverride }),
+    [route.name, gestureOverride],
+  );
 
   // After a reload on an inner screen, restart the camera silently if permission was already given.
   useEffect(() => {
@@ -76,7 +82,7 @@ export function App() {
           <div className={s.status}>
             <HandStatus />
           </div>
-          {route.name !== "record" && (
+          {!dockHidden && (
             <div className={s.dock}>
               <CameraView variant="mini" />
             </div>

@@ -20,6 +20,7 @@ import {
 import { navigate, paths } from "../router";
 import { useGestureCommands } from "../store/gestureCommands";
 import { useSession } from "../store/session";
+import { useUi } from "../store/ui";
 import r from "./Record.module.css";
 import s from "./Screen.module.css";
 
@@ -134,6 +135,13 @@ export function Record() {
       serializeReferenceFile({ letter, signer: signerId, handedness: recording.handedness, frame: selectedFrame }),
     );
   };
+
+  // This page has its own large camera view.
+  const setDockHidden = useUi((st) => st.setDockHidden);
+  useEffect(() => {
+    setDockHidden(true);
+    return () => setDockHidden(false);
+  }, [setDockHidden]);
 
   const busy = phase === "countdown" || phase === "recording";
   // While recording, a letter that looks like an open palm must not leave the page.

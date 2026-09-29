@@ -4,7 +4,7 @@ import { buildObservation, type HandObservation } from "../observation";
 import { createControlLayer, type ControlContext, type ControlOutput } from "./controller";
 
 const VIEW = { width: 1000, height: 1000 };
-const ALL: ControlContext = { cursor: true, ok: true, back: true };
+const ALL: ControlContext = { cursor: true, dwell: true, ok: true, back: true };
 const STEP = 33;
 
 const obs = (hand: SyntheticHandOptions, proj: ProjectionOptions = {}) =>
@@ -69,7 +69,7 @@ describe("control layer", () => {
 
   it("does nothing with the cursor disabled", () => {
     const layer = createControlLayer<string>({ hitTest: () => "btn" });
-    const ctx = { cursor: false, ok: false, back: true };
+    const ctx = { cursor: false, dwell: false, ok: false, back: true };
     const outs = [...run(layer, () => POINT, 0, 2000, ctx), ...run(layer, () => POINT_PINCH, 2000, 2500, ctx)];
     expect(clicks(outs)).toHaveLength(0);
     expect(outs.every((o) => !o.cursor.visible)).toBe(true);
@@ -109,7 +109,7 @@ describe("control layer", () => {
     expect(commands(run(on, () => THUMBS_UP, 0, 1500))).toEqual(["ok"]);
 
     const off = createControlLayer<string>({ hitTest: () => null });
-    expect(commands(run(off, () => THUMBS_UP, 0, 1500, { cursor: true, ok: false, back: true }))).toEqual([]);
+    expect(commands(run(off, () => THUMBS_UP, 0, 1500, { cursor: true, dwell: true, ok: false, back: true }))).toEqual([]);
   });
 
   it("does not dwell-click while a pose is being held", () => {
@@ -124,5 +124,17 @@ describe("control layer", () => {
     const outs = run(layer, () => null, 300, 1000);
     expect(outs[0]?.cursor.visible).toBe(true);
     expect(outs.at(-1)?.cursor.visible).toBe(false);
+  });
+});
+
+describe("control layer with dwell disabled", () => {
+  it("never dwell-clicks, but the pinch still clicks", () => {
+    const layer = createControlLayer<string>({ hitTest: () => "btn" });
+    const ctx = { cursor: true, dwell: false, ok: false, back: false };
+    const resting = run(layer, () => POINT, 0, 3000, ctx);
+    expect(clicks(resting)).toHaveLength(0);
+    expect(resting.every((o) => o.cursor.dwell === 0)).toBe(true);
+    const pinched = run(layer, () => POINT_PINCH, 3000, 3300, ctx);
+    expect(clicks(pinched).map((o) => o.click?.source)).toEqual(["pinch"]);
   });
 });

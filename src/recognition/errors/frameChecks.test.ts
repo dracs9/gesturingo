@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LANDMARK_COUNT, LM, type HandFrame, type Point3 } from "../landmarks";
-import { getHandStatus, palmSize } from "./frameChecks";
+import { frameErrors, getHandStatus, palmSize } from "./frameChecks";
 
 /** Synthetic hand: wrist at (0.5, 0.7), middle MCP `palm` above it (in video-height units). */
 function hand(palm: number, { score = 0.95, width = 640, height = 480 } = {}): HandFrame {
@@ -35,5 +35,23 @@ describe("getHandStatus", () => {
 
   it("accepts a normal hand", () => {
     expect(getHandStatus(hand(0.2))).toBe("ok");
+  });
+});
+
+describe("frameErrors", () => {
+  it("maps hand status to frame-level hints", () => {
+    expect(frameErrors(null).map((e) => e.hintCode)).toEqual(["frame.noHand"]);
+    expect(frameErrors(hand(0.03)).map((e) => e.hintCode)).toEqual(["frame.tooFar"]);
+    expect(frameErrors(hand(0.6)).map((e) => e.hintCode)).toEqual(["frame.tooClose"]);
+    expect(frameErrors(hand(0.2))).toEqual([]);
+    expect(frameErrors(null)[0]?.level).toBe("frame");
+  });
+
+  it("reports a hand cut off by the frame edge", () => {
+    const f = hand(0.2);
+    f.landmarks[LM.INDEX_TIP] = { x: 0.5, y: 0.005, z: 0 };
+    const [error] = frameErrors(f);
+    expect(error?.hintCode).toBe("frame.partlyOut");
+    expect(error?.landmarkIds).toEqual([LM.INDEX_TIP]);
   });
 });
