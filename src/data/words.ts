@@ -1,5 +1,7 @@
-// Words for the Bridge. Only words whose every letter is described in letters.ts AND learned are offered,
-// so letters with movement (Й, Щ, Ё…) never appear until the team adds them.
+import { isDynamicLetter } from "./dynamicLetters";
+
+// Words for the Bridge. Only words whose every letter is static, described in letters.ts AND learned
+// are offered, so letters with movement (dynamicLetters.ts) never appear.
 
 export const WORDS: readonly string[] = [
   "ВОВА",
@@ -34,13 +36,13 @@ export const WORDS: readonly string[] = [
   "СПАСИБО",
 ];
 
-/** Words the learner can spell: every letter has a spec and is learned. */
+/** Words the learner can spell: every letter is static, has a spec and is learned. */
 export function availableWords(
   words: readonly string[],
   learned: ReadonlySet<string>,
   hasSpec: (letter: string) => boolean,
 ): string[] {
-  return words.filter((w) => Array.from(w).every((l) => learned.has(l) && hasSpec(l)));
+  return words.filter((w) => Array.from(w).every((l) => !isDynamicLetter(l) && learned.has(l) && hasSpec(l)));
 }
 
 /** Random word, avoiding the previous one when there is a choice. */

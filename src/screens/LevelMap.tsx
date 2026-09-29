@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { GestureButton } from "../components/GestureButton";
 import { Stars } from "../components/Stars";
 import { XpCounter } from "../components/XpCounter";
+import { DYNAMIC_LETTERS } from "../data/dynamicLetters";
 import { LESSONS } from "../data/lessons";
 import { strings } from "../data/strings.ru";
 import { navigate, paths } from "../router";
@@ -102,6 +103,17 @@ export function LevelMap() {
           <span className={m.tileTitle}>🔁 {t.weakLetters}</span>
           <span className={m.tileLetters}>{weak.length > 0 ? t.weakLettersList(weak) : t.noWeakLetters}</span>
         </GestureButton>
+
+        {DYNAMIC_LETTERS.length > 0 && (
+          <GestureButton className={m.tile} disabled>
+            <span className={m.tileTitle}>
+              <span aria-hidden="true">⏳ </span>
+              {t.comingSoon}
+            </span>
+            <span className={m.tileLetters}>{t.lessonLetters(DYNAMIC_LETTERS)}</span>
+            <span className={m.muted}>{t.comingSoonHint}</span>
+          </GestureButton>
+        )}
       </div>
 
       <footer className={m.settings}>

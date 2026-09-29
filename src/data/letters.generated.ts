@@ -25,6 +25,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       pinky: { state: "bent", hintCode: "finger.bend.pinky" },
     },
     reference: "references/А.json",
+    confusedWith: ["Ж"],
   },
   // Б: 77 samples (kaggle 57, rsl 20), 20 signers, 111 Left/Right fixed, kNN accuracy 77% (leave-one-signer-out)
   //   thumb  straight 39% / half 48% / bent 13%, median 143° → free
@@ -69,7 +70,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       { type: "tipsTouch", a: "middle", b: "ring", hintCode: "tips.touch.middle-ring" },
     ],
     reference: "references/В.json",
-    confusedWith: ["Т", "Ё"],
+    confusedWith: ["Т"],
   },
   // Г: 70 samples (kaggle 50, rsl 20), 14 signers, 78 Left/Right fixed, kNN accuracy 94% (leave-one-signer-out)
   //   thumb  straight 94% / half 6% / bent 0%, median 165.8° → rule: straight
@@ -92,15 +93,6 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
     },
     reference: "references/Г.json",
   },
-  // Д: 20 samples (rsl 20), 1 signers, 22 Left/Right fixed, kNN accuracy 60% (leave-one-out, 1 signer)
-  //   thumb  straight 55% / half 45% / bent 0%, median 152.5° → free
-  //   index  straight 50% / half 50% / bent 0%, median 161° → free
-  //   middle straight 35% / half 50% / bent 15%, median 151.9° → free
-  //   ring   straight 0% / half 45% / bent 55%, median 91.9° → free
-  //   pinky  straight 0% / half 60% / bent 40%, median 109.4° → free
-  //   palm: camera 55% / side 45% / away 0% (no rule — photos are shot from any side)
-  //   thumb: acrossPalm 45% / side 40% / up 15% (no rule)
-  { letter: "Д", verified: false, fingers: {}, reference: "references/Д.json", confusedWith: ["Я", "Э", "З"] },
   // Е: 48 samples (kaggle 48), 10 signers, 2 Left/Right fixed, kNN accuracy 94% (leave-one-signer-out)
   //   thumb  straight 88% / half 13% / bent 0%, median 159.4° → rule: straight
   //   index  straight 0% / half 71% / bent 29%, median 108.4° → free
@@ -125,34 +117,6 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       { type: "tipsTouch", a: "ring", b: "pinky", hintCode: "tips.touch.ring-pinky" },
     ],
     reference: "references/Е.json",
-    confusedWith: ["Ё"],
-  },
-  // Ё: 20 samples (rsl 20), 1 signers, 6 Left/Right fixed, kNN accuracy 75% (leave-one-out, 1 signer)
-  //   thumb  straight 100% / half 0% / bent 0%, median 166.7° → rule: straight
-  //   index  straight 5% / half 95% / bent 0%, median 121.6° → rule: half
-  //   middle straight 0% / half 100% / bent 0%, median 114.3° → rule: half
-  //   ring   straight 5% / half 90% / bent 5%, median 113.4° → rule: half
-  //   pinky  straight 0% / half 100% / bent 0%, median 111.2° → rule: half
-  //   tips touch: index-middle 85%, middle-ring 80%, ring-pinky 100%
-  //   palm: camera 15% / side 80% / away 5% (no rule — photos are shot from any side)
-  //   thumb: acrossPalm 0% / side 100% / up 0% (no rule)
-  {
-    letter: "Ё",
-    verified: false,
-    fingers: {
-      thumb: { state: "straight", hintCode: "finger.straighten.thumb" },
-      index: { state: "half", hintCode: "finger.round.index" },
-      middle: { state: "half", hintCode: "finger.round.middle" },
-      ring: { state: "half", hintCode: "finger.round.ring" },
-      pinky: { state: "half", hintCode: "finger.round.pinky" },
-    },
-    extra: [
-      { type: "tipsTouch", a: "index", b: "middle", hintCode: "tips.touch.index-middle" },
-      { type: "tipsTouch", a: "middle", b: "ring", hintCode: "tips.touch.middle-ring" },
-      { type: "tipsTouch", a: "ring", b: "pinky", hintCode: "tips.touch.ring-pinky" },
-    ],
-    reference: "references/Ё.json",
-    confusedWith: ["Е", "Ж", "В"],
   },
   // Ж: 71 samples (kaggle 51, rsl 20), 21 signers, 80 Left/Right fixed, kNN accuracy 79% (leave-one-signer-out)
   //   thumb  straight 94% / half 4% / bent 1%, median 162.9° → rule: straight
@@ -172,29 +136,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       { type: "tipsTouch", a: "ring", b: "pinky", hintCode: "tips.touch.ring-pinky" },
     ],
     reference: "references/Ж.json",
-    confusedWith: ["Ё", "С"],
-  },
-  // З: 20 samples (rsl 20), 1 signers, 0 Left/Right fixed, kNN accuracy 100% (leave-one-out, 1 signer)
-  //   thumb  straight 5% / half 95% / bent 0%, median 141.6° → rule: half
-  //   index  straight 95% / half 5% / bent 0%, median 168.7° → rule: straight
-  //   middle straight 15% / half 40% / bent 45%, median 107.3° → free
-  //   ring   straight 0% / half 10% / bent 90%, median 87.4° → rule: bent
-  //   pinky  straight 0% / half 5% / bent 95%, median 88.4° → rule: bent
-  //   tips touch: ring-pinky 95%
-  //   not a rule (both fingers bent): ring-pinky
-  //   palm: camera 100% / side 0% / away 0% (no rule — photos are shot from any side)
-  //   thumb: acrossPalm 100% / side 0% / up 0% (no rule)
-  {
-    letter: "З",
-    verified: false,
-    fingers: {
-      thumb: { state: "half", hintCode: "finger.round.thumb" },
-      index: { state: "straight", hintCode: "finger.straighten.index" },
-      ring: { state: "bent", hintCode: "finger.bend.ring" },
-      pinky: { state: "bent", hintCode: "finger.bend.pinky" },
-    },
-    reference: "references/З.json",
-    confusedWith: ["Д"],
+    confusedWith: ["С", "А"],
   },
   // И: 56 samples (kaggle 56), 16 signers, 0 Left/Right fixed, kNN accuracy 86% (leave-one-signer-out)
   //   thumb  straight 11% / half 54% / bent 36%, median 126.5° → free
@@ -214,29 +156,6 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
     },
     reference: "references/И.json",
     confusedWith: ["У"],
-  },
-  // Й: 20 samples (rsl 20), 1 signers, 0 Left/Right fixed, kNN accuracy 100% (leave-one-out, 1 signer)
-  //   thumb  straight 20% / half 80% / bent 0%, median 147.2° → rule: half
-  //   index  straight 0% / half 0% / bent 100%, median 49° → rule: bent
-  //   middle straight 0% / half 0% / bent 100%, median 49.8° → rule: bent
-  //   ring   straight 100% / half 0% / bent 0%, median 166.5° → rule: straight
-  //   pinky  straight 100% / half 0% / bent 0%, median 163.1° → rule: straight
-  //   tips touch: thumb-middle 90%, index-middle 90%, ring-pinky 50%
-  //   not a rule (both fingers bent): index-middle
-  //   palm: camera 100% / side 0% / away 0% (no rule — photos are shot from any side)
-  //   thumb: acrossPalm 85% / side 15% / up 0% (no rule)
-  {
-    letter: "Й",
-    verified: false,
-    fingers: {
-      thumb: { state: "half", hintCode: "finger.round.thumb" },
-      index: { state: "bent", hintCode: "finger.bend.index" },
-      middle: { state: "bent", hintCode: "finger.bend.middle" },
-      ring: { state: "straight", hintCode: "finger.straighten.ring" },
-      pinky: { state: "straight", hintCode: "finger.straighten.pinky" },
-    },
-    extra: [{ type: "tipsTouch", a: "thumb", b: "middle", hintCode: "tips.touch.thumb-middle" }],
-    reference: "references/Й.json",
   },
   // К: 76 samples (kaggle 56, rsl 20), 17 signers, 86 Left/Right fixed, kNN accuracy 67% (leave-one-signer-out)
   //   thumb  straight 22% / half 49% / bent 29%, median 133.3° → free
@@ -258,7 +177,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
     reference: "references/К.json",
     confusedWith: ["Я", "Б", "О"],
   },
-  // Л: 75 samples (kaggle 55, rsl 20), 24 signers, 5 Left/Right fixed, kNN accuracy 87% (leave-one-signer-out)
+  // Л: 75 samples (kaggle 55, rsl 20), 24 signers, 5 Left/Right fixed, kNN accuracy 89% (leave-one-signer-out)
   //   thumb  straight 31% / half 69% / bent 0%, median 146.3° → free
   //   index  straight 44% / half 56% / bent 0%, median 155.8° → free
   //   middle straight 45% / half 55% / bent 0%, median 155.8° → free
@@ -304,7 +223,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
     },
     reference: "references/Н.json",
   },
-  // О: 80 samples (kaggle 60, rsl 20), 23 signers, 107 Left/Right fixed, kNN accuracy 66% (leave-one-signer-out)
+  // О: 80 samples (kaggle 60, rsl 20), 23 signers, 107 Left/Right fixed, kNN accuracy 68% (leave-one-signer-out)
   //   thumb  straight 89% / half 10% / bent 1%, median 160.3° → rule: straight
   //   index  straight 11% / half 85% / bent 4%, median 122° → rule: half
   //   middle straight 24% / half 76% / bent 0%, median 153.4° → free
@@ -320,7 +239,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       index: { state: "half", hintCode: "finger.round.index" },
     },
     reference: "references/О.json",
-    confusedWith: ["С", "Ф", "К"],
+    confusedWith: ["С", "Ф", "Я"],
   },
   // П: 68 samples (kaggle 48, rsl 20), 19 signers, 33 Left/Right fixed, kNN accuracy 43% (leave-one-signer-out)
   //   thumb  straight 63% / half 37% / bent 0%, median 154.2° → free
@@ -365,9 +284,9 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       pinky: { state: "half", hintCode: "finger.round.pinky" },
     },
     reference: "references/С.json",
-    confusedWith: ["Х", "О", "Ж"],
+    confusedWith: ["Х", "Ж", "О"],
   },
-  // Т: 71 samples (kaggle 51, rsl 20), 19 signers, 93 Left/Right fixed, kNN accuracy 59% (leave-one-signer-out)
+  // Т: 71 samples (kaggle 51, rsl 20), 19 signers, 93 Left/Right fixed, kNN accuracy 62% (leave-one-signer-out)
   //   thumb  straight 69% / half 31% / bent 0%, median 153.3° → free
   //   index  straight 14% / half 82% / bent 4%, median 133.1° → rule: half
   //   middle straight 14% / half 80% / bent 6%, median 134.8° → rule: half
@@ -444,7 +363,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       pinky: { state: "bent", hintCode: "finger.bend.pinky" },
     },
     reference: "references/Х.json",
-    confusedWith: ["Я", "С", "Д"],
+    confusedWith: ["Я", "С"],
   },
   // Ч: 49 samples (kaggle 49), 16 signers, 2 Left/Right fixed, kNN accuracy 90% (leave-one-signer-out)
   //   thumb  straight 98% / half 2% / bent 0%, median 161.5° → rule: straight
@@ -525,7 +444,6 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
       pinky: { state: "bent", hintCode: "finger.bend.pinky" },
     },
     reference: "references/Э.json",
-    confusedWith: ["Д"],
   },
   // Ю: 49 samples (kaggle 49), 20 signers, 0 Left/Right fixed, kNN accuracy 94% (leave-one-signer-out)
   //   thumb  straight 98% / half 2% / bent 0%, median 159.4° → rule: straight
@@ -549,7 +467,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
     extra: [{ type: "tipsTouch", a: "index", b: "middle", hintCode: "tips.touch.index-middle" }],
     reference: "references/Ю.json",
   },
-  // Я: 56 samples (kaggle 56), 19 signers, 2 Left/Right fixed, kNN accuracy 77% (leave-one-signer-out)
+  // Я: 56 samples (kaggle 56), 19 signers, 2 Left/Right fixed, kNN accuracy 84% (leave-one-signer-out)
   //   thumb  straight 7% / half 73% / bent 20%, median 129.5° → free
   //   index  straight 5% / half 93% / bent 2%, median 152.5° → rule: half
   //   middle straight 88% / half 7% / bent 5%, median 168° → rule: straight
@@ -570,7 +488,7 @@ export const GENERATED_LETTERS: readonly LetterSpec[] = [
     },
     extra: [{ type: "tipsTouch", a: "index", b: "middle", hintCode: "tips.touch.index-middle" }],
     reference: "references/Я.json",
-    confusedWith: ["К", "Д", "Х"],
+    confusedWith: ["К", "Х", "Б"],
   },
 ];
 
@@ -715,40 +633,6 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
       thumbPosition: { acrossPalm: 0, side: 0.814, up: 0.186 },
     },
   },
-  "Д": {
-    samples: 20,
-    sources: { rsl: 20 },
-    signers: 1,
-    flipped: 22,
-    accuracy: 0.6,
-    mode: "sample",
-    freeFingers: ["thumb", "index", "middle", "ring", "pinky"],
-    impliedTouches: [],
-    stats: {
-      samples: 20,
-      fingers: {
-        thumb: { states: { straight: 0.55, half: 0.45, bent: 0 }, medianAngle: 152.5, quartiles: [147.3, 161] },
-        index: { states: { straight: 0.5, half: 0.5, bent: 0 }, medianAngle: 161, quartiles: [153.3, 167.5] },
-        middle: { states: { straight: 0.35, half: 0.5, bent: 0.15 }, medianAngle: 151.9, quartiles: [139.7, 169.7] },
-        ring: { states: { straight: 0, half: 0.45, bent: 0.55 }, medianAngle: 91.9, quartiles: [70.7, 138.8] },
-        pinky: { states: { straight: 0, half: 0.6, bent: 0.4 }, medianAngle: 109.4, quartiles: [82.1, 132.5] },
-      },
-      tipsTouch: {
-        "thumb-index": 0,
-        "thumb-middle": 0.1,
-        "thumb-ring": 0.3,
-        "thumb-pinky": 0.05,
-        "index-middle": 0.35,
-        "index-ring": 0,
-        "index-pinky": 0,
-        "middle-ring": 0,
-        "middle-pinky": 0,
-        "ring-pinky": 0.45,
-      },
-      palmFacing: { camera: 0.55, side: 0.45, away: 0 },
-      thumbPosition: { acrossPalm: 0.45, side: 0.4, up: 0.15 },
-    },
-  },
   "Е": {
     samples: 48,
     sources: { kaggle: 48 },
@@ -781,40 +665,6 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
       },
       palmFacing: { camera: 0.25, side: 0.708, away: 0.042 },
       thumbPosition: { acrossPalm: 0.521, side: 0.458, up: 0.021 },
-    },
-  },
-  "Ё": {
-    samples: 20,
-    sources: { rsl: 20 },
-    signers: 1,
-    flipped: 6,
-    accuracy: 0.75,
-    mode: "sample",
-    freeFingers: [],
-    impliedTouches: [],
-    stats: {
-      samples: 20,
-      fingers: {
-        thumb: { states: { straight: 1, half: 0, bent: 0 }, medianAngle: 166.7, quartiles: [164.5, 170.2] },
-        index: { states: { straight: 0.05, half: 0.95, bent: 0 }, medianAngle: 121.6, quartiles: [118.7, 124] },
-        middle: { states: { straight: 0, half: 1, bent: 0 }, medianAngle: 114.3, quartiles: [113.3, 118.4] },
-        ring: { states: { straight: 0.05, half: 0.9, bent: 0.05 }, medianAngle: 113.4, quartiles: [108.5, 115.1] },
-        pinky: { states: { straight: 0, half: 1, bent: 0 }, medianAngle: 111.2, quartiles: [108.2, 116.4] },
-      },
-      tipsTouch: {
-        "thumb-index": 0.4,
-        "thumb-middle": 0.2,
-        "thumb-ring": 0.05,
-        "thumb-pinky": 0.05,
-        "index-middle": 0.85,
-        "index-ring": 0.15,
-        "index-pinky": 0,
-        "middle-ring": 0.8,
-        "middle-pinky": 0.05,
-        "ring-pinky": 1,
-      },
-      palmFacing: { camera: 0.15, side: 0.8, away: 0.05 },
-      thumbPosition: { acrossPalm: 0, side: 1, up: 0 },
     },
   },
   "Ж": {
@@ -859,40 +709,6 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
       thumbPosition: { acrossPalm: 0.296, side: 0.676, up: 0.028 },
     },
   },
-  "З": {
-    samples: 20,
-    sources: { rsl: 20 },
-    signers: 1,
-    flipped: 0,
-    accuracy: 1,
-    mode: "sample",
-    freeFingers: ["middle"],
-    impliedTouches: ["ring-pinky"],
-    stats: {
-      samples: 20,
-      fingers: {
-        thumb: { states: { straight: 0.05, half: 0.95, bent: 0 }, medianAngle: 141.6, quartiles: [133.7, 143.5] },
-        index: { states: { straight: 0.95, half: 0.05, bent: 0 }, medianAngle: 168.7, quartiles: [167.3, 169.4] },
-        middle: { states: { straight: 0.15, half: 0.4, bent: 0.45 }, medianAngle: 107.3, quartiles: [94.5, 120] },
-        ring: { states: { straight: 0, half: 0.1, bent: 0.9 }, medianAngle: 87.4, quartiles: [82, 92.7] },
-        pinky: { states: { straight: 0, half: 0.05, bent: 0.95 }, medianAngle: 88.4, quartiles: [85.2, 91.8] },
-      },
-      tipsTouch: {
-        "thumb-index": 0,
-        "thumb-middle": 0.25,
-        "thumb-ring": 0.2,
-        "thumb-pinky": 0,
-        "index-middle": 0.1,
-        "index-ring": 0,
-        "index-pinky": 0,
-        "middle-ring": 0.1,
-        "middle-pinky": 0,
-        "ring-pinky": 0.95,
-      },
-      palmFacing: { camera: 1, side: 0, away: 0 },
-      thumbPosition: { acrossPalm: 1, side: 0, up: 0 },
-    },
-  },
   "И": {
     samples: 56,
     sources: { kaggle: 56 },
@@ -933,40 +749,6 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
       },
       palmFacing: { camera: 1, side: 0, away: 0 },
       thumbPosition: { acrossPalm: 0.054, side: 0.946, up: 0 },
-    },
-  },
-  "Й": {
-    samples: 20,
-    sources: { rsl: 20 },
-    signers: 1,
-    flipped: 0,
-    accuracy: 1,
-    mode: "sample",
-    freeFingers: [],
-    impliedTouches: ["index-middle"],
-    stats: {
-      samples: 20,
-      fingers: {
-        thumb: { states: { straight: 0.2, half: 0.8, bent: 0 }, medianAngle: 147.2, quartiles: [143.2, 149] },
-        index: { states: { straight: 0, half: 0, bent: 1 }, medianAngle: 49, quartiles: [47.5, 50.3] },
-        middle: { states: { straight: 0, half: 0, bent: 1 }, medianAngle: 49.8, quartiles: [48.6, 52.2] },
-        ring: { states: { straight: 1, half: 0, bent: 0 }, medianAngle: 166.5, quartiles: [165.6, 167.2] },
-        pinky: { states: { straight: 1, half: 0, bent: 0 }, medianAngle: 163.1, quartiles: [162.1, 164.2] },
-      },
-      tipsTouch: {
-        "thumb-index": 0.05,
-        "thumb-middle": 0.9,
-        "thumb-ring": 0,
-        "thumb-pinky": 0,
-        "index-middle": 0.9,
-        "index-ring": 0,
-        "index-pinky": 0,
-        "middle-ring": 0,
-        "middle-pinky": 0,
-        "ring-pinky": 0.5,
-      },
-      palmFacing: { camera: 1, side: 0, away: 0 },
-      thumbPosition: { acrossPalm: 0.85, side: 0.15, up: 0 },
     },
   },
   "К": {
@@ -1012,7 +794,7 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
     sources: { kaggle: 55, rsl: 20 },
     signers: 24,
     flipped: 5,
-    accuracy: 0.867,
+    accuracy: 0.893,
     mode: "signer",
     freeFingers: ["thumb", "index", "middle"],
     impliedTouches: [],
@@ -1118,7 +900,7 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
     sources: { kaggle: 60, rsl: 20 },
     signers: 23,
     flipped: 107,
-    accuracy: 0.663,
+    accuracy: 0.675,
     mode: "signer",
     freeFingers: ["middle", "ring", "pinky"],
     impliedTouches: [],
@@ -1278,7 +1060,7 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
     sources: { kaggle: 51, rsl: 20 },
     signers: 19,
     flipped: 93,
-    accuracy: 0.592,
+    accuracy: 0.62,
     mode: "signer",
     freeFingers: ["thumb", "ring"],
     impliedTouches: [],
@@ -1596,7 +1378,7 @@ export const LETTER_BUILD_INFO: Readonly<Record<string, LetterBuildInfo>> = {
     sources: { kaggle: 56 },
     signers: 19,
     flipped: 2,
-    accuracy: 0.768,
+    accuracy: 0.839,
     mode: "signer",
     freeFingers: ["thumb"],
     impliedTouches: ["ring-pinky"],

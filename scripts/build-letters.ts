@@ -7,10 +7,11 @@
  *
  * Run: npm run build:letters
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ALPHABET } from "../src/data/alphabet";
+import { DYNAMIC_LETTERS, isDynamicLetter } from "../src/data/dynamicLetters";
 import { FINGERS } from "../src/recognition/features";
 import type { Handedness } from "../src/recognition/landmarks";
 import {
@@ -62,7 +63,8 @@ const KNOWN_HAND: Readonly<Record<string, Handedness>> = { "rsl-1": "Right" };
 function toSamples(raw: readonly RawSample[]): Sample[] {
   const byLetter = new Map<string, RawSample[]>();
   for (const r of raw) {
-    if (!ALPHABET.includes(r.letter)) continue;
+    // Letters with movement: a photo shows no movement, so no rules and no kNN samples.
+    if (!ALPHABET.includes(r.letter) || isDynamicLetter(r.letter)) continue;
     byLetter.set(r.letter, [...(byLetter.get(r.letter) ?? []), r]);
   }
   return [...byLetter.values()].flatMap((list) => {
@@ -181,6 +183,10 @@ function main(): void {
 
   mkdirSync(path.join(DATA_DIR, "references"), { recursive: true });
   mkdirSync(path.join(DATA_DIR, "samples"), { recursive: true });
+  // Letters that became dynamic must not keep an old reference or kNN samples.
+  for (const letter of DYNAMIC_LETTERS) {
+    for (const dir of ["references", "samples"]) rmSync(path.join(DATA_DIR, dir, `${letter}.json`), { force: true });
+  }
 
   const entries = letters.map((letter) => {
     const mine = samples.filter((s) => s.letter === letter);
@@ -226,6 +232,7 @@ function report(entries: { draft: SpecDraft; info: LetterBuildInfo }[], rawCount
   const short: Record<string, string> = { thumb: "Б", index: "У", middle: "С", ring: "Бз", pinky: "М" };
   const stateMark: Record<string, string> = { straight: "↑", half: "◠", bent: "✊" };
   console.log(`\nФото с точками: ${rawCount}, после ограничения ${MAX_PER_SIGNER}/автор/буква: ${entries.reduce((n, e) => n + e.info.samples, 0)}`);
+  console.log(`Динамические буквы (пропущены): ${DYNAMIC_LETTERS.join(" ")}`);
   console.log(`Left/Right исправлено: ${all.filter((s) => s.flipped).length} из ${all.length}`);
   console.log("Пальцы: Б большой, У указательный, С средний, Бз безымянный, М мизинец; ↑ прямой, ◠ полусогнут, ✊ согнут\n");
   console.log("буква образцы  авторы  испр.  точность        правила                        свободные  касания        confusedWith");

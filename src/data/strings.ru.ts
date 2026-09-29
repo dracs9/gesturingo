@@ -133,6 +133,8 @@ export const strings = {
     noWeakLetters: "Слабых букв нет",
     locked: (n: number) => `Пройди урок ${n}`,
     lockedLabel: "закрыт",
+    comingSoon: "Скоро",
+    comingSoonHint: "Буквы с движением — камера пока учит только неподвижные",
     hint: "Наведи курсор на урок и сделай щипок. Большой палец вверх — продолжить.",
     totalStars: (n: number) => `Звёзд: ${n}`,
   },
