@@ -6,7 +6,9 @@ import { CommandZones } from "../components/CommandZones";
 import { ComposerBar } from "../components/ComposerBar";
 import { ConversationFeed } from "../components/ConversationFeed";
 import { HoldRing } from "../components/HoldRing";
+import { ListenerPanel } from "../components/ListenerPanel";
 import { paintZones } from "../components/paintZones";
+import { SubtitleOverlay } from "../components/SubtitleOverlay";
 import { TalkLegend } from "../components/TalkLegend";
 import { hintText } from "../data/hintText";
 import { getLetterSpec, LETTERS } from "../data/letters";
@@ -23,6 +25,7 @@ import { clearTalkStats, setTalkStats } from "../store/talkStats";
 import { useUi } from "../store/ui";
 import { createComposer, createConfirmation, type Candidate } from "../talk/composer";
 import { useConversation } from "../talk/conversationStore";
+import { useListener } from "../talk/useListener";
 import { speak, warmVoices } from "../tts/speech";
 import t from "./Talk.module.css";
 
@@ -43,9 +46,10 @@ function readingView(u: ReaderUpdate): ReadingView {
 }
 
 /**
- * «Разговор» (docs/TRANSLATOR_SPEC.md, phase T1): fingerspelling without a target → words → a phrase
- * that is spoken only after a confirmation ring. Unsure readings never type or speak: they show
+ * «Разговор» (docs/TRANSLATOR_SPEC.md): fingerspelling without a target → words → a phrase that is
+ * spoken only after a confirmation ring (T1). Unsure readings never type or speak: they show
  * "almost" / «А или Б?» with a concrete hint. Commands are zones at the top of the frame.
+ * The hearing person answers by voice (or typing): subtitles over the video + the feed (T2).
  */
 export function Talk() {
   const setDockHidden = useUi((st) => st.setDockHidden);
@@ -57,6 +61,7 @@ export function Talk() {
   const [composer] = useState(createComposer);
   const [confirmation] = useState(() => createConfirmation());
   const [zones] = useState(() => createCommandZones());
+  const listener = useListener();
 
   const [draft, setDraft] = useState<{ words: readonly string[]; current: string }>({ words: [], current: "" });
   const [candidate, setCandidate] = useState<Candidate | null>(null);
@@ -219,6 +224,7 @@ export function Talk() {
               <span className={t.palmIcon}>✋</span>
             </HoldRing>
           </div>
+          <SubtitleOverlay subtitle={listener.subtitle} />
         </CameraView>
         <p className={t.frame}>{strings.talk.frame}</p>
       </section>
@@ -228,6 +234,14 @@ export function Talk() {
         <ComposerBar words={draft.words} current={draft.current} />
         <CandidateCard ref={ringRef} candidate={candidate} reading={reading} cancelled={cancelledAt !== null} />
         <ConversationFeed />
+        <ListenerPanel
+          supported={listener.supported}
+          listening={listener.listening}
+          ttsSpeaking={listener.ttsSpeaking}
+          error={listener.error}
+          onMic={listener.toggleMic}
+          onSend={listener.send}
+        />
       </section>
 
       <TalkLegend />

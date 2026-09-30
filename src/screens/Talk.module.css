@@ -31,12 +31,12 @@
   font-weight: 800;
 }
 
-/* Open-palm progress (cancel / exit), bottom centre of the video; hidden until the palm is held. */
+/* Open-palm progress (cancel / exit), centre of the video (subtitles take the bottom); hidden until held. */
 .palm {
   position: absolute;
   left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity 0.15s ease;
   pointer-events: none;

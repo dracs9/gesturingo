@@ -151,6 +151,8 @@ export const TALK_ZONE_HOLD_MS = 800;
 export const TALK_CANCEL_PALM_MS = 1200;
 /** … or, without a candidate, leaves the screen after this long. */
 export const TALK_EXIT_PALM_MS = 2000;
+/** The hearing person's final words stay as subtitles over the video this long (§6). */
+export const TALK_SUBTITLE_MS = 5000;
 /** The «А или Б?» card stays this long (time in a command zone does not count), so a zone can pick one. */
 export const TALK_AMBIGUOUS_LATCH_MS = 3000;
 /**

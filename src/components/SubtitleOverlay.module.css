@@ -1,0 +1,28 @@
+.subtitle {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.72);
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  line-height: 1.25;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.interim {
+  color: #c9ced8;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.final {
+  color: #fff;
+  font-weight: 800;
+}
