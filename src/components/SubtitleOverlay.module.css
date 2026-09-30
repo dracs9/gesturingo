@@ -16,6 +16,14 @@
   pointer-events: none;
 }
 
+@media (max-width: 600px) {
+  .subtitle {
+    bottom: 8px;
+    padding: 6px 12px;
+    font-size: 1.05rem;
+  }
+}
+
 .icon {
   margin-right: 8px;
   vertical-align: -0.1em;

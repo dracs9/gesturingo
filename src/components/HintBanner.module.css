@@ -36,6 +36,20 @@
   line-height: 1;
 }
 
+/* Phones: one or two short lines. */
+@media (max-width: 600px) {
+  .slot {
+    min-height: 52px;
+  }
+
+  .banner {
+    gap: 10px;
+    padding: 8px 14px 8px 12px;
+    border-left-width: 6px;
+    font-size: 1rem;
+  }
+}
+
 @keyframes appear {
   from {
     opacity: 0;

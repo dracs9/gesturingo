@@ -93,7 +93,8 @@
   :root {
     --btn-min: 88px;
     --chrome-top: calc(60px + env(safe-area-inset-top));
-    --chrome-bottom: calc(96px + env(safe-area-inset-bottom));
+    /* The camera dock (≤ 96 px, CameraView.module.css) + its 12 px offset + a little air. */
+    --chrome-bottom: calc(116px + env(safe-area-inset-bottom));
     --page-x: 12px;
   }
 }

@@ -219,7 +219,19 @@
   }
 
   .icon {
-    font-size: 3rem;
+    font-size: 2.4rem;
+  }
+
+  .layout {
+    gap: 10px;
+  }
+
+  .instruction {
+    font-size: 1.2rem;
+  }
+
+  .sub {
+    font-size: 0.95rem;
   }
 }
 

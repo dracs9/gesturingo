@@ -75,6 +75,11 @@
     padding: 6px 10px;
   }
 
+  .icon {
+    width: 1.4em;
+    font-size: 1.15rem;
+  }
+
   .label {
     position: absolute;
     width: 1px;

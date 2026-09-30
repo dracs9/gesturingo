@@ -16,6 +16,13 @@
   cursor: pointer;
 }
 
+@media (max-width: 600px) {
+  .summary {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 .summary::-webkit-details-marker {
   display: none;
 }

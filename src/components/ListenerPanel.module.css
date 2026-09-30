@@ -118,6 +118,43 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 600px) {
+  .panel {
+    gap: 6px;
+  }
+
+  .status {
+    gap: 6px 8px;
+    min-height: 40px;
+    padding: 6px 12px;
+  }
+
+  .statusIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .statusText,
+  .message {
+    font-size: 0.88rem;
+  }
+
+  .retry {
+    min-height: 34px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+  }
+
+  .input,
+  .send {
+    min-height: 44px;
+  }
+
+  .input {
+    font-size: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .status[data-status="listening"] .dot {
     animation: none;

@@ -140,6 +140,43 @@
   }
 }
 
+/* Phones: a smaller camera and toolbar, so the message, the reading, the feed and the listener fit one screen. */
+@media (max-width: 600px) {
+  .layout {
+    gap: 8px;
+    padding-top: calc(52px + env(safe-area-inset-top));
+  }
+
+  .camera .cameraView {
+    width: min(100%, 38dvh * var(--aspect, 1.333));
+  }
+
+  .toolbar {
+    top: calc(6px + env(safe-area-inset-top));
+    gap: 6px;
+  }
+
+  .toolButton,
+  .toolbar .help {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .toolbar svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .palmRing {
+    --ring-size: 56px;
+  }
+
+  .palmIcon {
+    font-size: 1.4rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .palm {
     transition: none;

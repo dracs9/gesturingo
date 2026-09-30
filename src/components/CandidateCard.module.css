@@ -130,3 +130,51 @@
     font-size: 2.2rem;
   }
 }
+
+/* Phones: one compact row — the ring and the verdict next to it. */
+@media (max-width: 600px) {
+  .card {
+    gap: 6px;
+    padding: 8px 12px;
+    border-width: 2px;
+    border-radius: var(--radius);
+  }
+
+  .row {
+    gap: 12px;
+  }
+
+  .ring {
+    --ring-size: 52px;
+  }
+
+  .letter {
+    font-size: 1.7rem;
+  }
+
+  .word {
+    font-size: 0.8rem;
+  }
+
+  .icon {
+    font-size: 1.4rem;
+  }
+
+  .title,
+  .state {
+    font-size: 1rem;
+  }
+
+  .advice,
+  .hint > p {
+    font-size: 0.95rem;
+  }
+
+  .phrase {
+    font-size: 1.3rem;
+  }
+
+  .note {
+    font-size: 0.85rem;
+  }
+}

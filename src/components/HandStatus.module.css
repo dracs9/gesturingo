@@ -16,6 +16,15 @@
   line-height: 1;
 }
 
+/* Phones: a compact pill in the top-left corner. */
+@media (max-width: 600px) {
+  .pill {
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 0.85rem;
+  }
+}
+
 .ok {
   color: var(--accent);
 }

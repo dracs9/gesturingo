@@ -80,6 +80,29 @@
   }
 }
 
+@media (max-width: 600px) {
+  .feed {
+    min-height: 64px;
+    padding: 8px;
+  }
+
+  .empty {
+    font-size: 0.9rem;
+  }
+
+  .list {
+    gap: 8px;
+  }
+
+  .bubble {
+    padding: 8px 12px;
+  }
+
+  .text {
+    font-size: 1.1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .speaking {
     animation: none;

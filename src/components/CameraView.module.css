@@ -16,6 +16,14 @@
   box-shadow: var(--shadow);
 }
 
+/* Phones: at most 96 px tall whatever the camera's orientation (a portrait video would be very tall at 34vw). */
+@media (max-width: 600px) {
+  .mini {
+    width: min(30vw, 96px * var(--aspect, 1.333));
+    border-width: 2px;
+  }
+}
+
 .mirror {
   position: absolute;
   inset: 0;

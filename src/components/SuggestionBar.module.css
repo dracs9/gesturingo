@@ -36,6 +36,18 @@
   outline-offset: 2px;
 }
 
+@media (max-width: 600px) {
+  .list {
+    gap: 6px;
+  }
+
+  .chip {
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 1rem;
+  }
+}
+
 .first {
   border-color: var(--mark);
   background: var(--mark-soft);

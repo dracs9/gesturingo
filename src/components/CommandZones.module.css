@@ -51,6 +51,21 @@
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
 }
 
+/* Phones: the camera is small — zone captions fit inside their zones. */
+@media (max-width: 600px) {
+  .ring {
+    --ring-size: 36px;
+  }
+
+  .icon {
+    font-size: 1rem;
+  }
+
+  .label {
+    font-size: 0.68rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .zone {
     transition: none;
