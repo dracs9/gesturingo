@@ -226,7 +226,8 @@ export const strings = {
   // Talk mode (docs/TRANSLATOR_SPEC.md). Neutral wording: the signer knows the language — the camera asks for help.
   talk: {
     title: "Разговор",
-    frame: "Это не универсальный переводчик: камера читает дактиль — буквы русской дактильной азбуки.",
+    frame:
+      "Это не универсальный переводчик: камера читает дактиль (буквы русской дактильной азбуки) и несколько жестов-фраз из датасета Slovo — они ещё сверяются со словарём РЖЯ.",
     draftEmpty: "Покажите букву в центре кадра — она появится здесь",
     draftLabel: "Набор",
     zones: {
@@ -353,6 +354,21 @@ export const strings = {
     next: "След. ›",
     cameraStarting: "Включаю камеру…",
     liveHint: "Показывай букву — подсказки как в уроке. Открытая ладонь 3 с — к списку.",
+    tabs: {
+      letters: "Буквы",
+      phrases: "Фразы",
+    },
+    phrases: {
+      intro:
+        "Жесты-фразы для «Разговора», собранные из точек датасета Slovo (видео не скачивались). Берутся только статичные жесты одной рукой; правила — из статистики, как у букв. Сверьте каждую фразу со словарём РЖЯ.",
+      source: (label: string) => `Метка Slovo: «${label}»`,
+      data: (videos: number, signers: number, samples: number, visible: number) =>
+        `Видео: ${videos} · авторов: ${signers} · образцов: ${samples} · рука видна: ${visible}%`,
+      markVerified: "Сверено со словарём РЖЯ",
+      exportTitle: "Вставь это значение в PHRASE_OVERRIDES (src/data/phrases.overrides.ts)",
+      none: "Статичных фраз не найдено — см. отчёт npm run find:phrases",
+      rejectedTitle: (n: number) => `Не вошли (${n})`,
+    },
   },
 
   handStatus: {

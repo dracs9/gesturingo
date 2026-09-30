@@ -40,6 +40,13 @@
   line-height: 1;
 }
 
+/* A phrase gesture («Хотеть») in the ring instead of a letter. */
+.word {
+  font-size: 1.1rem;
+  text-align: center;
+  word-break: break-word;
+}
+
 .icon {
   font-size: 2rem;
 }

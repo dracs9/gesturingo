@@ -49,3 +49,27 @@ export function loadLetterModels(): Promise<LetterModels> {
   );
   return models;
 }
+
+/** Phrase gesture samples (built from Slovo by `npm run build:phrases`), for talk mode only. */
+const phraseFiles = import.meta.glob<SampleFile>("./phraseSamples/*.json", { import: "default" });
+
+let talkModels: Promise<Knn | null> | null = null;
+
+/**
+ * kNN for talk mode: every letter AND every phrase gesture, with the same augmentation as the letters.
+ * Lessons keep `loadLetterModels` — phrases never enter a lesson.
+ */
+export function loadTalkModels(): Promise<Knn | null> {
+  talkModels ??= Promise.all([...Object.values(files), ...Object.values(phraseFiles)].map((load) => load())).then(
+    (sampleFiles) => {
+      const random = seededRandom(AUGMENT_SEED);
+      const augmented = sampleFiles.flatMap((f) =>
+        f.frames.flatMap((frame) => augmentFrame(frame, random).map((vector) => ({ label: f.letter, vector }))),
+      );
+      return augmented.length > 0 ? createKnn(augmented) : null;
+    },
+    // Broken files: talk falls back to the rules alone, like a lesson.
+    () => null,
+  );
+  return talkModels;
+}

@@ -11,6 +11,7 @@ import { navigate, paths } from "../router";
 import { useGestureCommands } from "../store/gestureCommands";
 import { LetterCard } from "./letters/LetterCard";
 import { LetterLive } from "./letters/LetterLive";
+import { PhrasesTab } from "./letters/PhrasesTab";
 import c from "./letters/Letters.module.css";
 
 const MARKS_KEY = "gesturingo.letterMarks";
@@ -52,6 +53,7 @@ export function Letters() {
   const t = strings.lettersPage;
   const [marks, setMarks] = useState<Marks>(loadMarks);
   const [live, setLive] = useState<string | null>(null);
+  const [tab, setTab] = useState<"letters" | "phrases">("letters");
   const [exportText, setExportText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
@@ -107,14 +109,31 @@ export function Letters() {
           <p className={c.intro}>{t.intro}</p>
         </div>
         <div className={c.headActions}>
-          <strong>{t.progress(done, LETTERS.length)}</strong>
-          <GestureButton variant="primary" className={c.small} onClick={openExport}>
-            {t.export}
-          </GestureButton>
+          {(["letters", "phrases"] as const).map((id) => (
+            <GestureButton
+              key={id}
+              variant={tab === id ? "primary" : "secondary"}
+              className={c.small}
+              aria-pressed={tab === id}
+              onClick={() => setTab(id)}
+            >
+              {t.tabs[id]}
+            </GestureButton>
+          ))}
         </div>
+        {tab === "letters" && (
+          <div className={c.headActions}>
+            <strong>{t.progress(done, LETTERS.length)}</strong>
+            <GestureButton variant="primary" className={c.small} onClick={openExport}>
+              {t.export}
+            </GestureButton>
+          </div>
+        )}
       </header>
 
-      {exportText !== null && (
+      {tab === "phrases" && <PhrasesTab />}
+
+      {tab === "letters" && exportText !== null && (
         <section className={c.export} aria-label={t.exportTitle}>
           <p>{t.exportTitle}</p>
           <textarea ref={textRef} readOnly value={exportText} rows={Math.min(16, exportText.split("\n").length)} />
@@ -132,24 +151,28 @@ export function Letters() {
         </section>
       )}
 
-      <div className={c.grid}>
-        {LETTERS.map((spec) => (
-          <LetterCard
-            key={spec.letter}
-            spec={spec}
-            info={LETTER_BUILD_INFO[spec.letter]}
-            verified={marks[spec.letter] ?? false}
-            onToggleVerified={() => toggle(spec.letter)}
-            onTryLive={() => setLive(spec.letter)}
-          />
-        ))}
-      </div>
+      {tab === "letters" && (
+        <>
+          <div className={c.grid}>
+            {LETTERS.map((spec) => (
+              <LetterCard
+                key={spec.letter}
+                spec={spec}
+                info={LETTER_BUILD_INFO[spec.letter]}
+                verified={marks[spec.letter] ?? false}
+                onToggleVerified={() => toggle(spec.letter)}
+                onTryLive={() => setLive(spec.letter)}
+              />
+            ))}
+          </div>
 
-      <section className={c.unavailable}>
-        <h2>{t.unavailableTitle}</h2>
-        <p>{t.dynamic(DYNAMIC_LETTERS.join(" · "))}</p>
-        <p>{t.excluded(EXCLUDED_LETTERS.join(" · "))}</p>
-      </section>
+          <section className={c.unavailable}>
+            <h2>{t.unavailableTitle}</h2>
+            <p>{t.dynamic(DYNAMIC_LETTERS.join(" · "))}</p>
+            <p>{t.excluded(EXCLUDED_LETTERS.join(" · "))}</p>
+          </section>
+        </>
+      )}
     </main>
   );
 }

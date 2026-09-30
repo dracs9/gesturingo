@@ -53,6 +53,8 @@ export interface OpenReaderOptions {
   specs: readonly LetterSpec[];
   getSpec(letter: string): LetterSpec | undefined;
   knn?: Knn | null;
+  /** How long a label must be held to count (phrases are held longer than letters). */
+  holdMsFor?(label: string): number;
 }
 
 export interface OpenReader {
@@ -73,10 +75,15 @@ export const RELEASE_HINT_CODE = "talk.release";
  * per-frame decision → majority vote → 0.6 s hold → letter typed. Never types while unsure:
  * "almost" and "ambiguous" only produce hints.
  */
-export function createOpenReader({ specs, getSpec, knn: initialKnn = null }: OpenReaderOptions): OpenReader {
+export function createOpenReader({
+  specs,
+  getSpec,
+  knn: initialKnn = null,
+  holdMsFor = () => TALK_LETTER_HOLD_MS,
+}: OpenReaderOptions): OpenReader {
   let knn = initialKnn;
   const vote = createMajorityVote<string>(TALK_VOTE_WINDOW, TALK_VOTE_SHARE);
-  const hold = createHold(TALK_LETTER_HOLD_MS, LETTER_HOLD_GRACE_MS);
+  let hold = createHold(TALK_LETTER_HOLD_MS, LETTER_HOLD_GRACE_MS);
   let hints = createHintEngine();
   const hintLog: HintLogEntry[] = [];
   /** Which letter a hint code was last about (shape hints do not name their letter). */
@@ -154,7 +161,7 @@ export function createOpenReader({ specs, getSpec, knn: initialKnn = null }: Ope
 
       trackRelease(acceptLabel, t);
       if (acceptLabel !== holdLabel) {
-        hold.reset();
+        hold = createHold(acceptLabel ? holdMsFor(acceptLabel) : TALK_LETTER_HOLD_MS, LETTER_HOLD_GRACE_MS);
         holdLabel = acceptLabel;
       }
       const { progress, fired } = hold.update(acceptLabel !== null && acceptLabel !== blocked, t);

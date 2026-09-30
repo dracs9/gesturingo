@@ -80,7 +80,7 @@ export const CandidateCard = forwardRef<HTMLDivElement, CandidateCardProps>(func
       {cancelled && <p className={s.note}>{t.cancelled}</p>}
       <div className={s.row}>
         <HoldRing ref={ringRef} className={s.ring}>
-          <span className={s.letter}>{label ?? "?"}</span>
+          <span className={label && label.length > 2 ? `${s.letter} ${s.word}` : s.letter}>{label ?? "?"}</span>
         </HoldRing>
         <p className={s.state} role="status">
           <span className={s.stateIcon} aria-hidden="true">

@@ -1,0 +1,34 @@
+# Candidate phrases for talk mode (docs/TRANSLATOR_SPEC.md §9): labels exactly as in Slovo's annotations.csv.
+# Only one-handed, static gestures with the hand visible in ≥ 80% of frames reach the app (see npm run find:phrases).
+# Not in Slovo: спасибо, нет, пожалуйста, извините, не понимаю, повторите, здравствуйте.
+
+# Greeting / goodbye
+привет!
+пока
+# Yes / no / evaluation
+да
+не
+хорошо
+плохо
+# Help and politeness
+помочь
+благодарность
+# People
+я
+ты
+мы
+вы
+# Needs
+хотеть
+знать
+есть
+пить
+вода
+спать
+ждать
+# Feelings and questions
+рад
+что
+когда
+сколько
+имя

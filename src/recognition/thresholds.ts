@@ -128,6 +128,8 @@ export const GHOST_ANGLE_TOLERANCE = 20;
 export const TALK_VOTE_WINDOW = 8;
 export const TALK_VOTE_SHARE = 0.6;
 export const TALK_LETTER_HOLD_MS = 600;
+/** A static phrase gesture must hold longer than a letter (docs/TRANSLATOR_SPEC.md §4.2). */
+export const TALK_PHRASE_HOLD_MS = 800;
 /**
  * Accept only if the 2nd closest letter is at least this many times further than the 1st
  * (leave-one-out on the samples: 1.15 → ~74% of frames accepted, ~1.4% accepted as a wrong letter).

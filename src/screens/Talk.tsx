@@ -13,13 +13,20 @@ import { SuggestionBar } from "../components/SuggestionBar";
 import { TalkLegend } from "../components/TalkLegend";
 import { hintText } from "../data/hintText";
 import { getLetterSpec, LETTERS } from "../data/letters";
-import { loadLetterModels } from "../data/samples";
+import { getPhraseByLabel, isPhraseLabel, labelText, PHRASE_HANDSHAPES } from "../data/phrases";
+import { loadTalkModels } from "../data/samples";
 import { strings } from "../data/strings.ru";
 import { createCommandZones } from "../recognition/control/commandZones";
 import { isOpenPalm } from "../recognition/control/poses";
 import { createOpenReader, type Ambiguity, type ReaderUpdate } from "../recognition/open/openReader";
 import { onFrame } from "../recognition/pipeline";
-import { POSE_GRACE_MS, TALK_CANCEL_PALM_MS, TALK_EXIT_PALM_MS } from "../recognition/thresholds";
+import {
+  POSE_GRACE_MS,
+  TALK_CANCEL_PALM_MS,
+  TALK_EXIT_PALM_MS,
+  TALK_LETTER_HOLD_MS,
+  TALK_PHRASE_HOLD_MS,
+} from "../recognition/thresholds";
 import { navigate, paths } from "../router";
 import { setHighlight, setSkeletonTone } from "../store/highlight";
 import { clearTalkStats, setTalkStats } from "../store/talkStats";
@@ -35,16 +42,21 @@ import t from "./Talk.module.css";
 /** How long «Отменено» stays under the card. */
 const CANCELLED_NOTE_MS = 2500;
 
+/** Everything the camera reads in talk mode: static letters and static phrase gestures (T4). */
+const TALK_SPECS = [...LETTERS, ...PHRASE_HANDSHAPES];
+const getTalkSpec = (label: string) => getLetterSpec(label) ?? getPhraseByLabel(label)?.handshape;
+const holdMsFor = (label: string) => (isPhraseLabel(label) ? TALK_PHRASE_HOLD_MS : TALK_LETTER_HOLD_MS);
+
 const EMPTY_READING: ReadingView = { state: "noHand", label: null, hint: null, ambiguity: null };
 
 function readingView(u: ReaderUpdate): ReadingView {
   const amb = u.ambiguity;
   return {
     state: u.state,
-    label: u.label,
+    label: u.label && labelText(u.label),
     // The «А или Б?» card already explains the difference: no second banner.
     hint: amb ? null : hintText(u.hint),
-    ambiguity: amb ? { a: amb.labels[0], b: amb.labels[1], advice: hintText(amb.hint) } : null,
+    ambiguity: amb ? { a: labelText(amb.labels[0]), b: labelText(amb.labels[1]), advice: hintText(amb.hint) } : null,
   };
 }
 
@@ -54,6 +66,7 @@ function readingView(u: ReaderUpdate): ReadingView {
  * "almost" / «А или Б?» with a concrete hint. Commands are zones at the top of the frame.
  * The hearing person answers by voice (or typing): subtitles over the video + the feed (T2).
  * Up to 3 dictionary words complete the typed prefix; the «Пробел» zone inserts the first one (T3).
+ * A static phrase gesture from Slovo («Я», «Что»…) adds its word and goes straight to confirmation (T4).
  */
 export function Talk() {
   const setDockHidden = useUi((st) => st.setDockHidden);
@@ -61,7 +74,7 @@ export function Talk() {
   const setSpeech = useConversation((st) => st.setSpeech);
   const logHints = useConversation((st) => st.logHints);
 
-  const [reader] = useState(() => createOpenReader({ specs: LETTERS, getSpec: getLetterSpec }));
+  const [reader] = useState(() => createOpenReader({ specs: TALK_SPECS, getSpec: getTalkSpec, holdMsFor }));
   const [composer] = useState(createComposer);
   const [confirmation] = useState(() => createConfirmation());
   const [zones] = useState(() => createCommandZones());
@@ -87,8 +100,8 @@ export function Talk() {
 
   useEffect(() => {
     let cancelled = false;
-    void loadLetterModels().then((m) => {
-      if (!cancelled) reader.setKnn(m.knn);
+    void loadTalkModels().then((knn) => {
+      if (!cancelled) reader.setKnn(knn);
     });
     return () => {
       cancelled = true;
@@ -136,6 +149,17 @@ export function Talk() {
       const words = composer.take();
       syncDraft();
       if (words.length > 0) setCandidate(confirmation.propose(words, now));
+    };
+    // A letter is typed; a phrase gesture adds its whole word and goes straight to confirmation (§4.3).
+    const typeLabel = (label: string, now: number) => {
+      const phrase = getPhraseByLabel(label);
+      if (!phrase) {
+        composer.addLetter(label);
+        return;
+      }
+      composer.space();
+      composer.complete(phrase.text.toLocaleUpperCase("ru-RU"));
+      propose(now);
     };
     const say = (c: Candidate) => {
       const id = addMessage({ side: "signer", text: c.text, source: "dactyl", timestamp: Date.now(), speech: "speaking" });
@@ -189,7 +213,7 @@ export function Talk() {
         if (ambiguity && (z.fired === "delete" || z.fired === "say")) {
           // «А или Б?»: the left zone picks the first letter, the right one the second.
           const letter = ambiguity.labels[z.fired === "delete" ? 0 : 1];
-          composer.addLetter(letter);
+          typeLabel(letter, now);
           reader.resolve(letter);
           playSound("click");
         } else if (z.fired === "delete") {
@@ -209,7 +233,7 @@ export function Talk() {
       const u = reader.update(obs, now, { suppressed: z.active !== null || confirmation.candidate !== null });
       ambiguity = u.ambiguity;
       if (u.accepted) {
-        composer.addLetter(u.accepted);
+        typeLabel(u.accepted, now);
         playSound("click");
         syncDraft();
       }

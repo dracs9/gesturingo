@@ -131,4 +131,17 @@ describe("open reader (talk mode)", () => {
     const { updates } = run(reader, null, 0, 2000);
     expect(updates.every((u) => u.hint === null && u.tone === null)).toBe(true);
   });
+
+  it("holds some labels longer (phrases: 0.8 s)", () => {
+    const reader = createOpenReader({
+      specs: SPECS,
+      getSpec: (l) => SPECS.find((s) => s.letter === l),
+      knn,
+      holdMsFor: (label) => (label === "1" ? 800 : 600),
+    });
+    const { updates } = run(reader, obs(ONE_HAND), 0, 1500);
+    const at = updates.findIndex((u) => u.accepted) * FRAME_MS;
+    expect(at).toBeGreaterThanOrEqual(800);
+    expect(at).toBeLessThan(1200);
+  });
 });
