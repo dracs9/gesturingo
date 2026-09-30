@@ -268,6 +268,17 @@ export const strings = {
     speaking: "Говорю…",
     noVoice: "Озвучка недоступна — попробуйте другой браузер или устройство",
     muted: "Звук выключен",
+    // Calibration (§4.5): where this person signs, for position hints.
+    calibration: {
+      text: "Покажите открытую ладонь на уровне груди и задержите",
+      note: "Без калибровки продолжим через",
+      seconds: "с",
+      skip: "Пропустить калибровку",
+      done: "Калибровка ✓ — подсказки положения включены",
+      skipped: "Без калибровки — подсказки положения выключены",
+      redo: "Откалибровать заново",
+      start: "Откалибровать",
+    },
     // Speech → subtitles for the hearing person (§6). They may use the mouse / touch.
     stt: {
       panelTitle: "Для собеседника",
@@ -365,6 +376,8 @@ export const strings = {
       data: (videos: number, signers: number, samples: number, visible: number) =>
         `Видео: ${videos} · авторов: ${signers} · образцов: ${samples} · рука видна: ${visible}%`,
       markVerified: "Сверено со словарём РЖЯ",
+      palm: (facing: string, share: number) => `Ладонь: ${facing} (${share}%) — правило`,
+      noPalm: "Ладонь: без правила (люди держат по-разному)",
       exportTitle: "Вставь это значение в PHRASE_OVERRIDES (src/data/phrases.overrides.ts)",
       none: "Статичных фраз не найдено — см. отчёт npm run find:phrases",
       rejectedTitle: (n: number) => `Не вошли (${n})`,
@@ -451,6 +464,13 @@ export const strings = {
     // Letter confusion / ghost hand
     "ghost.match": "Сверь руку с образцом в карточке буквы",
     "confusion.looksLike": "Получилась похожая буква",
+    // Talk mode: position relative to the calibrated place (relative words, no centimetres)
+    "position.up": "Поднимите руку чуть выше",
+    "position.down": "Опустите руку чуть ниже",
+    "position.left": "Сдвиньте руку чуть левее",
+    "position.right": "Сдвиньте руку чуть правее",
+    "position.closer": "Поднесите руку чуть ближе к камере",
+    "position.farther": "Отодвиньте руку чуть дальше от камеры",
     // Talk mode
     "talk.ambiguous": "Камера не уверена, какая это буква",
     "talk.release": "Опустите руку или смените форму, чтобы повторить букву",

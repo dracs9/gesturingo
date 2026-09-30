@@ -1,4 +1,4 @@
-import { FINGERS, type Finger, type FingerState } from "../../features";
+import { FINGERS, type Finger, type FingerState, type PalmFacing } from "../../features";
 import { fingerHintCode, touchHintCode } from "../hintCodes";
 import type { LetterExtra, LetterSpec } from "../spec";
 import { FINGER_PAIRS, type LetterStats } from "./stats";
@@ -53,4 +53,22 @@ export function draftSpec(letter: string, stats: LetterStats, minShare = RULE_MI
     reference: `references/${letter}.json`,
   };
   return { spec, freeFingers, impliedTouches };
+}
+
+const PALM_HINTS: Record<PalmFacing, string> = {
+  camera: "palm.faceCamera",
+  side: "palm.turnSide",
+  away: "palm.turnAway",
+};
+
+/**
+ * A palm-orientation rule from data filmed from the front, like the app's camera (Slovo videos):
+ * the dominant facing if ≥ `minShare` of the samples agree. Not for the letter photos — they are shot
+ * from any side, so their palm statistics say nothing about the sign.
+ */
+export function palmFacingRule(stats: LetterStats, minShare = RULE_MIN_SHARE): LetterExtra | null {
+  const [value, share] = (Object.entries(stats.palmFacing) as [PalmFacing, number][]).reduce((best, cur) =>
+    cur[1] > best[1] ? cur : best,
+  );
+  return share >= minShare ? { type: "palmFacing", value, hintCode: PALM_HINTS[value] } : null;
 }

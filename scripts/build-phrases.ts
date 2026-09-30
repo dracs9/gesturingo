@@ -14,7 +14,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { FINGERS } from "../src/recognition/features";
 import { capPerSigner, mirrorVector } from "../src/recognition/letters/build/dataset";
-import { draftSpec } from "../src/recognition/letters/build/draft";
+import { draftSpec, palmFacingRule } from "../src/recognition/letters/build/draft";
 import { confusedWith, crossValidate } from "../src/recognition/letters/build/evaluate";
 import { resolveOrientation } from "../src/recognition/letters/build/orientation";
 import { letterStats } from "../src/recognition/letters/build/stats";
@@ -121,6 +121,9 @@ function main(): void {
     const vectors = samples.map((s) => s.vector);
     const stats = letterStats(vectors);
     const draft = draftSpec(label, stats);
+    // Slovo is filmed from the front like the app's camera: the palm orientation is part of the sign.
+    const palm = palmFacingRule(stats);
+    if (palm) draft.spec.extra = [...(draft.spec.extra ?? []), palm];
     const ev = cv.perLetter.get(label) ?? { total: 0, correct: 0, mode: "signer" as const };
     const accuracy = ev.total ? ev.correct / ev.total : 0;
     const openPalm = Math.min(...FINGERS.map((f) => stats.fingers[f].states.straight));
@@ -198,7 +201,11 @@ function main(): void {
 
   console.log(`\nВ приложение: ${accepted.length}`);
   for (const { spec, info } of accepted) {
-    const rules = FINGERS.map((f) => `${f}:${spec.handshape?.fingers[f]?.state ?? "—"}`).join(" ");
+    const palmRule = spec.handshape?.extra?.find((e) => e.type === "palmFacing");
+    const rules = [
+      ...FINGERS.map((f) => `${f}:${spec.handshape?.fingers[f]?.state ?? "—"}`),
+      `palm:${palmRule && "value" in palmRule ? palmRule.value : "—"}`,
+    ].join(" ");
     console.log(
       `  ${spec.text.padEnd(10)} образцов ${String(info.samples).padStart(4)}, авторов ${info.signers}, точность ${pct(info.accuracy)}, ` +
         `похожие: ${spec.confusedWith?.join(" ") || "—"}\n    ${rules}`,

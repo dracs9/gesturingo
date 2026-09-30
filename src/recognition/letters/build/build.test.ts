@@ -10,7 +10,7 @@ import {
   serializeRawSamples,
   type RawSample,
 } from "./dataset";
-import { draftSpec, RULE_MIN_SHARE } from "./draft";
+import { draftSpec, palmFacingRule, RULE_MIN_SHARE } from "./draft";
 import { confusedWith, crossValidate, type EvalSample } from "./evaluate";
 import { resolveOrientation } from "./orientation";
 import { letterStats } from "./stats";
@@ -161,5 +161,15 @@ describe("crossValidate + confusedWith", () => {
     );
     expect(confusedWith(cv, "А")).toEqual(["С"]);
     expect(confusedWith(cv, "В")).toEqual([]);
+  });
+});
+
+describe("palmFacingRule (front-view data only)", () => {
+  it("drafts the palm orientation when ≥ 80% agree, else nothing", () => {
+    const facing = (away: number) =>
+      letterStats(Array.from({ length: 10 }, (_, i) => vector({ yaw: i < away ? 180 : 0 })));
+    expect(palmFacingRule(facing(1))).toEqual({ type: "palmFacing", value: "camera", hintCode: "palm.faceCamera" });
+    expect(palmFacingRule(facing(9))).toEqual({ type: "palmFacing", value: "away", hintCode: "palm.turnAway" });
+    expect(palmFacingRule(facing(4))).toBeNull();
   });
 });

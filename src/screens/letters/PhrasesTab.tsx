@@ -72,6 +72,7 @@ export function PhrasesTab() {
         {PHRASES.map((p) => {
           const info = PHRASE_BUILD_INFO[p.id];
           const verified = marks[p.id] === true;
+          const palm = p.handshape?.extra?.find((e) => e.type === "palmFacing");
           return (
             <article key={p.id} className={`${c.card} ${verified ? c.cardVerified : ""}`} aria-label={p.text}>
               <header className={c.cardHead}>
@@ -118,6 +119,11 @@ export function PhrasesTab() {
                   })}
                 </tbody>
               </table>
+              <p className={c.meta}>
+                {palm?.type === "palmFacing" && info
+                  ? t.palm(strings.palmFacing[palm.value].toLowerCase(), pct(info.stats.palmFacing[palm.value]))
+                  : t.noPalm}
+              </p>
               <p className={c.meta}>
                 {p.confusedWith?.length ? tl.similar(p.confusedWith.map(labelText).join(" · ")) : tl.noSimilar}
               </p>

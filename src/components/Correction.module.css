@@ -1,0 +1,142 @@
+/* Talk-mode overlays over the video: calibration, target zone, correction arrows (docs/TRANSLATOR_SPEC.md §4.5, §7.2). */
+
+.calibration {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+/* Where "chest level" roughly is: the lower middle of a selfie frame. */
+.chestGuide {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: 34%;
+  height: 34%;
+  border: 3px dashed rgb(255 255 255 / 0.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.calibrationCard {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  max-width: 80%;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  background: rgb(0 0 0 / 0.65);
+  color: #fff;
+  text-align: center;
+  align-self: start;
+  margin-top: 6%;
+}
+
+.calibrationRing {
+  --ring-size: 72px;
+}
+
+.calibrationIcon {
+  font-size: 2rem;
+}
+
+.calibrationTitle {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.4vw, 1.5rem);
+  font-weight: 800;
+}
+
+.calibrationNote {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.target {
+  position: absolute;
+  z-index: 1;
+  border: 3px dashed rgb(255 255 255 / 0.35);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+
+.targetActive {
+  border-color: var(--mark);
+}
+
+.correction {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.arrowSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.arrowLine {
+  stroke: var(--mark);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 14 10;
+  animation: flow 0.8s linear infinite;
+}
+
+.arrowHead {
+  fill: var(--mark);
+}
+
+.rotate {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  animation: turn 1.6s ease-in-out infinite;
+}
+
+.rotatePath {
+  fill: none;
+  stroke: var(--mark);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes turn {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(-20deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(20deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrowLine,
+  .rotate {
+    animation: none;
+  }
+
+  .target {
+    transition: none;
+  }
+}

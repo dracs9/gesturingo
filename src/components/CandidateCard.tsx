@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { strings } from "../data/strings.ru";
+import type { Visual } from "../recognition/errors/translatorHints";
 import type { ReaderState } from "../recognition/open/openReader";
 import type { Candidate } from "../talk/composer";
 import s from "./CandidateCard.module.css";
@@ -12,6 +13,8 @@ export interface ReadingView {
   hint: string | null;
   /** «А или Б?» choice: the two letters and the key difference. */
   ambiguity: { a: string; b: string; advice: string | null } | null;
+  /** The current hint has an arrow over the video (position / palm rotation). */
+  visual: Visual;
 }
 
 interface CandidateCardProps {

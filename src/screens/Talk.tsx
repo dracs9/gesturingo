@@ -1,22 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { playSound } from "../audio/sounds";
+import { CalibrationOverlay } from "../components/CalibrationOverlay";
 import { CameraView } from "../components/CameraView";
 import { CandidateCard, type ReadingView } from "../components/CandidateCard";
 import { CommandZones, type ZoneLabel } from "../components/CommandZones";
 import { ComposerBar } from "../components/ComposerBar";
 import { ConversationFeed } from "../components/ConversationFeed";
+import { CorrectionArrow } from "../components/CorrectionArrow";
 import { HoldRing } from "../components/HoldRing";
 import { ListenerPanel } from "../components/ListenerPanel";
+import { paintCorrection } from "../components/paintCorrection";
 import { paintZones } from "../components/paintZones";
 import { SubtitleOverlay } from "../components/SubtitleOverlay";
 import { SuggestionBar } from "../components/SuggestionBar";
 import { TalkLegend } from "../components/TalkLegend";
+import { TargetZone } from "../components/TargetZone";
 import { hintText } from "../data/hintText";
 import { getLetterSpec, LETTERS } from "../data/letters";
 import { getPhraseByLabel, isPhraseLabel, labelText, PHRASE_HANDSHAPES } from "../data/phrases";
 import { loadTalkModels } from "../data/samples";
 import { strings } from "../data/strings.ru";
+import { createCalibrator, palmCenter, type Calibrator } from "../recognition/control/calibration";
 import { createCommandZones } from "../recognition/control/commandZones";
+import { hintVisual, positionErrors } from "../recognition/errors/translatorHints";
 import { isOpenPalm } from "../recognition/control/poses";
 import { createOpenReader, type Ambiguity, type ReaderUpdate } from "../recognition/open/openReader";
 import { onFrame } from "../recognition/pipeline";
@@ -28,6 +34,7 @@ import {
   TALK_PHRASE_HOLD_MS,
 } from "../recognition/thresholds";
 import { navigate, paths } from "../router";
+import { useCalibration } from "../store/calibration";
 import { setHighlight, setSkeletonTone } from "../store/highlight";
 import { clearTalkStats, setTalkStats } from "../store/talkStats";
 import type { ZoneId } from "../recognition/control/commandZones";
@@ -47,7 +54,10 @@ const TALK_SPECS = [...LETTERS, ...PHRASE_HANDSHAPES];
 const getTalkSpec = (label: string) => getLetterSpec(label) ?? getPhraseByLabel(label)?.handshape;
 const holdMsFor = (label: string) => (isPhraseLabel(label) ? TALK_PHRASE_HOLD_MS : TALK_LETTER_HOLD_MS);
 
-const EMPTY_READING: ReadingView = { state: "noHand", label: null, hint: null, ambiguity: null };
+const EMPTY_READING: ReadingView = { state: "noHand", label: null, hint: null, ambiguity: null, visual: null };
+
+/** Raw camera point → percent of the mirrored video as the user sees it. */
+const toDisplay = (p: { x: number; y: number }) => ({ x: (1 - p.x) * 100, y: p.y * 100 });
 
 function readingView(u: ReaderUpdate): ReadingView {
   const amb = u.ambiguity;
@@ -57,6 +67,7 @@ function readingView(u: ReaderUpdate): ReadingView {
     // The «А или Б?» card already explains the difference: no second banner.
     hint: amb ? null : hintText(u.hint),
     ambiguity: amb ? { a: labelText(amb.labels[0]), b: labelText(amb.labels[1]), advice: hintText(amb.hint) } : null,
+    visual: amb ? null : hintVisual(u.hint?.hintCode),
   };
 }
 
@@ -67,6 +78,8 @@ function readingView(u: ReaderUpdate): ReadingView {
  * The hearing person answers by voice (or typing): subtitles over the video + the feed (T2).
  * Up to 3 dictionary words complete the typed prefix; the «Пробел» zone inserts the first one (T3).
  * A static phrase gesture from Slovo («Я», «Что»…) adds its word and goes straight to confirmation (T4).
+ * First an open palm at chest level calibrates the signing place: hints then say «чуть выше» with an
+ * arrow to a dashed target zone, and a palm-orientation hint gets a rotation arrow (T5).
  */
 export function Talk() {
   const setDockHidden = useUi((st) => st.setDockHidden);
@@ -79,6 +92,16 @@ export function Talk() {
   const [confirmation] = useState(() => createConfirmation());
   const [zones] = useState(() => createCommandZones());
   const listener = useListener();
+  const phase = useCalibration((st) => st.phase);
+  const calibration = useCalibration((st) => st.calibration);
+  const finishCalibration = useCalibration((st) => st.finish);
+  const skipCalibration = useCalibration((st) => st.skip);
+  const restartCalibration = useCalibration((st) => st.restart);
+  // The frame loop reads the calibration without re-subscribing.
+  const calRef = useRef({ phase, calibration });
+  useEffect(() => {
+    calRef.current = { phase, calibration };
+  }, [phase, calibration]);
 
   const [draft, setDraft] = useState<{ words: readonly string[]; current: string }>({ words: [], current: "" });
   const [candidate, setCandidate] = useState<Candidate | null>(null);
@@ -89,6 +112,9 @@ export function Talk() {
   const ringRef = useRef<HTMLDivElement>(null);
   const zonesRef = useRef<HTMLDivElement>(null);
   const palmRef = useRef<HTMLDivElement>(null);
+  const calibrationRingRef = useRef<HTMLDivElement>(null);
+  const calibrationLeftRef = useRef<HTMLSpanElement>(null);
+  const correctionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setDockHidden(true);
@@ -172,11 +198,40 @@ export function Talk() {
     let ambiguity: Ambiguity | null = null;
     let shown = JSON.stringify(EMPTY_READING);
     let left = false;
+    let calibrator: Calibrator | null = null;
     const loggedFrom = reader.hintLog.length;
 
     const unsubscribe = onFrame((obs) => {
       if (left) return;
       const now = performance.now();
+
+      // 0. Calibration first (§4.5): only the open palm counts — no commands, nothing typed.
+      const cal = calRef.current;
+      if (cal.phase === "pending") {
+        calibrator ??= createCalibrator();
+        const c = calibrator.update(obs, now);
+        calibrationRingRef.current?.style.setProperty("--progress", c.progress.toFixed(3));
+        if (calibrationLeftRef.current) calibrationLeftRef.current.textContent = String(Math.ceil(c.remainingMs / 1000));
+        if (c.status === "done" && c.result) {
+          calRef.current = { phase: "done", calibration: c.result };
+          finishCalibration(c.result);
+          playSound("success");
+          // The palm is still up: it must come down before it can mean «выход».
+          palmSince = now;
+          palmLast = now;
+          palmUsed = true;
+        } else if (c.status === "failed") {
+          calRef.current = { phase: "skipped", calibration: null };
+          skipCalibration();
+        }
+        paintZones(zonesRef.current, null);
+        paintCorrection(correctionRef.current, null, null, null);
+        palmRef.current?.toggleAttribute("data-active", false);
+        setHighlight(null);
+        setSkeletonTone(obs ? "neutral" : null);
+        return;
+      }
+      calibrator = null;
 
       // 1. Open palm: cancels the candidate (1.2 s) or, without one, leaves the screen (2 s).
       if (obs !== null && isOpenPalm(obs)) {
@@ -230,7 +285,13 @@ export function Talk() {
       }
 
       // 3. Letters: nothing is typed while the hand gives a command or a phrase waits.
-      const u = reader.update(obs, now, { suppressed: z.active !== null || confirmation.candidate !== null });
+      // After calibration, a hand far from the signing place gets «чуть выше» before any shape hint.
+      const extraErrors =
+        cal.calibration && obs && !confirmation.candidate ? positionErrors(obs.frame, cal.calibration) : [];
+      const u = reader.update(obs, now, {
+        suppressed: z.active !== null || confirmation.candidate !== null,
+        extraErrors,
+      });
       ambiguity = u.ambiguity;
       if (u.accepted) {
         typeLabel(u.accepted, now);
@@ -252,6 +313,12 @@ export function Talk() {
       }
 
       const waiting = confirmation.candidate !== null;
+      paintCorrection(
+        correctionRef.current,
+        waiting || u.ambiguity ? null : hintVisual(u.hint?.hintCode),
+        obs ? toDisplay(palmCenter(obs.frame)) : null,
+        cal.calibration ? toDisplay(cal.calibration.center) : null,
+      );
       setHighlight(waiting ? null : u.hint?.landmarkIds);
       setSkeletonTone(obs ? (waiting ? "neutral" : u.tone) : null);
       setTalkStats(u);
@@ -271,7 +338,7 @@ export function Talk() {
       clearTalkStats();
       logHints(reader.hintLog.slice(loggedFrom));
     };
-  }, [reader, composer, confirmation, zones, addMessage, setSpeech, logHints]);
+  }, [reader, composer, confirmation, zones, addMessage, setSpeech, logHints, finishCalibration, skipCalibration]);
 
   const amb = reading.ambiguity;
   const zoneLabels: Partial<Record<ZoneId, ZoneLabel>> = {};
@@ -285,14 +352,37 @@ export function Talk() {
     <main className={t.layout} aria-label={strings.talk.title}>
       <section className={t.camera}>
         <CameraView variant="large">
-          <CommandZones ref={zonesRef} labels={zoneLabels} />
+          {calibration && phase === "done" && <TargetZone calibration={calibration} active={reading.visual === "move"} />}
+          <CorrectionArrow ref={correctionRef} />
+          {phase !== "pending" && <CommandZones ref={zonesRef} labels={zoneLabels} />}
           <div ref={palmRef} className={t.palm} aria-hidden="true">
             <HoldRing className={t.palmRing}>
               <span className={t.palmIcon}>✋</span>
             </HoldRing>
           </div>
           <SubtitleOverlay subtitle={listener.subtitle} />
+          {phase === "pending" && <CalibrationOverlay ringRef={calibrationRingRef} remainingRef={calibrationLeftRef} />}
         </CameraView>
+        <p className={t.calibrationLine}>
+          <span>
+            {phase === "done"
+              ? strings.talk.calibration.done
+              : phase === "skipped"
+                ? strings.talk.calibration.skipped
+                : strings.talk.calibration.text}
+          </span>
+          <button
+            type="button"
+            className={t.linkButton}
+            onClick={phase === "pending" ? skipCalibration : restartCalibration}
+          >
+            {phase === "pending"
+              ? strings.talk.calibration.skip
+              : phase === "done"
+                ? strings.talk.calibration.redo
+                : strings.talk.calibration.start}
+          </button>
+        </p>
         <p className={t.frame}>{strings.talk.frame}</p>
       </section>
 

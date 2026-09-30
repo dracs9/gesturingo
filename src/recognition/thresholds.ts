@@ -153,6 +153,19 @@ export const TALK_ZONE_HOLD_MS = 800;
 export const TALK_CANCEL_PALM_MS = 1200;
 /** … or, without a candidate, leaves the screen after this long. */
 export const TALK_EXIT_PALM_MS = 2000;
+// --- Talk: calibration and position hints (docs/TRANSLATOR_SPEC.md §4.5, §7.2) ---
+/** Calibration: an open palm at chest level held steady this long … */
+export const TALK_CALIBRATION_HOLD_MS = 2500;
+/** … within this time, otherwise talk goes on without position hints. */
+export const TALK_CALIBRATION_TIMEOUT_MS = 10000;
+/** "Steady" while the palm centre stays within this many palm sizes of where the hold began. */
+export const TALK_CALIBRATION_MAX_DRIFT = 0.5;
+/** Position hints only when the palm centre is further than this from the calibrated place (palm sizes) … */
+export const TALK_POSITION_TOLERANCE_X = 2.5;
+export const TALK_POSITION_TOLERANCE_Y = 2;
+/** … or the hand looks this much bigger / smaller than at calibration (closer / further from the camera). */
+export const TALK_SIZE_RATIO_MAX = 1.6;
+export const TALK_SIZE_RATIO_MIN = 0.6;
 /** The hearing person's final words stay as subtitles over the video this long (§6). */
 export const TALK_SUBTITLE_MS = 5000;
 /** The «А или Б?» card stays this long (time in a command zone does not count), so a zone can pick one. */

@@ -19,6 +19,34 @@
   font-size: 0.95rem;
 }
 
+.calibrationLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Mouse / touch helper (e.g. for the hearing person): the signer is covered by the timeout. */
+.linkButton {
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.linkButton:focus-visible {
+  outline: 4px solid var(--mark);
+  outline-offset: 2px;
+}
+
 .side {
   display: flex;
   flex-direction: column;

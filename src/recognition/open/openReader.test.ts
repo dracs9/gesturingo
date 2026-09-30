@@ -4,6 +4,7 @@ import { createKnn, type LabeledVector } from "../letters/knn";
 import type { LetterSpec } from "../letters/spec";
 import { flattenPoints } from "../normalize";
 import { buildObservation, type HandObservation } from "../observation";
+import type { HintError } from "../errors/hintEngine";
 import { createOpenReader, type ReaderUpdate } from "./openReader";
 
 const samples = (label: string, hand: SyntheticHandOptions, n = 6): LabeledVector[] =>
@@ -61,7 +62,7 @@ function run(
   o: HandObservation | null,
   from: number,
   ms: number,
-  opts: { suppressed?: boolean } = {},
+  opts: { suppressed?: boolean; extraErrors?: readonly HintError[] } = {},
 ): { updates: ReaderUpdate[]; end: number } {
   const updates: ReaderUpdate[] = [];
   let t = from;
@@ -143,5 +144,17 @@ describe("open reader (talk mode)", () => {
     const at = updates.findIndex((u) => u.accepted) * FRAME_MS;
     expect(at).toBeGreaterThanOrEqual(800);
     expect(at).toBeLessThan(1200);
+  });
+
+  it("puts an extra hint (position) before the shape hints, but never over a recognized letter", () => {
+    const position = { level: "control" as const, hintCode: "position.up", severity: 0.6 };
+    const almost = run(newReader(), obs({ fingers: { ...ONE_HAND.fingers, ring: "half" } }), 0, 2000, {
+      extraErrors: [position],
+    });
+    expect(almost.updates.at(-1)?.hint?.hintCode).toBe("position.up");
+
+    const right = run(newReader(), obs(ONE_HAND), 0, 2000, { extraErrors: [position] });
+    expect(right.updates.some((u) => u.hint?.hintCode === "position.up")).toBe(false);
+    expect(typed(right.updates)).toEqual(["1"]);
   });
 });

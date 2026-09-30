@@ -58,8 +58,16 @@ export interface OpenReaderOptions {
 }
 
 export interface OpenReader {
-  /** `suppressed`: the hand is busy with a command (zone, candidate) — nothing is typed. */
-  update(observation: HandObservation | null, timestamp: number, opts?: { suppressed?: boolean }): ReaderUpdate;
+  /**
+   * `suppressed`: the hand is busy with a command (zone, candidate) — nothing is typed.
+   * `extraErrors`: hints that are not about the shape (e.g. position after calibration); shown while
+   * the letter is not recognized, ranked with the rest by the hint engine.
+   */
+  update(
+    observation: HandObservation | null,
+    timestamp: number,
+    opts?: { suppressed?: boolean; extraErrors?: readonly HintError[] },
+  ): ReaderUpdate;
   setKnn(knn: Knn | null): void;
   /** A letter was picked from the «А или Б?» card: it counts as typed (needs a release to repeat). */
   resolve(letter: string): void;
@@ -130,7 +138,7 @@ export function createOpenReader({
   };
 
   return {
-    update(obs, t, { suppressed = false } = {}) {
+    update(obs, t, { suppressed = false, extraErrors = [] } = {}) {
       const dt = lastT === null ? 0 : Math.max(0, t - lastT);
       lastT = t;
 
@@ -188,6 +196,7 @@ export function createOpenReader({
         // No hand is normal between words: not a hint.
         errors = d.errors.filter((e) => e.hintCode !== "frame.noHand");
       }
+      if (d.kind !== "accept" && extraErrors.length > 0) errors = [...extraErrors, ...errors];
       const { hint, letter } = showHint(errors, t);
 
       if (hint?.hintCode === AMBIGUOUS_HINT_CODE && hint.params?.a && hint.params.b) {
