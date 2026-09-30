@@ -5,7 +5,7 @@ import { FINGERS } from "../recognition/features";
 import { getStats } from "../recognition/pipeline";
 import { getControlStats } from "../store/controlStats";
 import { getLetterStats } from "../store/letterStats";
-import { getTalkStats } from "../store/talkStats";
+import { getMotionStats, getTalkStats } from "../store/talkStats";
 import s from "./DebugPanel.module.css";
 
 const REFRESH_MS = 250;
@@ -80,6 +80,13 @@ export function DebugPanel() {
           `${t.talkTop}: ${talk.top.map((c) => `${c.label} ${c.distance.toFixed(2)}`).join(" · ") || t.none}`,
           `${t.talkMargin}: ${margin}`,
           `${t.talkBlocked}: ${talk.blocked ?? t.none}`,
+        );
+      }
+      const motion = getMotionStats();
+      if (motion) {
+        lines.push(
+          `${t.motion}: ${motion.speed.toFixed(2)}${motion.moving ? " ▶" : ""}`,
+          `DTW: ${motion.top.map((c) => `${c.label} ${c.score.toFixed(2)}`).join(" · ") || t.none}`,
         );
       }
       el.textContent = lines.join("\n");

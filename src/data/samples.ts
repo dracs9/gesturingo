@@ -1,5 +1,6 @@
 import { augmentFrame, seededRandom } from "../recognition/letters/augment";
 import { createKnn, type Knn } from "../recognition/letters/knn";
+import type { DynamicTemplates } from "../recognition/sequence/phraseMatcher";
 import { pickMedoid, type SampleFile } from "../recognition/samples";
 
 const AUGMENT_SEED = 20260930;
@@ -72,4 +73,18 @@ export function loadTalkModels(): Promise<Knn | null> {
     () => null,
   );
   return talkModels;
+}
+
+/** DTW templates of the dynamic phrases (built from Slovo by `npm run build:phrases`), talk mode only. */
+const templateFiles = import.meta.glob<DynamicTemplates>("./phraseTemplates/*.json", { import: "default" });
+
+let dynamicTemplates: Promise<DynamicTemplates[]> | null = null;
+
+/** Templates of the phrases in `labels` (excluded phrases are not loaded); none if the files are broken. */
+export function loadDynamicTemplates(labels: ReadonlySet<string>): Promise<DynamicTemplates[]> {
+  dynamicTemplates ??= Promise.all(Object.values(templateFiles).map((load) => load())).then(
+    (sets) => sets.filter((s) => labels.has(s.label)),
+    () => [],
+  );
+  return dynamicTemplates;
 }

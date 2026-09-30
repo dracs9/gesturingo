@@ -1,4 +1,6 @@
+import { computeFeatures } from "../../features";
 import { flattenPoints, normalizeHand } from "../../normalize";
+import { FRAME_DIM, writeFrameFeatures } from "../../sequence/frameFeatures";
 import { frameDistance, pickMedoid } from "../../samples";
 
 /**
@@ -364,3 +366,31 @@ export function analyzeVideo(video: SlovoVideo): VideoAnalysis {
 }
 
 export { median };
+
+/** Slovo gives no timestamps: the clips are treated as 30 fps (frames without a hand are skipped). */
+export const SLOVO_FPS = 30;
+
+/**
+ * The signing hand of a clip as motion features, exactly like the app writes them per camera frame
+ * (see `writeFrameFeatures`), with timestamps at SLOVO_FPS.
+ */
+export function videoMotionFrames(video: SlovoVideo): { frames: number[][]; times: number[] } {
+  const { width, height } = video;
+  const aspect = height > 0 ? width / height : 1;
+  const { active } = pickActiveHand(video.frames, width, height);
+  const frames = active.map((hand) => {
+    const landmarks = hand.map((p) => ({ x: p.x, y: p.y, z: p.z }));
+    const normalized = normalizeHand({
+      landmarks,
+      handedness: "Right",
+      score: 1,
+      timestamp: 0,
+      videoWidth: width,
+      videoHeight: height,
+    });
+    const out = new Array<number>(FRAME_DIM).fill(0);
+    writeFrameFeatures(computeFeatures(normalized), landmarks, aspect, out);
+    return out;
+  });
+  return { frames, times: frames.map((_, i) => (i * 1000) / SLOVO_FPS) };
+}

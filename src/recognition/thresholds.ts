@@ -179,3 +179,35 @@ export const TALK_ZONES = {
   space: { x0: 0.37, x1: 0.63, y0: 0, y1: 0.3 },
   say: { x0: 0.74, x1: 1, y0: 0, y1: 0.4 },
 } as const;
+
+// --- Talk: dynamic phrases (docs/TRANSLATOR_SPEC.md §4.2, T6) ---
+/** Frames kept for motion segments (~4 s at 30 fps). */
+export const TALK_SEQ_CAPACITY = 120;
+/** Motion starts above this speed and ends below the lower one (hysteresis); units: see `motionSpeed`. */
+export const TALK_MOTION_START = 2.5;
+export const TALK_MOTION_END = 1.2;
+/** A motion ends after this long below the end speed. */
+export const TALK_MOTION_END_MS = 200;
+/** Motions shorter / longer than this are not signs (a twitch; a hand wandering around). */
+export const TALK_MOTION_MIN_MS = 300;
+export const TALK_MOTION_MAX_MS = 3500;
+/** Segments and templates are resampled to this many frames before DTW. */
+export const TALK_DTW_LENGTH = 24;
+/** Sakoe–Chiba band: frames may be matched at most this share of the length apart. */
+export const TALK_DTW_WINDOW = 0.25;
+/**
+ * DTW feature weights, tuned leave-one-signer-out on Slovo (14 one-handed dynamic signs, 1-NN):
+ * finger angles matter most; wrist travel differs a lot between people (weight 0.35 → 50%, 0.2 → ~60%).
+ */
+export const TALK_DTW_SHAPE_WEIGHT = 2;
+export const TALK_DTW_POSITION_WEIGHT = 0.2;
+/** Moving average over this many frames before DTW: MediaPipe jitter would otherwise dominate. */
+export const TALK_DTW_SMOOTHING = 5;
+/** The best phrase must beat the next one by this factor. */
+export const TALK_DTW_MARGIN = 1.1;
+/** Up to this × the phrase's threshold the motion counts as "almost" (speed / direction hints). */
+export const TALK_DTW_ALMOST = 1.5;
+/** After a dynamic phrase, new motions are ignored this long (it must not be added twice). */
+export const TALK_DYNAMIC_COOLDOWN_MS = 1500;
+/** An "almost" hint of a dynamic phrase stays on screen this long. */
+export const TALK_DYNAMIC_HINT_MS = 2500;

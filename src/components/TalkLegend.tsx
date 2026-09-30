@@ -7,6 +7,7 @@ export function TalkLegend() {
   const items = [
     { icon: "⬆️", label: t.zones },
     { icon: "⏸️", label: t.pause },
+    { icon: "〰️", label: t.motion },
     { icon: "✋", label: t.cancel },
     { icon: "🚪", label: t.exit },
   ];

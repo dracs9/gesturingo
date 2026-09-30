@@ -20,7 +20,27 @@ export interface PhraseSpec {
   source: { dataset: "slovo"; label: string; samples: number };
   /** Static phrases: finger rules like a letter, `letter` = `#<id>`. */
   handshape?: LetterSpec;
+  /**
+   * Dynamic phrases: DTW threshold and usual duration. The templates themselves live in
+   * data/phraseTemplates/<id>.json and load lazily with the talk models.
+   */
+  tolerance?: { dtw: number; durationMin: number; durationMax: number };
   confusedWith?: string[];
+}
+
+/** How a dynamic phrase was built — shown on the /letters «Фразы» tab. */
+export interface DynamicBuildInfo {
+  videos: number;
+  signers: number;
+  templates: number;
+  /** Leave-one-signer-out 1-NN accuracy among the dynamic phrases. */
+  accuracy: number;
+  /** Matcher as in the app (templates without the tested signer): accepted right / all its clips … */
+  recall: number;
+  /** … and accepted right / everything accepted as this phrase (other phrases' clips included). */
+  precision: number;
+  /** Wrist path of the main template (palm sizes, image x right / y down) for the preview animation. */
+  path: { x: number; y: number }[];
 }
 
 /** How a generated phrase was built — shown on the /letters «Фразы» tab. */

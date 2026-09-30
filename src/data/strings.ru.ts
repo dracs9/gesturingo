@@ -81,6 +81,7 @@ export const strings = {
     talkTop: "Топ-3",
     talkMargin: "Отрыв d2/d1",
     talkBlocked: "Ждёт смены формы",
+    motion: "Скорость движения",
     none: "—",
   },
 
@@ -260,6 +261,12 @@ export const strings = {
     ambiguousTitle: (a: string, b: string) => `Вы имели в виду «${a}» или «${b}»?`,
     ambiguousAdvice: (b: string, advice: string) => `Для «${b}» — ${advice}`,
     ambiguousPick: "Или выберите: запястье в левый угол — первая, в правый — вторая",
+    // Dynamic phrases (T6): «almost» after a motion.
+    dynamic: {
+      slower: (phrase: string) => `Почти «${phrase}» — покажите чуть медленнее`,
+      faster: (phrase: string) => `Почти «${phrase}» — покажите чуть быстрее`,
+      direction: (phrase: string) => `Почти «${phrase}» — ведите руку по пунктирной линии`,
+    },
     release: (letter: string) => `Чтобы повторить «${letter}», опустите руку или смените форму`,
     feedTitle: "Лента разговора",
     feedEmpty: "Здесь появится разговор. Наберите слово и поднимите руку в «Сказать».",
@@ -302,6 +309,7 @@ export const strings = {
     legend: {
       zones: "Запястье в зону сверху 0,8 с — команда",
       pause: "Рука опущена 1,2 с — пробел, 2 с — сказать",
+      motion: "Жест с движением — покажите целиком и замрите",
       cancel: "Ладонь 1,2 с — отменить фразу",
       exit: "Ладонь 2 с — выйти на карту",
     },
@@ -381,6 +389,16 @@ export const strings = {
       exportTitle: "Вставь это значение в PHRASE_OVERRIDES (src/data/phrases.overrides.ts)",
       none: "Статичных фраз не найдено — см. отчёт npm run find:phrases",
       rejectedTitle: (n: number) => `Не вошли (${n})`,
+      staticTitle: "Статичные (поза руки)",
+      dynamicTitle: "С движением (траектория, DTW)",
+      dynamicIntro:
+        "Сравниваются с шаблонами от разных людей. Цифры — честная проверка: шаблоны без проверяемого человека.",
+      dynamicQuality: (recall: number, confused: number, nn: number) =>
+        `Узнаёт ${recall}% показов новых людей · путает с другими фразами ${confused}% · 1-NN ${nn}%`,
+      dynamicData: (videos: number, signers: number, templates: number) =>
+        `Видео: ${videos} · авторов: ${signers} · шаблонов: ${templates}`,
+      duration: (min: number, max: number) => `Обычная длительность: ${(min / 1000).toFixed(1)}–${(max / 1000).toFixed(1)} с`,
+      pathAlt: (text: string) => `Траектория запястья в жесте «${text}»`,
     },
   },
 

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { SkeletonPreview } from "../../components/SkeletonPreview";
 import { labelText, PHRASES } from "../../data/phrases";
-import { PHRASE_BUILD_INFO, PHRASE_REJECTED } from "../../data/phrases.generated";
+import { DYNAMIC_BUILD_INFO, PHRASE_BUILD_INFO, PHRASE_REJECTED } from "../../data/phrases.generated";
 import { PHRASE_OVERRIDES, type PhraseOverride } from "../../data/phrases.overrides";
 import { strings } from "../../data/strings.ru";
 import { FINGERS } from "../../recognition/features";
 import c from "./Letters.module.css";
+import { PathPreview } from "./PathPreview";
 
 const MARKS_KEY = "gesturingo.phraseMarks";
 const pct = (v: number) => Math.round(v * 100);
@@ -68,8 +69,9 @@ export function PhrasesTab() {
       )}
 
       {PHRASES.length === 0 && <p className={c.muted}>{t.none}</p>}
+      <h2>{t.staticTitle}</h2>
       <div className={c.grid}>
-        {PHRASES.map((p) => {
+        {PHRASES.filter((p) => p.kind === "static").map((p) => {
           const info = PHRASE_BUILD_INFO[p.id];
           const verified = marks[p.id] === true;
           const palm = p.handshape?.extra?.find((e) => e.type === "palmFacing");
@@ -126,6 +128,49 @@ export function PhrasesTab() {
               </p>
               <p className={c.meta}>
                 {p.confusedWith?.length ? tl.similar(p.confusedWith.map(labelText).join(" · ")) : tl.noSimilar}
+              </p>
+              <div className={c.cardActions}>
+                <label className={c.check}>
+                  <input type="checkbox" checked={verified} onChange={() => setMarks((m) => ({ ...m, [p.id]: !verified }))} />
+                  {t.markVerified}
+                </label>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <h2>{t.dynamicTitle}</h2>
+      <p className={c.intro}>{t.dynamicIntro}</p>
+      <div className={c.grid}>
+        {PHRASES.filter((p) => p.kind === "dynamic").map((p) => {
+          const info = DYNAMIC_BUILD_INFO[p.id];
+          const verified = marks[p.id] === true;
+          return (
+            <article key={p.id} className={`${c.card} ${verified ? c.cardVerified : ""}`} aria-label={p.text}>
+              <header className={c.cardHead}>
+                <span className={c.letter}>{p.text}</span>
+                <span className={verified ? c.badgeOk : c.badgeTodo}>{verified ? tl.verified : tl.notVerified}</span>
+              </header>
+              <div className={c.visuals}>
+                {info ? <PathPreview path={info.path} label={t.pathAlt(p.text)} /> : <p className={c.muted}>{tl.noReference}</p>}
+              </div>
+              <p className={c.meta}>
+                {t.source(p.source.label)}
+                {info && (
+                  <>
+                    <br />
+                    {t.dynamicQuality(pct(info.recall), pct(1 - info.precision), pct(info.accuracy))}
+                    <br />
+                    {t.dynamicData(info.videos, info.signers, info.templates)}
+                  </>
+                )}
+                {p.tolerance && (
+                  <>
+                    <br />
+                    {t.duration(p.tolerance.durationMin, p.tolerance.durationMax)}
+                  </>
+                )}
               </p>
               <div className={c.cardActions}>
                 <label className={c.check}>

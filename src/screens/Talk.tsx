@@ -7,6 +7,8 @@ import { CommandZones, type ZoneLabel } from "../components/CommandZones";
 import { ComposerBar } from "../components/ComposerBar";
 import { ConversationFeed } from "../components/ConversationFeed";
 import { CorrectionArrow } from "../components/CorrectionArrow";
+import { GhostPath } from "../components/GhostPath";
+import { HintBanner } from "../components/HintBanner";
 import { HoldRing } from "../components/HoldRing";
 import { ListenerPanel } from "../components/ListenerPanel";
 import { paintCorrection } from "../components/paintCorrection";
@@ -17,17 +19,25 @@ import { TalkLegend } from "../components/TalkLegend";
 import { TargetZone } from "../components/TargetZone";
 import { hintText } from "../data/hintText";
 import { getLetterSpec, LETTERS } from "../data/letters";
-import { getPhraseByLabel, isPhraseLabel, labelText, PHRASE_HANDSHAPES } from "../data/phrases";
-import { loadTalkModels } from "../data/samples";
+import { DYNAMIC_PHRASES, getPhraseByLabel, isPhraseLabel, labelText, PHRASE_HANDSHAPES } from "../data/phrases";
+import { loadDynamicTemplates, loadTalkModels } from "../data/samples";
 import { strings } from "../data/strings.ru";
 import { createCalibrator, palmCenter, type Calibrator } from "../recognition/control/calibration";
 import { createCommandZones } from "../recognition/control/commandZones";
+import { frameErrors, palmSize } from "../recognition/errors/frameChecks";
 import { hintVisual, positionErrors } from "../recognition/errors/translatorHints";
+import { LM } from "../recognition/landmarks";
+import { PHRASE_PREFIX } from "../recognition/phrases/spec";
+import { FRAME_DIM, writeFrameFeatures } from "../recognition/sequence/frameFeatures";
+import { createPhraseMatcher, type DynamicMatch, type PhraseMatcher } from "../recognition/sequence/phraseMatcher";
+import { createSequenceTracker, type MotionSegment } from "../recognition/sequence/sequenceBuffer";
 import { isOpenPalm } from "../recognition/control/poses";
 import { createOpenReader, type Ambiguity, type ReaderUpdate } from "../recognition/open/openReader";
 import { onFrame } from "../recognition/pipeline";
 import {
   POSE_GRACE_MS,
+  POSE_MAX_SPEED,
+  TALK_DYNAMIC_HINT_MS,
   TALK_CANCEL_PALM_MS,
   TALK_EXIT_PALM_MS,
   TALK_LETTER_HOLD_MS,
@@ -36,7 +46,7 @@ import {
 import { navigate, paths } from "../router";
 import { useCalibration } from "../store/calibration";
 import { setHighlight, setSkeletonTone } from "../store/highlight";
-import { clearTalkStats, setTalkStats } from "../store/talkStats";
+import { clearTalkStats, setMotionStats, setTalkStats } from "../store/talkStats";
 import type { ZoneId } from "../recognition/control/commandZones";
 import { useUi } from "../store/ui";
 import { createAutocomplete, type Autocomplete } from "../talk/autocomplete";
@@ -58,6 +68,33 @@ const EMPTY_READING: ReadingView = { state: "noHand", label: null, hint: null, a
 
 /** Raw camera point → percent of the mirrored video as the user sees it. */
 const toDisplay = (p: { x: number; y: number }) => ({ x: (1 - p.x) * 100, y: p.y * 100 });
+
+/** Dynamic phrases in the app (their templates load lazily). */
+const DYNAMIC_LABELS = new Set(DYNAMIC_PHRASES.map((p) => `${PHRASE_PREFIX}${p.id}`));
+
+/** Wrist speed smoothing for the open-palm commands (as in the control layer): a waving hand is no command. */
+const WRIST_SPEED_EMA = 0.3;
+
+interface DynamicHint {
+  text: string;
+  /** Template path in display percent, from where the user's motion started. */
+  ghost: { x: number; y: number }[];
+  at: number;
+}
+
+/** Where the template says the hand should have gone, drawn from the start of the user's motion. */
+function ghostPoints(segment: MotionSegment, ghost: readonly { x: number; y: number }[], aspect: number) {
+  const first = segment.frames[0];
+  if (!first || aspect <= 0) return [];
+  const wx = first[10] ?? 0;
+  const wy = first[11] ?? 0;
+  const palm = first[12] ?? 0;
+  return ghost.map((g) => toDisplay({ x: (wx + g.x * palm) / aspect, y: wy + g.y * palm }));
+}
+
+function dynamicHintText(result: Extract<DynamicMatch, { kind: "almost" }>): string {
+  return strings.talk.dynamic[result.reason](labelText(result.label));
+}
 
 function readingView(u: ReaderUpdate): ReadingView {
   const amb = u.ambiguity;
@@ -108,6 +145,8 @@ export function Talk() {
   const [reading, setReading] = useState<ReadingView>(EMPTY_READING);
   const [cancelledAt, setCancelledAt] = useState<number | null>(null);
   const [autocomplete, setAutocomplete] = useState<Autocomplete | null>(null);
+  const [dynamicHint, setDynamicHint] = useState<DynamicHint | null>(null);
+  const matcherRef = useRef<PhraseMatcher | null>(null);
   const topSuggestion = useRef<string | null>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const zonesRef = useRef<HTMLDivElement>(null);
@@ -133,6 +172,23 @@ export function Talk() {
       cancelled = true;
     };
   }, [reader]);
+
+  // Dynamic phrases: DTW templates load with the talk screen; without them only letters and static phrases work.
+  useEffect(() => {
+    let cancelled = false;
+    void loadDynamicTemplates(DYNAMIC_LABELS).then((sets) => {
+      if (!cancelled && sets.length > 0) matcherRef.current = createPhraseMatcher(sets);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!dynamicHint) return;
+    const id = window.setTimeout(() => setDynamicHint(null), TALK_DYNAMIC_HINT_MS);
+    return () => window.clearTimeout(id);
+  }, [dynamicHint]);
 
   // The dictionary (~55 KB) is loaded only here, not on the first screen.
   useEffect(() => {
@@ -177,10 +233,13 @@ export function Talk() {
       if (words.length > 0) setCandidate(confirmation.propose(words, now));
     };
     // A letter is typed; a phrase gesture adds its whole word and goes straight to confirmation (§4.3).
+    // When letters were typed (a dynamic phrase recognized later takes back the ones typed during its motion).
+    let typedAt: number[] = [];
     const typeLabel = (label: string, now: number) => {
       const phrase = getPhraseByLabel(label);
       if (!phrase) {
         composer.addLetter(label);
+        typedAt.push(now);
         return;
       }
       composer.space();
@@ -199,6 +258,10 @@ export function Talk() {
     let shown = JSON.stringify(EMPTY_READING);
     let left = false;
     let calibrator: Calibrator | null = null;
+    const tracker = createSequenceTracker();
+    const scratch = new Float32Array(FRAME_DIM);
+    let prevWrist: { x: number; y: number; t: number } | null = null;
+    let wristSpeed = 0;
     const loggedFrom = reader.hintLog.length;
 
     const unsubscribe = onFrame((obs) => {
@@ -233,8 +296,27 @@ export function Talk() {
       }
       calibrator = null;
 
+      // Motion features into the sequence buffer (dynamic phrases); nothing while a phrase waits.
+      const usable = obs !== null && frameErrors(obs.frame).length === 0;
+      const aspect = obs && obs.frame.videoHeight > 0 ? obs.frame.videoWidth / obs.frame.videoHeight : 1;
+      if (usable && obs) writeFrameFeatures(obs.features, obs.frame.landmarks, aspect, scratch);
+      const motion = tracker.push(usable && !confirmation.candidate ? scratch : null, now);
+
+      // Wrist speed: the open palm is a command only while the hand is still (a wave is not «выход»).
+      const wrist = obs?.frame.landmarks[LM.WRIST];
+      if (wrist && obs) {
+        if (prevWrist && now > prevWrist.t) {
+          const dist = Math.hypot((wrist.x - prevWrist.x) * aspect, wrist.y - prevWrist.y) / (palmSize(obs.frame) || 1);
+          wristSpeed = wristSpeed * (1 - WRIST_SPEED_EMA) + (dist / ((now - prevWrist.t) / 1000)) * WRIST_SPEED_EMA;
+        }
+        prevWrist = { x: wrist.x, y: wrist.y, t: now };
+      } else {
+        prevWrist = null;
+        wristSpeed = 0;
+      }
+
       // 1. Open palm: cancels the candidate (1.2 s) or, without one, leaves the screen (2 s).
-      if (obs !== null && isOpenPalm(obs)) {
+      if (obs !== null && isOpenPalm(obs) && wristSpeed < POSE_MAX_SPEED) {
         palmSince ??= now;
         palmLast = now;
       } else if (palmSince !== null && now - palmLast > POSE_GRACE_MS) {
@@ -299,6 +381,32 @@ export function Talk() {
         syncDraft();
       }
 
+      // 3b. A motion just ended: is it a dynamic phrase? (Not while a zone command or a phrase is going on.)
+      const matcher = matcherRef.current;
+      let top: { label: string; score: number }[] = [];
+      if (motion.segment && matcher && z.active === null && !confirmation.candidate) {
+        const report = matcher.match(motion.segment);
+        top = report.top;
+        const result = report.result;
+        if (result.kind === "accept") {
+          // Letters «typed» while the hand was moving through the sign were not meant: take them back.
+          let undo = typedAt.filter((at) => at >= (motion.segment?.startT ?? now)).length;
+          typedAt = typedAt.filter((at) => at < (motion.segment?.startT ?? now));
+          while (undo > 0 && composer.current !== "") {
+            composer.deleteLast();
+            undo--;
+          }
+          reader.resolve(result.label);
+          typeLabel(result.label, now);
+          playSound("click");
+          setDynamicHint(null);
+        } else if (result.kind === "almost") {
+          setDynamicHint({ text: dynamicHintText(result), ghost: ghostPoints(motion.segment, result.ghost, aspect), at: now });
+          logHints([{ letter: labelText(result.label), hintCode: `dynamic.${result.reason}`, timestamp: now }]);
+        }
+      }
+      setMotionStats({ speed: motion.speed, moving: motion.moving, top });
+
       // 4. Pauses without a hand: end of word, then end of phrase.
       const tick = composer.tick(now, obs !== null);
       if (tick.changed) syncDraft();
@@ -354,6 +462,7 @@ export function Talk() {
         <CameraView variant="large">
           {calibration && phase === "done" && <TargetZone calibration={calibration} active={reading.visual === "move"} />}
           <CorrectionArrow ref={correctionRef} />
+          {dynamicHint && <GhostPath points={dynamicHint.ghost} />}
           {phase !== "pending" && <CommandZones ref={zonesRef} labels={zoneLabels} />}
           <div ref={palmRef} className={t.palm} aria-hidden="true">
             <HoldRing className={t.palmRing}>
@@ -391,6 +500,7 @@ export function Talk() {
         <ComposerBar words={draft.words} current={draft.current} />
         <SuggestionBar words={suggestions} onPick={pickSuggestion} />
         <CandidateCard ref={ringRef} candidate={candidate} reading={reading} cancelled={cancelledAt !== null} />
+        {dynamicHint && !candidate && <HintBanner text={dynamicHint.text} />}
         <ConversationFeed />
         <ListenerPanel
           supported={listener.supported}
