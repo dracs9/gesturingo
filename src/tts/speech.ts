@@ -8,15 +8,19 @@ import { useSettings } from "../store/settings";
 
 export type SpeakResult = "spoken" | "unavailable" | "muted";
 
-type VoiceInfo = Pick<SpeechSynthesisVoice, "lang" | "localService"> & { voiceURI?: string };
+type VoiceInfo = Pick<SpeechSynthesisVoice, "lang" | "localService"> & { voiceURI?: string; name?: string };
+
+/** The default voice where it exists (Windows, Edge): «Microsoft Pavel». */
+const DEFAULT_VOICE = /microsoft pavel/i;
 
 /**
- * Best Russian voice: the one chosen before (if still there), then ru-RU before any ru-*,
- * preferring on-device voices (work offline, start faster).
+ * Best Russian voice: the one chosen before (if still there), then Microsoft Pavel, then ru-RU before
+ * any ru-*, preferring on-device voices (work offline, start faster).
  */
 export function pickRussianVoice<V extends VoiceInfo>(voices: readonly V[], preferredUri?: string | null): V | null {
   const lang = (v: V) => v.lang.replace("_", "-").toLowerCase();
-  const rank = (v: V) => (lang(v) === "ru-ru" ? 0 : 2) + (v.localService ? 0 : 1);
+  const rank = (v: V) =>
+    (DEFAULT_VOICE.test(v.name ?? "") ? 0 : 4) + (lang(v) === "ru-ru" ? 0 : 2) + (v.localService ? 0 : 1);
   const russian = voices.filter((v) => lang(v).startsWith("ru"));
   const preferred = preferredUri ? russian.find((v) => v.voiceURI === preferredUri) : undefined;
   return preferred ?? [...russian].sort((a, b) => rank(a) - rank(b))[0] ?? null;

@@ -13,6 +13,17 @@ describe("speech", () => {
     expect(pickRussianVoice([])).toBeNull();
   });
 
+  it("prefers Microsoft Pavel by default, but not over the voice chosen before", () => {
+    const voices = [
+      { lang: "ru-RU", localService: true, voiceURI: "irina", name: "Microsoft Irina - Russian (Russia)" },
+      { lang: "ru-RU", localService: false, voiceURI: "pavel-online", name: "Microsoft Pavel Online (Natural) - Russian (Russia)" },
+      { lang: "ru-RU", localService: true, voiceURI: "pavel", name: "Microsoft Pavel - Russian (Russia)" },
+    ];
+    expect(pickRussianVoice(voices)?.voiceURI).toBe("pavel");
+    expect(pickRussianVoice(voices.slice(0, 2))?.voiceURI).toBe("pavel-online");
+    expect(pickRussianVoice(voices, "irina")?.voiceURI).toBe("irina");
+  });
+
   it("turns a word into something engines read as a word", () => {
     expect(speakableWord("ВОВА")).toBe("Вова");
     expect(speakableWord("ёж")).toBe("Ёж");
