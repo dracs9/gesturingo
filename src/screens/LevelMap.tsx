@@ -101,6 +101,12 @@ export function LevelMap() {
           {!bridgeOpen && <span className={m.muted}>{t.bridgeLocked}</span>}
         </GestureButton>
 
+        {/* Talk reads every letter the camera knows, so it is always open. */}
+        <GestureButton className={m.tile} onClick={() => navigate(paths.talk())}>
+          <span className={m.tileTitle}>{t.talk}</span>
+          <span className={m.muted}>{t.talkHint}</span>
+        </GestureButton>
+
         <GestureButton
           className={m.tile}
           disabled={weak.length === 0}

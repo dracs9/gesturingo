@@ -7,6 +7,7 @@ describe("matchRoute", () => {
     expect(matchRoute("/tutorial")).toEqual({ name: "tutorial" });
     expect(matchRoute("/map")).toEqual({ name: "map" });
     expect(matchRoute("/bridge")).toEqual({ name: "bridge" });
+    expect(matchRoute("/talk")).toEqual({ name: "talk" });
     expect(matchRoute("/record")).toEqual({ name: "record" });
     expect(matchRoute("/letters")).toEqual({ name: "letters" });
   });

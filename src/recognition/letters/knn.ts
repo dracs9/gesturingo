@@ -20,6 +20,8 @@ export interface KnnPrediction {
   neighbors: readonly KnnNeighbor[];
   /** Labels by votes, for the debug panel (top-3). */
   ranking: ReadonlyArray<{ label: string; votes: number }>;
+  /** Every label with the distance to its closest sample, closest first (open-set ranking of all classes). */
+  nearestByLabel: readonly KnnNeighbor[];
 }
 
 export interface Knn {
@@ -50,8 +52,10 @@ export function createKnn(samples: readonly LabeledVector[], k = KNN_K): Knn {
 
       // Keep the k best in a small sorted array: O(n·k) with tiny k, no full sort per frame.
       const best: Array<{ label: string; d2: number }> = [];
+      const perLabel = new Map<string, number>();
       for (const s of samples) {
         const d2 = squaredDistance(vector, s.vector);
+        if (d2 < (perLabel.get(s.label) ?? Infinity)) perLabel.set(s.label, d2);
         if (best.length === k && d2 >= (best[k - 1]?.d2 ?? Infinity)) continue;
         let i = best.length;
         while (i > 0 && (best[i - 1]?.d2 ?? 0) > d2) i--;
@@ -72,6 +76,9 @@ export function createKnn(samples: readonly LabeledVector[], k = KNN_K): Knn {
         votes,
         neighbors: best.map((n) => ({ label: n.label, distance: Math.sqrt(n.d2) })),
         ranking,
+        nearestByLabel: [...perLabel]
+          .map(([label, d2]) => ({ label, distance: Math.sqrt(d2) }))
+          .sort((a, b) => a.distance - b.distance),
       };
     },
   };

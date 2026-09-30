@@ -122,3 +122,43 @@ export const KNN_MAX_DISTANCE = 2.5;
 // --- Ghost hand ---
 /** A finger matches the reference when its state is the same or its angle is within this many degrees. */
 export const GHOST_ANGLE_TOLERANCE = 20;
+
+// --- Talk: open-set fingerspelling (docs/TRANSLATOR_SPEC.md §4–§7) ---
+/** Majority vote over the last N frame decisions; a letter must then hold this long to be typed. */
+export const TALK_VOTE_WINDOW = 8;
+export const TALK_VOTE_SHARE = 0.6;
+export const TALK_LETTER_HOLD_MS = 600;
+/**
+ * Accept only if the 2nd closest letter is at least this many times further than the 1st
+ * (leave-one-out on the samples: 1.15 → ~74% of frames accepted, ~1.4% accepted as a wrong letter).
+ */
+export const TALK_MARGIN_RATIO = 1.15;
+/** "Almost": the closest letter is within this distance (90% of sample frames are within ~1.0) … */
+export const TALK_ALMOST_MAX_DISTANCE = 1.5;
+/** … and breaks at most this many of its rules; more → the hand shows no known letter (neutral). */
+export const TALK_ALMOST_MAX_ERRORS = 2;
+/** The same letter is typed again only after it was not seen for this long (hand lowered or reshaped). */
+export const TALK_RELEASE_MS = 300;
+/** No hand this long → end of word (space). */
+export const TALK_SPACE_PAUSE_MS = 1200;
+/** No hand this long with a non-empty draft → the phrase becomes a candidate. */
+export const TALK_PHRASE_END_MS = 2000;
+/** A candidate is spoken after this long unless cancelled (open palm). */
+export const TALK_CONFIRM_MS = 1500;
+/** The wrist must stay in a command zone this long. */
+export const TALK_ZONE_HOLD_MS = 800;
+/** Open palm: cancels the candidate after this long … */
+export const TALK_CANCEL_PALM_MS = 1200;
+/** … or, without a candidate, leaves the screen after this long. */
+export const TALK_EXIT_PALM_MS = 2000;
+/** The «А или Б?» card stays this long (time in a command zone does not count), so a zone can pick one. */
+export const TALK_AMBIGUOUS_LATCH_MS = 3000;
+/**
+ * Command zones in DISPLAY coordinates (the video is mirrored for the user): fractions of the frame.
+ * Letters are shown in the middle; the wrist has to be raised into a top corner or the top edge.
+ */
+export const TALK_ZONES = {
+  delete: { x0: 0, x1: 0.26, y0: 0, y1: 0.4 },
+  space: { x0: 0.37, x1: 0.63, y0: 0, y1: 0.3 },
+  say: { x0: 0.74, x1: 1, y0: 0, y1: 0.4 },
+} as const;

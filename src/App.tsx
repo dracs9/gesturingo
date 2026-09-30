@@ -16,6 +16,7 @@ import { Lesson } from "./screens/Lesson";
 import { Letters } from "./screens/Letters";
 import { Record } from "./screens/Record";
 import { Results } from "./screens/Results";
+import { Talk } from "./screens/Talk";
 import { Welcome } from "./screens/Welcome";
 import { useSession } from "./store/session";
 import { useUi } from "./store/ui";
@@ -36,6 +37,8 @@ function renderScreen(route: Route) {
       return <Results lessonId={route.lessonId} />;
     case "bridge":
       return <Bridge />;
+    case "talk":
+      return <Talk />;
     case "record":
       return <Record />;
     case "letters":
@@ -96,7 +99,8 @@ export function App() {
               <CameraView variant="mini" />
             </div>
           )}
-          <GestureLegend context={gestureContext} compact={dockHidden} />
+          {/* Talk shows its own legend: command zones instead of the cursor. */}
+          {route.name !== "talk" && <GestureLegend context={gestureContext} compact={dockHidden} />}
           <GestureLayer context={gestureContext} />
         </>
       )}

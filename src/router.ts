@@ -7,6 +7,7 @@ export type Route =
   | { name: "lesson"; lessonId: string }
   | { name: "results"; lessonId: string }
   | { name: "bridge" }
+  | { name: "talk" }
   | { name: "record" }
   | { name: "letters" };
 
@@ -17,6 +18,7 @@ export const paths = {
   lesson: (lessonId: string) => `/lesson/${encodeURIComponent(lessonId)}`,
   results: (lessonId: string) => `/results/${encodeURIComponent(lessonId)}`,
   bridge: () => "/bridge",
+  talk: () => "/talk",
   record: () => "/record",
   letters: () => "/letters",
 } as const;
@@ -37,6 +39,8 @@ export function matchRoute(pathname: string): Route {
         return { name: "map" };
       case "bridge":
         return { name: "bridge" };
+      case "talk":
+        return { name: "talk" };
       case "record":
         return { name: "record" };
       case "letters":

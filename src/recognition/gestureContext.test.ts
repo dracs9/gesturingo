@@ -13,6 +13,10 @@ describe("gestureContext (CLAUDE.md §7.5)", () => {
     expect(getGestureContext("bridge")).toEqual({ cursor: false, dwell: false, ok: false, back: true, letters: "learned" });
   });
 
+  it("leaves talk to its own command zones: no cursor, no control poses", () => {
+    expect(getGestureContext("talk")).toEqual({ cursor: false, dwell: false, ok: false, back: false, letters: "all" });
+  });
+
   it("uses buttons and back on /record", () => {
     expect(getGestureContext("record")).toEqual({ cursor: true, dwell: true, ok: false, back: true, letters: "none" });
   });

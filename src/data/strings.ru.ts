@@ -19,6 +19,7 @@ export const strings = {
     lesson: "Урок · Gesturingo",
     results: "Итоги · Gesturingo",
     bridge: "Тренажёр · Gesturingo",
+    talk: "Разговор · Gesturingo",
     record: "Запись образцов · Gesturingo",
     letters: "Проверка букв · Gesturingo",
   },
@@ -75,6 +76,11 @@ export const strings = {
     letter: "Буква",
     rules: "Правила",
     knnOff: "нет образцов / не участвует",
+    talk: "Разговор",
+    talkState: "Состояние",
+    talkTop: "Топ-3",
+    talkMargin: "Отрыв d2/d1",
+    talkBlocked: "Ждёт смены формы",
     none: "—",
   },
 
@@ -132,6 +138,8 @@ export const strings = {
     lessonLetters: (letters: readonly string[]) => letters.join(" "),
     bridge: "Тренажёр",
     bridgeLocked: "Пройди урок 1, чтобы открыть",
+    talk: "Разговор",
+    talkHint: "Жесты → текст и голос",
     weakLetters: "Повтори слабые буквы",
     weakLettersList: (letters: readonly string[]) => letters.join(" "),
     noWeakLetters: "Слабых букв нет",
@@ -213,6 +221,54 @@ export const strings = {
     next: "Следующее слово через пару секунд…",
     wordsDone: (n: number) => `Слов собрано: ${n}`,
     release: (letter: string) => `Опусти руку и покажи «${letter}» ещё раз`,
+  },
+
+  // Talk mode (docs/TRANSLATOR_SPEC.md). Neutral wording: the signer knows the language — the camera asks for help.
+  talk: {
+    title: "Разговор",
+    frame: "Это не универсальный переводчик: камера читает дактиль — буквы русской дактильной азбуки.",
+    draftEmpty: "Покажите букву в центре кадра — она появится здесь",
+    draftLabel: "Набор",
+    zones: {
+      delete: "Стереть",
+      space: "Пробел",
+      say: "Сказать",
+    },
+    zoneIcons: {
+      delete: "⌫",
+      space: "␣",
+      say: "🔊",
+    },
+    pick: "Выбрать",
+    state: {
+      noHand: "Руки не видно",
+      suppressed: "Команда",
+      neutral: "Распознаю…",
+      accept: (letter: string) => `Вижу «${letter}»`,
+      almost: (letter: string) => `Почти «${letter}»`,
+      ambiguous: "Не уверена, какая буква",
+    },
+    candidateTitle: "Скажу вслух",
+    candidateCancel: "Открытая ладонь 1,2 с — отменить",
+    cancelled: "Отменено — ничего не сказано",
+    ambiguousTitle: (a: string, b: string) => `Вы имели в виду «${a}» или «${b}»?`,
+    ambiguousAdvice: (b: string, advice: string) => `Для «${b}» — ${advice}`,
+    ambiguousPick: "Или выберите: запястье в левый угол — первая, в правый — вторая",
+    release: (letter: string) => `Чтобы повторить «${letter}», опустите руку или смените форму`,
+    feedTitle: "Лента разговора",
+    feedEmpty: "Здесь появится разговор. Наберите слово и поднимите руку в «Сказать».",
+    signer: "Жесты",
+    listener: "Собеседник",
+    speaking: "Говорю…",
+    noVoice: "Озвучка недоступна — попробуйте другой браузер или устройство",
+    muted: "Звук выключен",
+    legendTitle: "Команды разговора",
+    legend: {
+      zones: "Запястье в зону сверху 0,8 с — команда",
+      pause: "Рука опущена 1,2 с — пробел, 2 с — сказать",
+      cancel: "Ладонь 1,2 с — отменить фразу",
+      exit: "Ладонь 2 с — выйти на карту",
+    },
   },
 
   record: {
@@ -355,5 +411,8 @@ export const strings = {
     // Letter confusion / ghost hand
     "ghost.match": "Сверь руку с образцом в карточке буквы",
     "confusion.looksLike": "Получилась похожая буква",
+    // Talk mode
+    "talk.ambiguous": "Камера не уверена, какая это буква",
+    "talk.release": "Опустите руку или смените форму, чтобы повторить букву",
   } as Record<string, string>,
 } as const;

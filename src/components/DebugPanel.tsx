@@ -5,6 +5,7 @@ import { FINGERS } from "../recognition/features";
 import { getStats } from "../recognition/pipeline";
 import { getControlStats } from "../store/controlStats";
 import { getLetterStats } from "../store/letterStats";
+import { getTalkStats } from "../store/talkStats";
 import s from "./DebugPanel.module.css";
 
 const REFRESH_MS = 250;
@@ -67,6 +68,18 @@ export function DebugPanel() {
           `${t.letter}: ${letter.letter}`,
           `${t.rules}: ${d ? (d.rulesOk ? "✓" : "✗") : t.none}`,
           `kNN: ${knn}${d?.knn ? ` (${d.knn.prediction.neighbors[0]?.distance.toFixed(2) ?? ""})` : ""}`,
+        );
+      }
+      const talk = getTalkStats();
+      if (talk) {
+        const d = talk.decision;
+        const margin = d && "margin" in d && Number.isFinite(d.margin) ? d.margin.toFixed(2) : t.none;
+        lines.push(
+          "",
+          `${t.talk}: ${talk.state}${talk.label ? ` ${talk.label}` : ""} (${d?.kind ?? t.none})`,
+          `${t.talkTop}: ${talk.top.map((c) => `${c.label} ${c.distance.toFixed(2)}`).join(" · ") || t.none}`,
+          `${t.talkMargin}: ${margin}`,
+          `${t.talkBlocked}: ${talk.blocked ?? t.none}`,
         );
       }
       el.textContent = lines.join("\n");

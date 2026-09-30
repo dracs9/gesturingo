@@ -1,9 +1,15 @@
 import { useEffect, useRef } from "react";
 import { HAND_CONNECTIONS, type HandFrame } from "../recognition/landmarks";
 import { onFrame } from "../recognition/pipeline";
-import { getHighlight } from "../store/highlight";
+import { getHighlight, getSkeletonTone, type SkeletonTone } from "../store/highlight";
 
 const BONE_COLOR = "rgba(77, 212, 172, 0.9)";
+/** Talk mode: the skeleton itself says how sure the recognition is (the UI repeats it with text + icon). */
+const TONE_COLORS: Record<SkeletonTone, string> = {
+  accept: "rgba(46, 204, 113, 0.95)",
+  almost: "rgba(239, 71, 71, 0.95)",
+  neutral: "rgba(170, 176, 186, 0.85)",
+};
 const JOINT_COLOR = "#f5f6f8";
 
 function draw(ctx: CanvasRenderingContext2D, frame: HandFrame | null): void {
@@ -14,8 +20,9 @@ function draw(ctx: CanvasRenderingContext2D, frame: HandFrame | null): void {
   const unit = Math.max(1.5, Math.min(width, height) / 120);
   const pts = frame.landmarks.map((p) => [p.x * width, p.y * height] as const);
 
-  ctx.strokeStyle = BONE_COLOR;
-  ctx.lineWidth = unit;
+  const tone = getSkeletonTone();
+  ctx.strokeStyle = tone ? TONE_COLORS[tone] : BONE_COLOR;
+  ctx.lineWidth = tone ? unit * 1.5 : unit;
   ctx.lineCap = "round";
   ctx.beginPath();
   for (const [a, b] of HAND_CONNECTIONS) {

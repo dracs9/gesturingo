@@ -1,0 +1,70 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+  gap: var(--gap);
+  align-items: start;
+  min-height: 100dvh;
+  padding: 72px 24px 110px;
+}
+
+.camera {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.frame {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
+  font-weight: 800;
+}
+
+/* Open-palm progress (cancel / exit), bottom centre of the video; hidden until the palm is held. */
+.palm {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.palm[data-active] {
+  opacity: 1;
+}
+
+.palmRing {
+  --ring-size: 72px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+}
+
+.palmIcon {
+  font-size: 1.8rem;
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 64px 16px 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palm {
+    transition: none;
+  }
+}

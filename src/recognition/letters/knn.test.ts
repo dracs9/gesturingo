@@ -31,6 +31,13 @@ describe("knn", () => {
     ]);
   });
 
+  it("ranks every label by its closest sample", () => {
+    const p = knn.predict([0, 1, 0]);
+    expect(p?.nearestByLabel.map((n) => n.label)).toEqual(["А", "Б"]);
+    expect(p?.nearestByLabel[0]?.distance).toBeCloseTo(1);
+    expect(p?.nearestByLabel[1]?.distance).toBeCloseTo(Math.hypot(5, 4));
+  });
+
   it("knows its labels and handles no samples", () => {
     expect([...knn.labels].sort()).toEqual(["А", "Б"]);
     expect(knn.size).toBe(12);

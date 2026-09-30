@@ -1,0 +1,111 @@
+.card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 3px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.accept {
+  border-color: var(--accent);
+}
+
+.almost {
+  border-color: var(--danger);
+}
+
+.candidate {
+  border-color: var(--mark);
+  background: var(--mark-soft);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ring {
+  --ring-size: 96px;
+  flex: none;
+}
+
+.letter {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.icon {
+  font-size: 2rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.phrase {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.stateIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  background: var(--line);
+  font-size: 0.9em;
+}
+
+.accept .stateIcon {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.almost .stateIcon {
+  background: var(--danger);
+  color: #fff;
+}
+
+.advice {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .ring {
+    --ring-size: 72px;
+  }
+
+  .letter {
+    font-size: 2.2rem;
+  }
+}

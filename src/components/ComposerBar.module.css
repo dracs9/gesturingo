@@ -1,0 +1,49 @@
+.bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 72px;
+  width: 100%;
+  padding: 12px 18px;
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+}
+
+.text {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  word-break: break-word;
+}
+
+.current {
+  color: var(--accent);
+}
+
+.placeholder {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+.cursor {
+  width: 3px;
+  height: 1.8em;
+  margin-left: 4px;
+  background: var(--text);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}

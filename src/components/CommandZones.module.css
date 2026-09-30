@@ -1,0 +1,51 @@
+.zones {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.zone {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 2px dashed rgb(255 255 255 / 0.55);
+  border-radius: 14px;
+  background: rgb(27 35 64 / 0.28);
+  color: #fff;
+  transition: background 0.15s ease;
+}
+
+.zone[data-active] {
+  border-style: solid;
+  border-color: var(--mark);
+  background: rgb(27 35 64 / 0.55);
+}
+
+.pick {
+  border-color: var(--mark);
+}
+
+.ring {
+  --ring-size: clamp(40px, 7vw, 64px);
+}
+
+.icon {
+  font-size: clamp(1.1rem, 2.4vw, 1.8rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.label {
+  font-size: clamp(0.75rem, 1.4vw, 1rem);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zone {
+    transition: none;
+  }
+}

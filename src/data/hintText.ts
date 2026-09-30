@@ -7,6 +7,13 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export function hintText(hint: Pick<HintError, "hintCode" | "params"> | null): string | null {
   if (!hint) return null;
   if (hint.hintCode === "bridge.release") return strings.bridge.release(hint.params?.letter ?? "?");
+  if (hint.hintCode === "talk.release") return strings.talk.release(hint.params?.letter ?? "?");
+  if (hint.hintCode === "talk.ambiguous") {
+    const b = hint.params?.b ?? "?";
+    const adviceCode = hint.params?.advice;
+    const advice = adviceCode ? strings.hints[adviceCode] : undefined;
+    return advice ? strings.talk.ambiguousAdvice(b, lowerFirst(advice)) : strings.hints[hint.hintCode] ?? null;
+  }
   if (hint.hintCode === "confusion.looksLike") {
     const letter = hint.params?.letter ?? "?";
     const adviceCode = hint.params?.advice;
