@@ -5,9 +5,16 @@ import { TALK_ZONES } from "../recognition/thresholds";
 import s from "./CommandZones.module.css";
 import { HoldRing } from "./HoldRing";
 
+export interface ZoneLabel {
+  /** Big text in the ring, e.g. a letter of an «А или Б?» choice or a suggested word. */
+  text: string;
+  /** Small caption under it. */
+  caption: string;
+}
+
 interface CommandZonesProps {
-  /** Replaces a zone's label, e.g. the two letters of an «А или Б?» choice. */
-  labels?: Partial<Record<ZoneId, string>>;
+  /** Replaces a zone's usual icon and name while it means something else. */
+  labels?: Partial<Record<ZoneId, ZoneLabel>>;
 }
 
 /** Semi-transparent command zones over the camera view (drawn unmirrored, as the user sees them). */
@@ -31,9 +38,11 @@ export const CommandZones = forwardRef<HTMLDivElement, CommandZonesProps>(functi
             }}
           >
             <HoldRing className={s.ring}>
-              <span className={s.icon}>{label ?? t.zoneIcons[id]}</span>
+              <span className={label && label.text.length > 2 ? `${s.icon} ${s.word}` : s.icon}>
+                {label?.text ?? t.zoneIcons[id]}
+              </span>
             </HoldRing>
-            <span className={s.label}>{label ? t.pick : t.zones[id]}</span>
+            <span className={s.label}>{label?.caption ?? t.zones[id]}</span>
           </div>
         );
       })}

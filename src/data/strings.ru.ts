@@ -240,6 +240,11 @@ export const strings = {
       say: "🔊",
     },
     pick: "Выбрать",
+    suggestions: {
+      title: "Подсказки",
+      insert: "Вставить",
+      zoneHint: "Запястье в зону «Пробел» — вставить первое слово",
+    },
     state: {
       noHand: "Руки не видно",
       suppressed: "Команда",

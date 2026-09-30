@@ -45,6 +45,14 @@ describe("composer", () => {
     expect(c.text()).toBe("ДА");
   });
 
+  it("completes the typed word with a suggestion", () => {
+    const c = createComposer();
+    for (const l of "ПРИВ") c.addLetter(l);
+    c.complete("ПРИВЕТ");
+    expect(c.words).toEqual(["ПРИВЕТ"]);
+    expect(c.current).toBe("");
+  });
+
   it("makes a phrase engines read as words", () => {
     expect(speakableText(["ПРИВЕТ", "МАМА"])).toBe("Привет мама");
   });

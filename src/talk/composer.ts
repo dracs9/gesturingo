@@ -17,6 +17,8 @@ export interface Composer {
   deleteLast(): void;
   /** Ends the current word. */
   space(): void;
+  /** Replaces the word being typed with an autocomplete suggestion and ends it. */
+  complete(word: string): void;
   tick(timestamp: number, handVisible: boolean): ComposerTick;
   /** Finished words. */
   readonly words: readonly string[];
@@ -62,6 +64,10 @@ export function createComposer(): Composer {
       current = Array.from(current).slice(0, -1).join("");
     },
     space() {
+      endWord();
+    },
+    complete(word) {
+      current = word;
       endWord();
     },
     tick(t, handVisible) {

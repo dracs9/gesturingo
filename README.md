@@ -192,7 +192,9 @@ npm run build:letters
 | Vite, @vitejs/plugin-react | сборка | MIT |
 | TypeScript | язык | Apache-2.0 |
 | Vitest, ESLint, typescript-eslint, eslint-plugin-react-hooks / react-refresh, globals | тесты и линтер | MIT |
-| Web Speech API (`speechSynthesis`) | озвучка слов в «Тренажёре» — голос браузера | встроено в браузер |
+| Web Speech API (`speechSynthesis`) | озвучка слов в «Тренажёре» и фраз в «Разговоре» — голос браузера | встроено в браузер |
+| Web Speech API (`SpeechRecognition`) | речь собеседника → субтитры в «Разговоре» | встроено в браузер; может обрабатываться сервисом браузера |
+| [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (Hermit Dave, по субтитрам OpenSubtitles 2018), `ru_50k.txt` | 4000 частых слов → `src/data/dictionary.ru.ts` для автодополнения в «Разговоре» (`npm run build:dictionary`, мат отфильтрован) | списки слов CC BY-SA 4.0, код MIT |
 | [Russian Sign Language Alphabet](https://www.kaggle.com/datasets/kamillakabardieva/russian-sign-language-alphabet) (Kaggle, Kamilla Kabardieva) | фото букв → координаты точек, правила, kNN | **не указана** на Kaggle («Unknown») |
 | [Russian Sign Language](https://www.kaggle.com/datasets/mandartayade/russian-sign-language) (Kaggle, Mandar Tayade) | кадры видео букв → координаты точек, kNN | MIT |
 | mediapipe (Python), opencv-python, numpy | офлайн-извлечение точек в `scripts/` | Apache-2.0, Apache-2.0, BSD-3-Clause |

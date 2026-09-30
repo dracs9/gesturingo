@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { playSound } from "../audio/sounds";
 import { CameraView } from "../components/CameraView";
 import { CandidateCard, type ReadingView } from "../components/CandidateCard";
-import { CommandZones } from "../components/CommandZones";
+import { CommandZones, type ZoneLabel } from "../components/CommandZones";
 import { ComposerBar } from "../components/ComposerBar";
 import { ConversationFeed } from "../components/ConversationFeed";
 import { HoldRing } from "../components/HoldRing";
 import { ListenerPanel } from "../components/ListenerPanel";
 import { paintZones } from "../components/paintZones";
 import { SubtitleOverlay } from "../components/SubtitleOverlay";
+import { SuggestionBar } from "../components/SuggestionBar";
 import { TalkLegend } from "../components/TalkLegend";
 import { hintText } from "../data/hintText";
 import { getLetterSpec, LETTERS } from "../data/letters";
@@ -22,7 +23,9 @@ import { POSE_GRACE_MS, TALK_CANCEL_PALM_MS, TALK_EXIT_PALM_MS } from "../recogn
 import { navigate, paths } from "../router";
 import { setHighlight, setSkeletonTone } from "../store/highlight";
 import { clearTalkStats, setTalkStats } from "../store/talkStats";
+import type { ZoneId } from "../recognition/control/commandZones";
 import { useUi } from "../store/ui";
+import { createAutocomplete, type Autocomplete } from "../talk/autocomplete";
 import { createComposer, createConfirmation, type Candidate } from "../talk/composer";
 import { useConversation } from "../talk/conversationStore";
 import { useListener } from "../talk/useListener";
@@ -50,6 +53,7 @@ function readingView(u: ReaderUpdate): ReadingView {
  * spoken only after a confirmation ring (T1). Unsure readings never type or speak: they show
  * "almost" / «А или Б?» with a concrete hint. Commands are zones at the top of the frame.
  * The hearing person answers by voice (or typing): subtitles over the video + the feed (T2).
+ * Up to 3 dictionary words complete the typed prefix; the «Пробел» zone inserts the first one (T3).
  */
 export function Talk() {
   const setDockHidden = useUi((st) => st.setDockHidden);
@@ -67,6 +71,8 @@ export function Talk() {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [reading, setReading] = useState<ReadingView>(EMPTY_READING);
   const [cancelledAt, setCancelledAt] = useState<number | null>(null);
+  const [autocomplete, setAutocomplete] = useState<Autocomplete | null>(null);
+  const topSuggestion = useRef<string | null>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const zonesRef = useRef<HTMLDivElement>(null);
   const palmRef = useRef<HTMLDivElement>(null);
@@ -88,6 +94,34 @@ export function Talk() {
       cancelled = true;
     };
   }, [reader]);
+
+  // The dictionary (~55 KB) is loaded only here, not on the first screen.
+  useEffect(() => {
+    let cancelled = false;
+    void import("../data/dictionary.ru").then(
+      (m) => {
+        if (!cancelled) setAutocomplete(createAutocomplete(m.DICTIONARY));
+      },
+      () => undefined, // Without the dictionary the screen simply has no suggestions.
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const typing = draft.current;
+  const suggestions = useMemo(
+    () => (autocomplete && !candidate ? autocomplete.suggest(typing) : []),
+    [autocomplete, candidate, typing],
+  );
+  useEffect(() => {
+    topSuggestion.current = suggestions[0] ?? null;
+  }, [suggestions]);
+
+  const pickSuggestion = (word: string) => {
+    composer.complete(word);
+    setDraft({ words: composer.words, current: composer.current });
+  };
 
   useEffect(() => {
     if (cancelledAt === null) return;
@@ -161,7 +195,10 @@ export function Talk() {
         } else if (z.fired === "delete") {
           composer.deleteLast();
         } else if (z.fired === "space") {
-          composer.space();
+          // With a suggestion the zone inserts the first word; otherwise it is a plain space.
+          const top = topSuggestion.current;
+          if (top && composer.current !== "") composer.complete(top);
+          else composer.space();
         } else {
           propose(now);
         }
@@ -213,12 +250,18 @@ export function Talk() {
   }, [reader, composer, confirmation, zones, addMessage, setSpeech, logHints]);
 
   const amb = reading.ambiguity;
+  const zoneLabels: Partial<Record<ZoneId, ZoneLabel>> = {};
+  if (!candidate && amb) {
+    zoneLabels.delete = { text: amb.a, caption: strings.talk.pick };
+    zoneLabels.say = { text: amb.b, caption: strings.talk.pick };
+  }
+  if (!candidate && suggestions[0]) zoneLabels.space = { text: suggestions[0], caption: strings.talk.suggestions.insert };
 
   return (
     <main className={t.layout} aria-label={strings.talk.title}>
       <section className={t.camera}>
         <CameraView variant="large">
-          <CommandZones ref={zonesRef} labels={amb && !candidate ? { delete: amb.a, say: amb.b } : undefined} />
+          <CommandZones ref={zonesRef} labels={zoneLabels} />
           <div ref={palmRef} className={t.palm} aria-hidden="true">
             <HoldRing className={t.palmRing}>
               <span className={t.palmIcon}>✋</span>
@@ -232,6 +275,7 @@ export function Talk() {
       <section className={t.side}>
         <h1 className={t.title}>{strings.talk.title}</h1>
         <ComposerBar words={draft.words} current={draft.current} />
+        <SuggestionBar words={suggestions} onPick={pickSuggestion} />
         <CandidateCard ref={ringRef} candidate={candidate} reading={reading} cancelled={cancelledAt !== null} />
         <ConversationFeed />
         <ListenerPanel

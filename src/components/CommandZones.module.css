@@ -38,6 +38,13 @@
   line-height: 1;
 }
 
+/* A suggested word is wider than the ring: let it spill over, readable on the dark zone. */
+.word {
+  font-size: clamp(0.8rem, 1.6vw, 1.15rem);
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.7);
+}
+
 .label {
   font-size: clamp(0.75rem, 1.4vw, 1rem);
   font-weight: 700;
