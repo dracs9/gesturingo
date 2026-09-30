@@ -83,6 +83,9 @@ export function ControlTutorial() {
 
   // Finishing or skipping the tutorial: next visits start from the lessons.
   const markTutorialDone = useProgress((st) => st.markTutorialDone);
+  // Skip is for repeat runs (§10.2). On the first run it is touch/mouse only: on a phone the hand
+  // near the camera easily rests on or pinches the corner button and skipped the whole tutorial.
+  const [repeatRun] = useState(() => useProgress.getState().tutorialDone);
   const toMap = useCallback(() => {
     markTutorialDone();
     navigate(paths.map());
@@ -209,7 +212,7 @@ export function ControlTutorial() {
 
   return (
     <main className={t.layout}>
-      <GestureButton className={t.skip} onClick={toMap}>
+      <GestureButton className={t.skip} onClick={toMap} noGesture={!repeatRun}>
         {strings.common.skip}
       </GestureButton>
 
