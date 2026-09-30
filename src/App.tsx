@@ -17,6 +17,7 @@ import { Letters } from "./screens/Letters";
 import { Record } from "./screens/Record";
 import { Results } from "./screens/Results";
 import { Talk } from "./screens/Talk";
+import { TalkSummary } from "./screens/TalkSummary";
 import { Welcome } from "./screens/Welcome";
 import { useSession } from "./store/session";
 import { useUi } from "./store/ui";
@@ -39,6 +40,8 @@ function renderScreen(route: Route) {
       return <Bridge />;
     case "talk":
       return <Talk />;
+    case "talkSummary":
+      return <TalkSummary />;
     case "record":
       return <Record />;
     case "letters":

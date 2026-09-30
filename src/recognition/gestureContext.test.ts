@@ -3,7 +3,7 @@ import { getGestureContext } from "./gestureContext";
 
 describe("gestureContext (CLAUDE.md §7.5)", () => {
   it("allows full navigation on menu screens", () => {
-    for (const s of ["welcome", "map", "results"] as const) {
+    for (const s of ["welcome", "map", "results", "talkSummary"] as const) {
       expect(getGestureContext(s)).toEqual({ cursor: true, dwell: true, ok: true, back: true, letters: "none" });
     }
   });

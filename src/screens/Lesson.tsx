@@ -10,13 +10,19 @@ import { useLessonRun, type LetterResult } from "../store/lessonRun";
 import { progressSnapshot, useProgress } from "../store/progress";
 import { REVIEW_LESSON_ID, weakLetters } from "../store/progressLogic";
 import { useUi } from "../store/ui";
+import { practiceLetters } from "../talk/summary";
 import { lessonTitle } from "./lesson/lessonTitle";
 import { LetterStep } from "./lesson/LetterStep";
 import s from "./Screen.module.css";
 
-/** Letters of a lesson; the review lesson takes the weakest letters at the moment it opens. */
+/**
+ * Letters of a lesson; the review lesson takes the weakest letters at the moment it opens, a practice
+ * lesson (from the talk summary) the letters named in its id.
+ */
 function lessonLetters(lessonId: string): readonly string[] {
   if (lessonId === REVIEW_LESSON_ID) return weakLetters(progressSnapshot());
+  const practice = practiceLetters(lessonId);
+  if (practice) return practice.filter((l) => getLetterSpec(l) !== undefined);
   return getLesson(lessonId)?.letters ?? [];
 }
 

@@ -17,26 +17,43 @@ export interface Message {
 
 interface ConversationState {
   messages: Message[];
-  /** Hints shown during the conversation (for the summary, T7). */
+  /** Hints shown during the conversation (for the summary). */
   hintLog: HintLogEntry[];
+  /** Corrections by the signer: cancelled phrases, erased letters / words. */
+  cancels: number;
+  deletes: number;
+  /** The summary already added this conversation to the all-time statistics. */
+  recorded: boolean;
   addMessage(message: Omit<Message, "id">): number;
   setSpeech(id: number, speech: MessageSpeech): void;
   logHints(entries: readonly HintLogEntry[]): void;
+  countCancel(): void;
+  countDelete(): void;
+  markRecorded(): void;
   clear(): void;
 }
 
 let nextId = 1;
 
-/** The dialogue feed of the talk screen (docs/TRANSLATOR_SPEC.md §3.2). Not persisted: it stays on the device only while open. */
+/**
+ * The dialogue of the talk screen (docs/TRANSLATOR_SPEC.md §3.2, §8). Not persisted: the conversation
+ * itself stays on the device only while the app is open; only aggregates go to localStorage.
+ */
 export const useConversation = create<ConversationState>()((set) => ({
   messages: [],
   hintLog: [],
+  cancels: 0,
+  deletes: 0,
+  recorded: false,
   addMessage: (message) => {
     const id = nextId++;
-    set((s) => ({ messages: [...s.messages, { ...message, id }] }));
+    set((s) => ({ messages: [...s.messages, { ...message, id }], recorded: false }));
     return id;
   },
   setSpeech: (id, speech) => set((s) => ({ messages: s.messages.map((m) => (m.id === id ? { ...m, speech } : m)) })),
   logHints: (entries) => set((s) => ({ hintLog: [...s.hintLog, ...entries] })),
-  clear: () => set({ messages: [], hintLog: [] }),
+  countCancel: () => set((s) => ({ cancels: s.cancels + 1 })),
+  countDelete: () => set((s) => ({ deletes: s.deletes + 1 })),
+  markRecorded: () => set({ recorded: true }),
+  clear: () => set({ messages: [], hintLog: [], cancels: 0, deletes: 0, recorded: false }),
 }));

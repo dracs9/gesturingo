@@ -84,10 +84,28 @@
   font-size: 1.8rem;
 }
 
+/* Phone, portrait (§3.1): camera on top, the message being typed right under it, the feed below. */
 @media (max-width: 800px) {
   .layout {
     grid-template-columns: 1fr;
-    padding: 64px 16px 96px;
+    gap: 12px;
+    padding: 56px 12px 96px;
+  }
+
+  .camera {
+    gap: 6px;
+  }
+
+  .title {
+    display: none;
+  }
+
+  .frame {
+    font-size: 0.85rem;
+  }
+
+  .calibrationLine {
+    font-size: 0.9rem;
   }
 }
 

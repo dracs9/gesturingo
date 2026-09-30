@@ -52,25 +52,6 @@ function synth(): SpeechSynthesis | null {
   }
 }
 
-const VOICE_KEY = "gesturingo.voice";
-
-function rememberedVoice(): string | null {
-  try {
-    return window.localStorage.getItem(VOICE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function rememberVoice(uri: string | undefined): void {
-  if (!uri) return;
-  try {
-    window.localStorage.setItem(VOICE_KEY, uri);
-  } catch {
-    // Not critical.
-  }
-}
-
 /** Voices load asynchronously in Chrome: wait for `voiceschanged`, but never for long. */
 function loadVoices(s: SpeechSynthesis, timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
   const now = s.getVoices();
@@ -84,6 +65,29 @@ function loadVoices(s: SpeechSynthesis, timeoutMs = 1500): Promise<SpeechSynthes
     const timer = window.setTimeout(done, timeoutMs);
     s.addEventListener("voiceschanged", done);
   });
+}
+
+export interface VoiceOption {
+  uri: string;
+  name: string;
+  lang: string;
+  local: boolean;
+}
+
+/** Russian voices of this browser for the settings (best first); empty without the API. */
+export async function listRussianVoices(): Promise<VoiceOption[]> {
+  const s = synth();
+  if (!s) return [];
+  try {
+    const voices = await loadVoices(s);
+    const best = pickRussianVoice(voices);
+    return voices
+      .filter((v) => v.lang.replace("_", "-").toLowerCase().startsWith("ru"))
+      .sort((a, b) => (a === best ? -1 : b === best ? 1 : 0))
+      .map((v) => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService }));
+  } catch {
+    return [];
+  }
 }
 
 /** Load the voices ahead of time, so the first phrase starts without waiting for them. */
@@ -134,10 +138,12 @@ export function onSpeakingChange(listener: (speaking: boolean) => void): () => v
 }
 
 function sayChunk(s: SpeechSynthesis, text: string, voice: SpeechSynthesisVoice): Promise<void> {
+  const { speechRate, speechVolume } = useSettings.getState();
   const u = new SpeechSynthesisUtterance(text);
   u.voice = voice;
   u.lang = voice.lang;
-  u.rate = 0.9;
+  u.rate = speechRate;
+  u.volume = speechVolume;
   return new Promise<void>((resolve) => {
     const finish = () => {
       window.clearTimeout(timer);
@@ -156,9 +162,9 @@ async function speakNow(text: string): Promise<SpeakResult> {
   const s = synth();
   if (!s) return "unavailable";
   try {
-    const voice = pickRussianVoice(await loadVoices(s), rememberedVoice());
+    // The voice chosen in the settings (remembered in localStorage), else the best Russian one.
+    const voice = pickRussianVoice(await loadVoices(s), useSettings.getState().voiceURI);
     if (!voice) return "unavailable";
-    rememberVoice(voice.voiceURI);
     // Only our own queue speaks: clear anything stuck (e.g. the silent iOS unlock utterance).
     s.cancel();
     setSpeaking(true);

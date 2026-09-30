@@ -20,6 +20,7 @@ export const strings = {
     results: "Итоги · Gesturingo",
     bridge: "Тренажёр · Gesturingo",
     talk: "Разговор · Gesturingo",
+    talkSummary: "Сводка разговора · Gesturingo",
     record: "Запись образцов · Gesturingo",
     letters: "Проверка букв · Gesturingo",
   },
@@ -275,6 +276,27 @@ export const strings = {
     speaking: "Говорю…",
     noVoice: "Озвучка недоступна — попробуйте другой браузер или устройство",
     muted: "Звук выключен",
+    // «Повернуть к собеседнику» (§3.1): the last phrase full screen.
+    facing: {
+      button: "Показать собеседнику крупно",
+      says: "Говорит жестами:",
+      close: "Коснитесь, чтобы закрыть",
+    },
+    // Speech settings (§4.3–4.4), mouse / touch.
+    settings: {
+      title: "Озвучка",
+      sound: "Звук включён",
+      rate: (v: string) => `Скорость речи: ${v}`,
+      volume: (v: number) => `Громкость: ${v}%`,
+      voice: "Голос",
+      voiceAuto: "Лучший русский голос (авто)",
+      online: "онлайн",
+      noVoices: "Русских голосов нет — фразы будут только текстом",
+      test: "Проверить голос",
+      sample: "Привет! Так звучит мой голос.",
+      immediately: "Озвучивать сразу, без кольца подтверждения",
+      immediatelyNote: "Быстрее, но ошибочно распознанную фразу уже не отменить",
+    },
     // Calibration (§4.5): where this person signs, for position hints.
     calibration: {
       text: "Покажите открытую ладонь на уровне груди и задержите",
@@ -311,8 +333,27 @@ export const strings = {
       pause: "Рука опущена 1,2 с — пробел, 2 с — сказать",
       motion: "Жест с движением — покажите целиком и замрите",
       cancel: "Ладонь 1,2 с — отменить фразу",
-      exit: "Ладонь 2 с — выйти на карту",
+      exit: "Ладонь 2 с — выйти к сводке",
     },
+  },
+
+  // After a conversation (docs/TRANSLATOR_SPEC.md §8).
+  talkSummary: {
+    title: "Сводка разговора",
+    signed: "Сказано жестами",
+    heard: "Ответов собеседника",
+    hints: "Подсказок",
+    corrections: "Исправлений",
+    needHelp: "Чаще всего камере нужна была помощь",
+    noHelp: "Подсказки не понадобились — камера всё поняла с первого раза.",
+    allTime: (conversations: number, signed: number, heard: number) =>
+      `За всё время: разговоров ${conversations}, фраз жестами ${signed}, ответов ${heard}`,
+    practice: (letters: readonly string[]) => `Потренировать: ${letters.join(" ")}`,
+    practiceTitle: "Тренировка жестов из разговора",
+    back: "Вернуться к разговору",
+    newConversation: "Новый разговор",
+    reset: "Очистить статистику",
+    resetConfirm: "Нажми ещё раз — сотрёт статистику",
   },
 
   record: {

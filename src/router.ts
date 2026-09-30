@@ -8,6 +8,7 @@ export type Route =
   | { name: "results"; lessonId: string }
   | { name: "bridge" }
   | { name: "talk" }
+  | { name: "talkSummary" }
   | { name: "record" }
   | { name: "letters" };
 
@@ -19,6 +20,7 @@ export const paths = {
   results: (lessonId: string) => `/results/${encodeURIComponent(lessonId)}`,
   bridge: () => "/bridge",
   talk: () => "/talk",
+  talkSummary: () => "/talk/summary",
   record: () => "/record",
   letters: () => "/letters",
 } as const;
@@ -49,6 +51,7 @@ export function matchRoute(pathname: string): Route {
     return { name: "welcome" };
   }
 
+  if (head === "talk" && param === "summary") return { name: "talkSummary" };
   if (head === "lesson") return { name: "lesson", lessonId: param };
   if (head === "results") return { name: "results", lessonId: param };
   return { name: "welcome" };

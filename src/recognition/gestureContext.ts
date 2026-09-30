@@ -8,6 +8,7 @@ export type ScreenName =
   | "results"
   | "bridge"
   | "talk"
+  | "talkSummary"
   | "record"
   | "letters";
 export type LetterMode = "none" | "current" | "learned" | "all";
@@ -38,6 +39,8 @@ export const GESTURE_CONTEXTS: Readonly<Record<ScreenName, GestureContext>> = {
   // Talk (docs/TRANSLATOR_SPEC.md §5): no cursor, no poses of the control layer — the screen has its own
   // command zones and open-palm cancel (1.2 s) / exit (2 s), and letters are read without a target.
   talk: { cursor: false, dwell: false, ok: false, back: false, letters: "all" },
+  // The summary is a menu screen: buttons by cursor, thumbs up / open palm → map.
+  talkSummary: NAVIGATION,
   record: { cursor: true, dwell: true, ok: false, back: true, letters: "none" },
   // Service page: buttons like /record; its live check narrows this to the lesson context via the UI store.
   letters: { cursor: true, dwell: true, ok: false, back: true, letters: "none" },

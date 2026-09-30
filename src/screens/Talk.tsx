@@ -6,6 +6,8 @@ import { CandidateCard, type ReadingView } from "../components/CandidateCard";
 import { CommandZones, type ZoneLabel } from "../components/CommandZones";
 import { ComposerBar } from "../components/ComposerBar";
 import { ConversationFeed } from "../components/ConversationFeed";
+import { FacingOverlay } from "../components/FacingOverlay";
+import { TalkSettings } from "../components/TalkSettings";
 import { CorrectionArrow } from "../components/CorrectionArrow";
 import { GhostPath } from "../components/GhostPath";
 import { HintBanner } from "../components/HintBanner";
@@ -48,6 +50,7 @@ import { useCalibration } from "../store/calibration";
 import { setHighlight, setSkeletonTone } from "../store/highlight";
 import { clearTalkStats, setMotionStats, setTalkStats } from "../store/talkStats";
 import type { ZoneId } from "../recognition/control/commandZones";
+import { useSettings } from "../store/settings";
 import { useUi } from "../store/ui";
 import { createAutocomplete, type Autocomplete } from "../talk/autocomplete";
 import { createComposer, createConfirmation, type Candidate } from "../talk/composer";
@@ -146,6 +149,8 @@ export function Talk() {
   const [cancelledAt, setCancelledAt] = useState<number | null>(null);
   const [autocomplete, setAutocomplete] = useState<Autocomplete | null>(null);
   const [dynamicHint, setDynamicHint] = useState<DynamicHint | null>(null);
+  const [facing, setFacing] = useState<string | null>(null);
+  const lastSigned = useConversation((st) => st.messages.filter((m) => m.side === "signer").at(-1)?.text ?? null);
   const matcherRef = useRef<PhraseMatcher | null>(null);
   const topSuggestion = useRef<string | null>(null);
   const ringRef = useRef<HTMLDivElement>(null);
@@ -230,7 +235,15 @@ export function Talk() {
     const propose = (now: number) => {
       const words = composer.take();
       syncDraft();
-      if (words.length > 0) setCandidate(confirmation.propose(words, now));
+      if (words.length === 0) return;
+      const c = confirmation.propose(words, now);
+      if (!useSettings.getState().speakImmediately) {
+        setCandidate(c);
+        return;
+      }
+      // «Озвучивать сразу» (off by default, §4.3): no ring, straight to the feed and speech.
+      confirmation.cancel();
+      say(c);
     };
     // A letter is typed; a phrase gesture adds its whole word and goes straight to confirmation (§4.3).
     // When letters were typed (a dynamic phrase recognized later takes back the ones typed during its motion).
@@ -333,12 +346,13 @@ export function Talk() {
         if (confirmation.candidate) {
           const dropped = confirmation.cancel();
           if (dropped) composer.restore(dropped.words);
+          useConversation.getState().countCancel();
           setCandidate(null);
           setCancelledAt(now);
           syncDraft();
         } else {
           left = true;
-          navigate(paths.map());
+          navigate(paths.talkSummary());
           return;
         }
       }
@@ -355,6 +369,7 @@ export function Talk() {
           playSound("click");
         } else if (z.fired === "delete") {
           composer.deleteLast();
+          useConversation.getState().countDelete();
         } else if (z.fired === "space") {
           // With a suggestion the zone inserts the first word; otherwise it is a plain space.
           const top = topSuggestion.current;
@@ -502,6 +517,11 @@ export function Talk() {
         <CandidateCard ref={ringRef} candidate={candidate} reading={reading} cancelled={cancelledAt !== null} />
         {dynamicHint && !candidate && <HintBanner text={dynamicHint.text} />}
         <ConversationFeed />
+        {lastSigned && (
+          <button type="button" className={t.linkButton} onClick={() => setFacing(lastSigned)}>
+            🔄 {strings.talk.facing.button}
+          </button>
+        )}
         <ListenerPanel
           supported={listener.supported}
           listening={listener.listening}
@@ -510,9 +530,11 @@ export function Talk() {
           onMic={listener.toggleMic}
           onSend={listener.send}
         />
+        <TalkSettings />
       </section>
 
       <TalkLegend />
+      {facing && <FacingOverlay text={facing} onClose={() => setFacing(null)} />}
     </main>
   );
 }
