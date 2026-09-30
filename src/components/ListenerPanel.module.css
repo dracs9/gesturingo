@@ -1,73 +1,82 @@
 .panel {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  padding: 14px 16px;
-  border: 2px solid var(--line);
-  border-radius: var(--radius-card);
-  background: var(--surface);
 }
 
-.title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 800;
-}
-
-.mic {
+/* One line: dot + microphone + what it is doing (the dot pulses while listening). */
+.status {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: var(--btn-min);
-  width: 100%;
-  padding: 16px 20px;
-  border: 3px solid var(--text);
+  gap: 8px 10px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 2px solid var(--line);
   border-radius: var(--radius);
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status[data-status="listening"] .dot {
+  background: var(--danger);
+  animation: listening 1.2s ease-in-out infinite alternate;
+}
+
+.status[data-status="error"] {
+  border-color: var(--danger);
+}
+
+.statusIcon {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.statusText {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: 0.95rem;
+}
+
+.retry {
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 2px solid var(--text);
+  border-radius: 999px;
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   font-weight: 800;
   cursor: pointer;
 }
 
-.mic:hover:not(:disabled) {
-  background: var(--surface-hover);
-}
-
-.mic:focus-visible {
+.retry:focus-visible {
   outline: 4px solid var(--mark);
-  outline-offset: 3px;
-}
-
-.mic:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.micOn {
-  border-color: var(--danger);
-  background: #fdeaea;
-  animation: listening 1.2s ease-in-out infinite alternate;
-}
-
-.micIcon {
-  font-size: 2rem;
+  outline-offset: 2px;
 }
 
 @keyframes listening {
   from {
-    box-shadow: 0 0 0 0 rgb(201 60 60 / 0.4);
+    box-shadow: 0 0 0 0 rgb(201 60 60 / 0.5);
   }
   to {
-    box-shadow: 0 0 0 10px rgb(201 60 60 / 0);
+    box-shadow: 0 0 0 6px rgb(201 60 60 / 0);
   }
 }
 
 .message {
   margin: 0;
-  font-size: 1rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
@@ -79,12 +88,12 @@
 .input {
   flex: 1;
   min-width: 0;
-  min-height: 56px;
-  padding: 10px 14px;
+  min-height: 48px;
+  padding: 8px 14px;
   border: 2px solid var(--line);
   border-radius: var(--radius);
   font: inherit;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .input:focus-visible {
@@ -93,7 +102,7 @@
 }
 
 .send {
-  min-height: 56px;
+  min-height: 48px;
   padding: 0 18px;
   border: 0;
   border-radius: var(--radius);
@@ -109,14 +118,8 @@
   cursor: not-allowed;
 }
 
-.privacy {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .micOn {
+  .status[data-status="listening"] .dot {
     animation: none;
   }
 }

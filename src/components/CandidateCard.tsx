@@ -6,6 +6,7 @@ import type { Candidate } from "../talk/composer";
 import s from "./CandidateCard.module.css";
 import { HintBanner } from "./HintBanner";
 import { HoldRing } from "./HoldRing";
+import { Icon } from "./Icon";
 
 export interface ReadingView {
   state: ReaderState;
@@ -48,13 +49,11 @@ export const CandidateCard = forwardRef<HTMLDivElement, CandidateCardProps>(func
         <p className={s.title}>{t.candidateTitle}</p>
         <div className={s.row}>
           <HoldRing ref={ringRef} className={s.ring}>
-            <span className={s.icon} aria-hidden="true">
-              🔊
-            </span>
+            <Icon name="speaker" size={32} className={s.icon} />
           </HoldRing>
           <p className={s.phrase}>{candidate.text}</p>
         </div>
-        <p className={s.note}>✋ {t.candidateCancel}</p>
+        <p className={s.note}>{t.candidateCancel}</p>
       </div>
     );
   }
@@ -92,7 +91,7 @@ export const CandidateCard = forwardRef<HTMLDivElement, CandidateCardProps>(func
           {stateText}
         </p>
       </div>
-      <HintBanner text={reading.hint} />
+      <HintBanner text={reading.hint} className={s.hint} />
     </div>
   );
 });

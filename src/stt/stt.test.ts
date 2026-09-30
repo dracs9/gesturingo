@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const tts = vi.hoisted(() => ({ speaking: false, listeners: new Set<(speaking: boolean) => void>() }));
 vi.mock("../tts/speech", () => ({
@@ -11,7 +11,7 @@ vi.mock("../tts/speech", () => ({
 
 import {
   collectText,
-  createSpeechListener,
+  createAutoListener,
   isSpeechRecognitionSupported,
   sttErrorKind,
   type RecognitionLike,
@@ -63,16 +63,16 @@ class TrackedRecognition extends FakeRecognition {
 }
 
 function listen() {
-  const texts: Array<{ interim: string; final: string }> = [];
-  const ends: string[] = [];
-  const errors: string[] = [];
-  const listener = createSpeechListener({
+  const interims: string[] = [];
+  const finals: string[] = [];
+  const statuses: string[] = [];
+  const listener = createAutoListener({
     ctor: TrackedRecognition,
-    onText: (t) => texts.push(t),
-    onEnd: (t) => ends.push(t),
-    onError: (e) => errors.push(e),
+    onInterim: (t) => interims.push(t),
+    onFinal: (t) => finals.push(t),
+    onStatus: (st, error) => statuses.push(error ? `${st}:${error}` : st),
   });
-  return { listener, texts, ends, errors };
+  return { listener, interims, finals, statuses };
 }
 
 beforeEach(() => {
@@ -80,6 +80,11 @@ beforeEach(() => {
   last = null;
   tts.speaking = false;
   tts.listeners.clear();
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("speech recognition (talk mode)", () => {
@@ -101,53 +106,102 @@ describe("speech recognition (talk mode)", () => {
     expect(sttErrorKind("bad-grammar")).toBe("other");
   });
 
-  it("listens once in Russian with interim results, then ends with the final text", () => {
-    const { listener, texts, ends } = listen();
-    expect(listener.start()).toBe(true);
-    expect(last).toMatchObject({ lang: "ru-RU", interimResults: true, continuous: false, started: true });
-    expect(listener.listening).toBe(true);
+  it("listens continuously in Russian and gives out each finished phrase once", () => {
+    const { listener, interims, finals, statuses } = listen();
+    listener.start();
+    expect(last).toMatchObject({ lang: "ru-RU", interimResults: true, continuous: true, started: true });
+    expect(statuses).toEqual(["listening"]);
 
     last?.onresult?.({ results: list(result("добрый", false)) });
     last?.onresult?.({ results: list(result("добрый день", true)) });
-    last?.stop();
+    last?.onresult?.({ results: list(result("добрый день", true), result("как", false)) });
+    last?.onresult?.({ results: list(result("добрый день", true), result("как дела", true)) });
 
-    expect(texts).toEqual([
-      { interim: "добрый", final: "" },
-      { interim: "", final: "добрый день" },
-    ]);
-    expect(ends).toEqual(["добрый день"]);
-    expect(listener.listening).toBe(false);
+    expect(finals).toEqual(["добрый день", "как дела"]);
+    expect(interims).toEqual(["добрый", "", "как", ""]);
   });
 
-  it("does not start while our own voice speaks", () => {
-    setSpeaking(true);
+  it("reopens a session the browser ended", () => {
     const { listener } = listen();
-    expect(listener.start()).toBe(false);
-    expect(last).toBeNull();
+    listener.start();
+    last?.onresult?.({ results: list(result("да", true)) });
+    last?.stop();
+    expect(created).toHaveLength(1);
+    vi.advanceTimersByTime(1000);
+    expect(created).toHaveLength(2);
+    expect(last?.started).toBe(true);
+    listener.dispose();
   });
 
-  it("drops what it heard when our voice starts (no echo in the feed)", () => {
-    const { listener, ends, errors } = listen();
+  it("pauses while our own voice speaks and drops what it heard (no echo in the feed)", () => {
+    const { listener, finals, statuses } = listen();
     listener.start();
-    last?.onresult?.({ results: list(result("спасибо", true)) });
+    last?.onresult?.({ results: list(result("спаси", false)) });
     setSpeaking(true);
     expect(last?.aborted).toBe(true);
-    expect(ends).toEqual([""]);
-    expect(errors).toEqual([]);
+    expect(statuses).toEqual(["listening", "paused"]);
+    vi.advanceTimersByTime(5000);
+    expect(created).toHaveLength(1);
+
+    setSpeaking(false);
+    vi.advanceTimersByTime(1000);
+    expect(created).toHaveLength(2);
+    expect(statuses).toEqual(["listening", "paused", "listening"]);
+    expect(finals).toEqual([]);
   });
 
-  it("reports errors", () => {
-    const { listener, errors } = listen();
+  it("waits for our voice to finish before the first session", () => {
+    setSpeaking(true);
+    const { listener, statuses } = listen();
+    listener.start();
+    expect(last).toBeNull();
+    expect(statuses).toEqual(["paused"]);
+    setSpeaking(false);
+    vi.advanceTimersByTime(1000);
+    expect(last?.started).toBe(true);
+  });
+
+  it("keeps listening through silence", () => {
+    const { listener, statuses } = listen();
+    listener.start();
+    vi.advanceTimersByTime(8000);
+    last?.onerror?.({ error: "no-speech" });
+    last?.onend?.();
+    vi.advanceTimersByTime(1000);
+    expect(created).toHaveLength(2);
+    expect(statuses).toEqual(["listening"]);
+  });
+
+  it("stops on a missing permission until started again", () => {
+    const { listener, statuses } = listen();
     listener.start();
     last?.onerror?.({ error: "not-allowed" });
-    expect(errors).toEqual(["denied"]);
+    last?.onend?.();
+    vi.advanceTimersByTime(5000);
+    expect(created).toHaveLength(1);
+    expect(statuses).toEqual(["listening", "error:denied"]);
+
+    listener.start();
+    expect(created).toHaveLength(2);
+    expect(statuses.at(-1)).toBe("listening");
+  });
+
+  it("gives up after sessions keep ending at once (no endless restart loop)", () => {
+    const { listener, statuses } = listen();
+    listener.start();
+    for (let i = 0; i < 10; i++) {
+      last?.onend?.();
+      vi.advanceTimersByTime(400);
+    }
+    expect(created.length).toBeLessThanOrEqual(5);
+    expect(statuses.at(-1)).toBe("error:other");
   });
 
   it("does nothing without the API", () => {
     expect(isSpeechRecognitionSupported()).toBe(false);
-    const listener = createSpeechListener({ ctor: null, onText: () => {}, onEnd: () => {}, onError: () => {} });
+    const listener = createAutoListener({ ctor: null, onInterim: () => {}, onFinal: () => {}, onStatus: () => {} });
     expect(listener.supported).toBe(false);
-    expect(listener.start()).toBe(false);
+    expect(() => listener.start()).not.toThrow();
     expect(() => listener.dispose()).not.toThrow();
   });
 });

@@ -13,10 +13,44 @@
   z-index: 50;
 }
 
+/* Gesture legend + «?» in the bottom-left corner. */
+.corner {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 16px;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+}
+
+/* Screens with a big camera leave little room at the bottom: a smaller «?». */
+.cornerCompact .help {
+  min-width: 52px;
+  min-height: 52px;
+}
+
 /* Phones: the status goes to the left corner so it never covers titles or the top-right button. */
 @media (max-width: 600px) {
   .status {
     left: 12px;
     transform: none;
+  }
+
+  .dock {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .corner {
+    left: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+
+  .corner .help {
+    min-width: 52px;
+    min-height: 52px;
   }
 }

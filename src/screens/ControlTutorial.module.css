@@ -4,7 +4,7 @@
   align-items: center;
   gap: 16px;
   min-height: 100dvh;
-  padding: 84px 16px calc(150px + env(safe-area-inset-bottom));
+  padding: calc(var(--chrome-top) + 12px) 16px var(--chrome-bottom);
   text-align: center;
 }
 
@@ -179,7 +179,7 @@
 
 /* --- Steps 3–4: camera --- */
 .camera {
-  width: min(460px, 92vw);
+  width: min(460px, 92vw, 48dvh * 1.333);
 }
 
 .success {
@@ -193,6 +193,21 @@
   font-size: 2rem;
   font-weight: 800;
   animation: pop 0.25s ease-out;
+}
+
+/* Short laptop screens: a smaller step icon, so the camera of steps 3–4 fits. */
+@media (max-height: 800px) {
+  .layout {
+    gap: 10px;
+  }
+
+  .icon {
+    font-size: 3rem;
+  }
+
+  .skip {
+    min-height: 56px;
+  }
 }
 
 /* Phones: a smaller skip button so it never meets the hand status in the top-left corner. */

@@ -1,14 +1,26 @@
+/* One window, like the lesson: the camera shrinks with the window height, the card scrolls if it must. */
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--gap);
-  align-items: start;
-  min-height: 100dvh;
-  padding: 72px 24px 24px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: var(--chrome-top) var(--page-x) calc(80px + env(safe-area-inset-bottom));
 }
 
 .camera {
   position: relative;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+/* Largest size of the video's aspect ratio that fits the cell. */
+.camera .cameraView {
+  width: min(100cqw, 100cqh * var(--aspect, 1.333));
 }
 
 .card {
@@ -16,6 +28,8 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
   text-align: center;
 }
 
@@ -73,7 +87,7 @@
 }
 
 .ring {
-  --ring-size: 150px;
+  --ring-size: clamp(96px, 18vh, 150px);
 }
 
 .sample {
@@ -145,11 +159,65 @@
   }
 }
 
-@media (max-width: 800px) {
-  .layout {
-    grid-template-columns: 1fr;
-    padding: 64px 16px 96px;
+/* Short laptop screens: everything down to the hint must fit without scrolling (hands cannot scroll). */
+@media (max-height: 800px) {
+  .card {
+    gap: 8px;
   }
+
+  .title {
+    font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  }
+
+  .tile {
+    width: 52px;
+    height: 62px;
+    font-size: 1.7rem;
+  }
+
+  .ring {
+    --ring-size: clamp(80px, 14vh, 120px);
+  }
+
+  .letter {
+    font-size: calc(var(--ring-size) * 0.46);
+  }
+
+  .photo {
+    height: clamp(96px, 17vh, 150px);
+  }
+
+  .show {
+    font-size: 1.25rem;
+  }
+
+  /* The legend in the corner already says it. */
+  .exit {
+    display: none;
+  }
+}
+
+/* Tablets in portrait and phones: camera on top (at most ~45% of the height), the card under it. */
+@media (max-width: 800px), (max-width: 1100px) and (orientation: portrait) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .camera {
+    container-type: normal;
+    display: flex;
+    justify-content: center;
+  }
+
+  .camera .cameraView {
+    width: min(100%, 32dvh * var(--aspect, 1.333));
+  }
+}
+
+@media (max-width: 800px) {
 
   .tile {
     width: 52px;
@@ -157,16 +225,30 @@
     font-size: 2rem;
   }
 
+  .card {
+    gap: 6px;
+  }
+
+  .exit {
+    display: none;
+  }
+
+  .tile {
+    width: 44px;
+    height: 54px;
+    font-size: 1.5rem;
+  }
+
   .ring {
-    --ring-size: 100px;
+    --ring-size: 80px;
   }
 
   .letter {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
   }
 
   .photo {
-    height: 120px;
+    height: 96px;
   }
 }
 

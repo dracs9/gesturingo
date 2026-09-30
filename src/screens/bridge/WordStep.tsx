@@ -118,7 +118,7 @@ export function WordStep({ word, warmup, header, models, onDone }: WordStepProps
   return (
     <div className={b.layout}>
       <section className={b.camera}>
-        <CameraView variant="large" />
+        <CameraView variant="large" className={b.cameraView} />
         <Confetti burst={done ? 1 : 0} originX={0.5} originY={0.35} count={160} />
       </section>
 
@@ -163,7 +163,7 @@ export function WordStep({ word, warmup, header, models, onDone }: WordStepProps
           )
         )}
 
-        <p className={b.note}>✋ {strings.lesson.exitHint}</p>
+        <p className={`${b.note} ${b.exit}`}>✋ {strings.lesson.exitHint}</p>
       </section>
     </div>
   );

@@ -4,6 +4,8 @@ import { CameraView } from "./components/CameraView";
 import { DebugPanel } from "./components/DebugPanel";
 import { GestureLayer } from "./components/GestureLayer";
 import { GestureLegend } from "./components/GestureLegend";
+import { HelpButton } from "./components/HelpButton";
+import { HelpSheet } from "./components/HelpSheet";
 import { HandStatus } from "./components/HandStatus";
 import { isDebug } from "./config";
 import { strings } from "./data/strings.ru";
@@ -72,10 +74,15 @@ export function App() {
   const ready = cameraStatus === "ready";
   const gestureOverride = useUi((st) => st.gestureOverride);
   const dockHidden = useUi((st) => st.dockHidden);
+  const helpOpen = useUi((st) => st.helpOpen);
+  const setHelpOpen = useUi((st) => st.setHelpOpen);
   const gestureContext = useMemo(
     () => ({ ...getGestureContext(route.name), ...gestureOverride }),
     [route.name, gestureOverride],
   );
+
+  // Help belongs to the screen it was opened on.
+  useEffect(() => setHelpOpen(false), [route.name, setHelpOpen]);
 
   // After a reload on an inner screen, restart the camera silently if permission was already given.
   useEffect(() => {
@@ -102,8 +109,14 @@ export function App() {
               <CameraView variant="mini" />
             </div>
           )}
-          {/* Talk shows its own legend: command zones instead of the cursor. */}
-          {route.name !== "talk" && <GestureLegend context={gestureContext} compact={dockHidden} />}
+          {/* Talk has its own toolbar (command zones instead of the cursor); the tutorial teaches the legend itself. */}
+          {route.name !== "talk" && (
+            <div className={`${s.corner} ${dockHidden ? s.cornerCompact : ""}`}>
+              <GestureLegend context={gestureContext} compact={dockHidden} />
+              {route.name !== "tutorial" && <HelpButton className={s.help} />}
+            </div>
+          )}
+          {helpOpen && <HelpSheet screen={route.name} context={gestureContext} />}
           <GestureLayer context={gestureContext} />
         </>
       )}

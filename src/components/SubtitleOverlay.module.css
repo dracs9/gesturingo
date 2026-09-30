@@ -16,6 +16,12 @@
   pointer-events: none;
 }
 
+.icon {
+  margin-right: 8px;
+  vertical-align: -0.1em;
+  opacity: 0.8;
+}
+
 .interim {
   color: #c9ced8;
   font-style: italic;

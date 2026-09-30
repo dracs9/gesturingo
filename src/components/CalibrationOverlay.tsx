@@ -8,10 +8,12 @@ interface CalibrationOverlayProps {
   ringRef: Ref<HTMLDivElement>;
   /** Seconds left before calibration is skipped: textContent set per frame. */
   remainingRef: Ref<HTMLSpanElement>;
+  /** Mouse / touch: go on without calibration. */
+  onSkip(): void;
 }
 
 /** Over the camera while talk mode calibrates (docs/TRANSLATOR_SPEC.md §4.5): «открытая ладонь на уровне груди». */
-export function CalibrationOverlay({ ringRef, remainingRef }: CalibrationOverlayProps) {
+export function CalibrationOverlay({ ringRef, remainingRef, onSkip }: CalibrationOverlayProps) {
   const t = strings.talk.calibration;
   return (
     <div className={s.calibration} role="status">
@@ -26,6 +28,9 @@ export function CalibrationOverlay({ ringRef, remainingRef }: CalibrationOverlay
         <p className={s.calibrationNote}>
           {t.note} <span ref={remainingRef}>10</span> {t.seconds}
         </p>
+        <button type="button" className={s.calibrationSkip} onClick={onSkip}>
+          {t.skip}
+        </button>
       </div>
     </div>
   );

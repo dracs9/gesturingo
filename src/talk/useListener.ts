@@ -2,38 +2,37 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Subtitle } from "../components/SubtitleOverlay";
 import { TALK_SUBTITLE_MS } from "../recognition/thresholds";
 import {
-  createSpeechListener,
+  createAutoListener,
   isSpeechRecognitionSupported,
-  type SpeechListener,
+  type AutoListener,
+  type ListenStatus,
   type SttErrorKind,
 } from "../stt/stt";
-import { isSpeaking, onSpeakingChange } from "../tts/speech";
 import { useConversation } from "./conversationStore";
 
 export interface ListenerState {
   supported: boolean;
-  listening: boolean;
-  /** Our TTS is speaking: the microphone waits (no echo). */
-  ttsSpeaking: boolean;
+  status: ListenStatus;
   error: SttErrorKind | null;
   subtitle: Subtitle | null;
-  toggleMic(): void;
+  /** After an error: try the microphone again (a tap — some browsers need one). */
+  retry(): void;
   /** The typed answer (fallback without speech recognition). */
   send(text: string): void;
 }
 
 /**
- * The hearing person's channel on the talk screen (docs/TRANSLATOR_SPEC.md §6): push-to-talk speech
- * recognition → subtitles over the video (interim, then final for 5 s) and a message in the feed.
+ * The hearing person's channel on the talk screen (docs/TRANSLATOR_SPEC.md §6): the microphone listens by
+ * itself while the screen is open → subtitles over the video (interim, then final for 5 s) and a message
+ * in the feed.
  */
 export function useListener(): ListenerState {
   const addMessage = useConversation((st) => st.addMessage);
   const [supported] = useState(isSpeechRecognitionSupported);
-  const [listening, setListening] = useState(false);
-  const [ttsSpeaking, setTtsSpeaking] = useState(isSpeaking);
+  const [status, setStatus] = useState<ListenStatus>("off");
   const [error, setError] = useState<SttErrorKind | null>(null);
   const [subtitle, setSubtitle] = useState<Subtitle | null>(null);
-  const listenerRef = useRef<SpeechListener | null>(null);
+  const listenerRef = useRef<AutoListener | null>(null);
 
   const post = useCallback(
     (text: string, source: "voice" | "typed") => {
@@ -43,20 +42,17 @@ export function useListener(): ListenerState {
     [addMessage],
   );
 
-  useEffect(() => onSpeakingChange(setTtsSpeaking), []);
-
   useEffect(() => {
-    const listener = createSpeechListener({
-      onText: ({ interim, final }) =>
-        setSubtitle({ text: [final, interim].filter(Boolean).join(" "), final: interim === "" }),
-      onEnd: (text) => {
-        setListening(false);
-        if (text) post(text, "voice");
-        else setSubtitle((current) => (current?.final ? current : null));
+    const listener = createAutoListener({
+      onInterim: (text) => setSubtitle((current) => (text ? { text, final: false } : current?.final ? current : null)),
+      onFinal: (text) => post(text, "voice"),
+      onStatus: (next, kind) => {
+        setStatus(next);
+        setError(kind);
       },
-      onError: setError,
     });
     listenerRef.current = listener;
+    listener.start();
     return () => {
       listener.dispose();
       listenerRef.current = null;
@@ -70,18 +66,12 @@ export function useListener(): ListenerState {
     return () => window.clearTimeout(id);
   }, [subtitle]);
 
-  const toggleMic = useCallback(() => {
-    const listener = listenerRef.current;
-    if (!listener) return;
-    if (listener.listening) {
-      listener.stop();
-      return;
-    }
+  const retry = useCallback(() => {
     setError(null);
-    if (listener.start()) setListening(true);
+    listenerRef.current?.start();
   }, []);
 
   const send = useCallback((text: string) => post(text, "typed"), [post]);
 
-  return { supported, listening, ttsSpeaking, error, subtitle, toggleMic, send };
+  return { supported, status, error, subtitle, retry, send };
 }

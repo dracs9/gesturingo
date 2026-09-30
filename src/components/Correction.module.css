@@ -57,6 +57,45 @@
   opacity: 0.85;
 }
 
+.calibrationSkip {
+  min-height: 40px;
+  padding: 6px 16px;
+  border: 2px solid rgb(255 255 255 / 0.8);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.calibrationSkip:focus-visible {
+  outline: 4px solid var(--mark);
+  outline-offset: 2px;
+}
+
+/* Small camera (phone): the card keeps to the essentials. */
+@media (max-width: 600px), (max-height: 700px) {
+  .calibrationCard {
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  .calibrationRing {
+    --ring-size: 56px;
+  }
+
+  .calibrationIcon {
+    font-size: 1.5rem;
+  }
+
+  .calibrationNote {
+    font-size: 0.8rem;
+  }
+}
+
 .target {
   position: absolute;
   z-index: 1;

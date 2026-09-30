@@ -11,7 +11,7 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  padding: 72px 24px calc(76px + env(safe-area-inset-bottom));
+  padding: var(--chrome-top) var(--page-x) calc(80px + env(safe-area-inset-bottom));
 }
 
 .camera {
@@ -28,8 +28,10 @@
 
 /* The letter card. */
 .card {
+  /* The letter row never gets smaller than this, however short the window. */
+  --sample-min: 120px;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto auto;
+  grid-template-rows: auto minmax(var(--sample-min), 1fr) auto auto auto auto auto;
   gap: 14px;
   min-height: 0;
   padding: 20px 24px;
@@ -274,13 +276,22 @@
 /* Short laptop screens (1366×768, 1280×720 projectors): tighter spacing, the drawing keeps the rest. */
 @media (min-width: 801px) and (max-height: 800px) {
   .layout {
-    padding-top: 64px;
-    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
 
   .card {
-    gap: 10px;
-    padding: 16px 20px;
+    --sample-min: clamp(80px, 15vh, 120px);
+    gap: 8px;
+    padding: 14px 18px;
+    overflow-y: auto;
+  }
+
+  .ring {
+    --ring-size: var(--sample-min);
+  }
+
+  .show {
+    font-size: 1.2rem;
   }
 
   .sub {
@@ -288,17 +299,27 @@
   }
 
   .card .hint {
-    min-height: 56px;
+    min-height: 52px;
+  }
+
+  .card .hint > p {
+    padding: 8px 14px 8px 10px;
+    font-size: 1.05rem;
+  }
+
+  .rules li {
+    padding: 1px 10px 1px 3px;
+    font-size: 0.8rem;
   }
 }
 
-/* Phones and narrow windows: the camera on top takes what the card leaves. */
-@media (max-width: 800px) {
+/* Phones, narrow windows and tablets in portrait: the camera on top takes what the card leaves. */
+@media (max-width: 800px), (max-width: 1100px) and (orientation: portrait) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(160px, 1fr) auto;
     gap: 10px;
-    padding: 60px 12px calc(60px + env(safe-area-inset-bottom));
+    padding: var(--chrome-top) 12px calc(72px + env(safe-area-inset-bottom));
   }
 
   .card {

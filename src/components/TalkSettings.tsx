@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { strings } from "../data/strings.ru";
 import { SPEECH_RATE_MAX, SPEECH_RATE_MIN, useSettings } from "../store/settings";
 import { listRussianVoices, speak, type VoiceOption } from "../tts/speech";
+import { Icon } from "./Icon";
 import s from "./TalkSettings.module.css";
 
 /**
- * Speech settings of the talk screen (docs/TRANSLATOR_SPEC.md §4.3–4.4): sound, rate, volume, voice and
- * «озвучивать сразу». Mouse / touch — set up once, e.g. by a helper; saved in localStorage.
+ * Settings of the talk screen behind a gear (docs/TRANSLATOR_SPEC.md §4.3–4.5): sound, rate, volume, voice,
+ * «озвучивать сразу» and a new calibration. Mouse / touch — set up once, e.g. by a helper; saved in localStorage.
  */
-export function TalkSettings() {
+export function TalkSettings({ onRecalibrate }: { onRecalibrate(): void }) {
   const t = strings.talk.settings;
   const settings = useSettings();
   const [voices, setVoices] = useState<VoiceOption[]>([]);
@@ -25,7 +26,9 @@ export function TalkSettings() {
 
   return (
     <details className={s.panel}>
-      <summary className={s.summary}>⚙️ {t.title}</summary>
+      <summary className={s.summary} aria-label={t.title} title={t.title}>
+        <Icon name="gear" />
+      </summary>
       <div className={s.body}>
         <label className={s.check}>
           <input type="checkbox" checked={settings.soundOn} onChange={settings.toggleSound} />
@@ -70,7 +73,7 @@ export function TalkSettings() {
           )}
         </label>
         <button type="button" className={s.button} onClick={() => void speak(t.sample)}>
-          🔊 {t.test}
+          {t.test}
         </button>
         <label className={s.check}>
           <input
@@ -84,6 +87,9 @@ export function TalkSettings() {
             <span className={s.muted}>{t.immediatelyNote}</span>
           </span>
         </label>
+        <button type="button" className={s.button} onClick={onRecalibrate}>
+          {t.recalibrate}
+        </button>
       </div>
     </details>
   );

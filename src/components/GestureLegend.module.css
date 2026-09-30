@@ -1,8 +1,5 @@
+/* Placed by the app's bottom-left corner, next to the «?» button. */
 .legend {
-  position: fixed;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  left: 16px;
-  z-index: 40;
   display: grid;
   gap: 4px;
   margin: 0;
@@ -52,6 +49,23 @@
   height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
+}
+
+/* Short laptop screens: two columns, half the height. */
+@media (max-height: 800px) and (min-width: 701px) {
+  .legend:not(.compact) {
+    grid-template-columns: repeat(2, auto);
+    gap: 2px 18px;
+    padding: 6px 12px;
+  }
+
+  .item {
+    font-size: 0.85rem;
+  }
+
+  .icon {
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 700px) {

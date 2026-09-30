@@ -64,11 +64,11 @@ export function TalkSummary() {
       <dl className={r.stats}>
         <div>
           <dt>{t.signed}</dt>
-          <dd>🤟 {summary.signed}</dd>
+          <dd>{summary.signed}</dd>
         </div>
         <div>
           <dt>{t.heard}</dt>
-          <dd>🎤 {summary.heard}</dd>
+          <dd>{summary.heard}</dd>
         </div>
         <div>
           <dt>{t.hints}</dt>

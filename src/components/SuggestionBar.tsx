@@ -23,7 +23,6 @@ export function SuggestionBar({ words, onPick }: SuggestionBarProps) {
           </li>
         ))}
       </ul>
-      <p className={s.hint}>{t.zoneHint}</p>
     </div>
   );
 }

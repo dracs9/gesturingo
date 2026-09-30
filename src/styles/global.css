@@ -63,8 +63,12 @@
   --radius-card: 24px;
   --radius: 16px;
   --shadow: 0 1px 2px rgb(27 35 64 / 0.06), 0 6px 18px rgb(27 35 64 / 0.08);
-  --gap: 24px;
+  --gap: clamp(12px, 2vw, 24px);
   --btn-min: 120px;
+  /* Room the fixed chrome takes: the hand status on top; the gesture legend, «?» and camera dock at the bottom. */
+  --chrome-top: calc(72px + env(safe-area-inset-top));
+  --chrome-bottom: calc(150px + env(safe-area-inset-bottom));
+  --page-x: 24px;
 
   font-family: var(--font-text);
   font-size: 18px;
@@ -73,6 +77,25 @@
   background: var(--bg);
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Short laptop screens (1366×768, 1280×720 with the browser's own bars ≈ 650 px of page). */
+@media (max-height: 800px) {
+  :root {
+    --btn-min: 96px;
+    --chrome-top: calc(64px + env(safe-area-inset-top));
+    --chrome-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Phones. */
+@media (max-width: 600px) {
+  :root {
+    --btn-min: 88px;
+    --chrome-top: calc(60px + env(safe-area-inset-top));
+    --chrome-bottom: calc(96px + env(safe-area-inset-bottom));
+    --page-x: 12px;
+  }
 }
 
 *,

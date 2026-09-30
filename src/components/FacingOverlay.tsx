@@ -17,7 +17,7 @@ export function FacingOverlay({ text, onClose }: { text: string; onClose(): void
 
   return (
     <button type="button" className={s.overlay} onClick={onClose} aria-label={strings.talk.facing.close}>
-      <span className={s.who}>🤟 {strings.talk.facing.says}</span>
+      <span className={s.who}>{strings.talk.facing.says}</span>
       <span className={s.text}>{text}</span>
       <span className={s.close}>{strings.talk.facing.close}</span>
     </button>

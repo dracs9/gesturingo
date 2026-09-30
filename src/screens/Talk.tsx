@@ -10,14 +10,15 @@ import { FacingOverlay } from "../components/FacingOverlay";
 import { TalkSettings } from "../components/TalkSettings";
 import { CorrectionArrow } from "../components/CorrectionArrow";
 import { GhostPath } from "../components/GhostPath";
+import { HelpButton } from "../components/HelpButton";
 import { HintBanner } from "../components/HintBanner";
 import { HoldRing } from "../components/HoldRing";
+import { Icon } from "../components/Icon";
 import { ListenerPanel } from "../components/ListenerPanel";
 import { paintCorrection } from "../components/paintCorrection";
 import { paintZones } from "../components/paintZones";
 import { SubtitleOverlay } from "../components/SubtitleOverlay";
 import { SuggestionBar } from "../components/SuggestionBar";
-import { TalkLegend } from "../components/TalkLegend";
 import { TargetZone } from "../components/TargetZone";
 import { hintText } from "../data/hintText";
 import { getLetterSpec, LETTERS } from "../data/letters";
@@ -120,6 +121,7 @@ function readingView(u: ReaderUpdate): ReadingView {
  * A static phrase gesture from Slovo («Я», «Что»…) adds its word and goes straight to confirmation (T4).
  * First an open palm at chest level calibrates the signing place: hints then say «чуть выше» with an
  * arrow to a dashed target zone, and a palm-orientation hint gets a rotation arrow (T5).
+ * The microphone listens to the hearing person by itself; help and settings sit behind icons.
  */
 export function Talk() {
   const setDockHidden = useUi((st) => st.setDockHidden);
@@ -309,6 +311,16 @@ export function Talk() {
       }
       calibrator = null;
 
+      // The help sheet is open: no commands, no typing, and the pause timers wait too.
+      if (useUi.getState().helpOpen) {
+        palmSince = null;
+        palmUsed = false;
+        paintZones(zonesRef.current, null);
+        palmRef.current?.toggleAttribute("data-active", false);
+        composer.tick(now, true);
+        return;
+      }
+
       // Motion features into the sequence buffer (dynamic phrases); nothing while a phrase waits.
       const usable = obs !== null && frameErrors(obs.frame).length === 0;
       const aspect = obs && obs.frame.videoHeight > 0 ? obs.frame.videoWidth / obs.frame.videoHeight : 1;
@@ -474,7 +486,7 @@ export function Talk() {
   return (
     <main className={t.layout} aria-label={strings.talk.title}>
       <section className={t.camera}>
-        <CameraView variant="large">
+        <CameraView variant="large" className={t.cameraView}>
           {calibration && phase === "done" && <TargetZone calibration={calibration} active={reading.visual === "move"} />}
           <CorrectionArrow ref={correctionRef} />
           {dynamicHint && <GhostPath points={dynamicHint.ghost} />}
@@ -485,55 +497,49 @@ export function Talk() {
             </HoldRing>
           </div>
           <SubtitleOverlay subtitle={listener.subtitle} />
-          {phase === "pending" && <CalibrationOverlay ringRef={calibrationRingRef} remainingRef={calibrationLeftRef} />}
+          {phase === "pending" && (
+            <CalibrationOverlay
+              ringRef={calibrationRingRef}
+              remainingRef={calibrationLeftRef}
+              onSkip={skipCalibration}
+            />
+          )}
         </CameraView>
-        <p className={t.calibrationLine}>
-          <span>
-            {phase === "done"
-              ? strings.talk.calibration.done
-              : phase === "skipped"
-                ? strings.talk.calibration.skipped
-                : strings.talk.calibration.text}
-          </span>
-          <button
-            type="button"
-            className={t.linkButton}
-            onClick={phase === "pending" ? skipCalibration : restartCalibration}
-          >
-            {phase === "pending"
-              ? strings.talk.calibration.skip
-              : phase === "done"
-                ? strings.talk.calibration.redo
-                : strings.talk.calibration.start}
-          </button>
-        </p>
-        <p className={t.frame}>{strings.talk.frame}</p>
       </section>
 
       <section className={t.side}>
-        <h1 className={t.title}>{strings.talk.title}</h1>
         <ComposerBar words={draft.words} current={draft.current} />
         <SuggestionBar words={suggestions} onPick={pickSuggestion} />
         <CandidateCard ref={ringRef} candidate={candidate} reading={reading} cancelled={cancelledAt !== null} />
         {dynamicHint && !candidate && <HintBanner text={dynamicHint.text} />}
         <ConversationFeed />
-        {lastSigned && (
-          <button type="button" className={t.linkButton} onClick={() => setFacing(lastSigned)}>
-            🔄 {strings.talk.facing.button}
-          </button>
-        )}
         <ListenerPanel
           supported={listener.supported}
-          listening={listener.listening}
-          ttsSpeaking={listener.ttsSpeaking}
+          status={listener.status}
           error={listener.error}
-          onMic={listener.toggleMic}
+          onRetry={listener.retry}
           onSend={listener.send}
         />
-        <TalkSettings />
       </section>
 
-      <TalkLegend />
+      {/* Mouse / touch helpers (e.g. for the hearing person): the signer never needs them. */}
+      <div className={t.toolbar} role="toolbar" aria-label={strings.talk.toolbar}>
+        {lastSigned && (
+          <button
+            type="button"
+            className={t.toolButton}
+            onClick={() => setFacing(lastSigned)}
+            aria-label={strings.talk.facing.buttonLabel}
+            title={strings.talk.facing.buttonLabel}
+          >
+            <Icon name="expand" size={20} />
+            <span className={t.toolLabel}>{strings.talk.facing.button}</span>
+          </button>
+        )}
+        <HelpButton className={t.help} withLabel />
+        <TalkSettings onRecalibrate={restartCalibration} />
+      </div>
+
       {facing && <FacingOverlay text={facing} onClose={() => setFacing(null)} />}
     </main>
   );

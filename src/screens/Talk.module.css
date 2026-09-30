@@ -1,62 +1,75 @@
+/*
+ * The talk screen fits one window, no page scrolling: the camera takes what it can, the side column
+ * keeps the message being typed and the reading on top, the feed scrolls inside itself.
+ */
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+  grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--gap);
-  align-items: start;
-  min-height: 100dvh;
-  padding: 72px 24px 110px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: var(--chrome-top) var(--page-x) calc(16px + env(safe-area-inset-bottom));
 }
 
 .camera {
-  position: relative;
+  container-type: size;
   display: grid;
+  place-items: start center;
+  min-height: 0;
+}
+
+/* Largest size of the video's aspect ratio that fits the cell. */
+.camera .cameraView {
+  width: min(100cqw, 100cqh * var(--aspect, 1.333));
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Top-right icons, level with the hand status. Mouse / touch only (the signer is covered by gestures). */
+.toolbar {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: var(--page-x);
+  z-index: 70;
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.frame {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
-.calibrationLine {
-  display: flex;
-  flex-wrap: wrap;
+.toolButton {
+  display: inline-flex;
   align-items: center;
-  gap: 8px 12px;
-  margin: 0;
-  font-weight: 600;
-}
-
-/* Mouse / touch helper (e.g. for the hearing person): the signer is covered by the timeout. */
-.linkButton {
-  min-height: 40px;
+  gap: 6px;
+  min-height: 48px;
   padding: 6px 14px;
   border: 2px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
 }
 
-.linkButton:focus-visible {
+.toolButton:focus-visible {
   outline: 4px solid var(--mark);
   outline-offset: 2px;
 }
 
-.side {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.title {
-  margin: 0;
-  font-size: clamp(1.4rem, 3.2vw, 2rem);
-  font-weight: 800;
+.toolbar .help {
+  min-width: 48px;
+  min-height: 48px;
+  box-shadow: none;
+  font-size: 0.95rem;
 }
 
 /* Open-palm progress (cancel / exit), centre of the video (subtitles take the bottom); hidden until held. */
@@ -84,28 +97,46 @@
   font-size: 1.8rem;
 }
 
-/* Phone, portrait (§3.1): camera on top, the message being typed right under it, the feed below. */
-@media (max-width: 800px) {
+/* Tablets in portrait and phones: camera on top, the message and the reading under it, the feed below. */
+@media (max-width: 800px), (max-width: 1100px) and (orientation: portrait) {
   .layout {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 56px 12px 96px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
 
   .camera {
-    gap: 6px;
+    container-type: normal;
+    display: flex;
+    justify-content: center;
   }
 
-  .title {
-    display: none;
+  /* The camera keeps at most ~45% of the height, so the text below always has room. */
+  .camera .cameraView {
+    width: min(100%, 45dvh * var(--aspect, 1.333));
   }
 
-  .frame {
-    font-size: 0.85rem;
+  .side {
+    gap: 8px;
+    overflow-y: auto;
+  }
+}
+
+/* Narrower than a laptop: icons only in the toolbar (the hand status is centred). */
+@media (max-width: 1100px) {
+  .toolLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
   }
 
-  .calibrationLine {
-    font-size: 0.9rem;
+  .toolButton {
+    justify-content: center;
+    width: 48px;
+    padding: 0;
   }
 }
 

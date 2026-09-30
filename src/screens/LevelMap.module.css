@@ -5,7 +5,7 @@
   justify-content: space-between;
   gap: 12px 24px;
   width: 100%;
-  max-width: 760px;
+  max-width: 960px;
   text-align: left;
 }
 
@@ -44,7 +44,7 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
   width: 100%;
-  max-width: 760px;
+  max-width: 960px;
 }
 
 /* A lesson tile reads like a flash card: small title, the letters large. */
@@ -98,6 +98,22 @@
 .danger {
   border-color: var(--danger);
   color: var(--danger);
+}
+
+/* Short laptop screens: lower tiles, so more of the map fits without scrolling. */
+@media (max-height: 800px) {
+  .grid {
+    gap: 12px;
+  }
+
+  .tile {
+    min-height: 118px;
+    padding: 12px 16px;
+  }
+
+  .tileLetters {
+    font-size: 1.45rem;
+  }
 }
 
 @media (max-width: 600px) {

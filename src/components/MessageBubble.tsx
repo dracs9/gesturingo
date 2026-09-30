@@ -17,12 +17,12 @@ export function MessageBubble({ message }: { message: Message }) {
   return (
     <li className={`${s.bubble} ${signer ? s.signer : s.listener} ${message.speech === "speaking" ? s.speaking : ""}`}>
       <span className={s.who}>
-        <span aria-hidden="true">{signer ? "🤟" : "🎤"}</span> {signer ? t.signer : t.listener}
+        {signer ? t.signer : t.listener}
       </span>
       <span className={s.text}>{message.text}</span>
       {note && (
         <span className={s.note}>
-          <span aria-hidden="true">{message.speech === "speaking" ? "🔊" : "🔇"}</span> {note}
+          {note}
         </span>
       )}
     </li>

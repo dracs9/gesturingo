@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import s from "./SubtitleOverlay.module.css";
 
 export interface Subtitle {
@@ -11,7 +12,7 @@ export function SubtitleOverlay({ subtitle }: { subtitle: Subtitle | null }) {
   if (!subtitle || subtitle.text === "") return null;
   return (
     <p className={`${s.subtitle} ${subtitle.final ? s.final : s.interim}`} aria-live="polite">
-      <span aria-hidden="true">🎤 </span>
+      <Icon name="mic" size={22} className={s.icon} />
       {subtitle.text}
     </p>
   );

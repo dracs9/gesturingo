@@ -168,6 +168,15 @@ export const TALK_SIZE_RATIO_MAX = 1.6;
 export const TALK_SIZE_RATIO_MIN = 0.6;
 /** The hearing person's final words stay as subtitles over the video this long (§6). */
 export const TALK_SUBTITLE_MS = 5000;
+/** The microphone listens by itself: a new recognition session this long after the browser ended one. */
+export const STT_RESTART_MS = 300;
+/** …and this long after our own voice stops (the tail of the phrase must not be subtitled). */
+export const STT_RESUME_MS = 400;
+/** This many failed or instantly ended sessions within the window stop listening (no endless restart loop). */
+export const STT_FAILURE_LIMIT = 5;
+export const STT_FAILURE_WINDOW_MS = 10000;
+/** A session that ends sooner than this without hearing anything counts as a failure. */
+export const STT_QUICK_END_MS = 1000;
 /** The «А или Б?» card stays this long (time in a command zone does not count), so a zone can pick one. */
 export const TALK_AMBIGUOUS_LATCH_MS = 3000;
 /**
